@@ -5,9 +5,10 @@ Flask backend: login (admins + staff), dashboard, help requests, QR codes, API t
 import io
 import json
 import os
+import re
 import secrets
 import socket
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 import qrcode
@@ -86,13 +87,57 @@ def save_data():
         json.dump(payload, f, indent=2)
 
 
+# Chennai (IST) = UTC+5:30
+CHENNAI_TZ = timezone(timedelta(hours=5, minutes=30))
+
+
+def _utc_iso_now():
+    """Current time in UTC as ISO string."""
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def _to_chennai_time(iso_or_legacy):
+    """Convert to Chennai (IST) display. Handles ISO UTC and legacy 'HH:MM:SS AM/PM' (was server UTC)."""
+    if not iso_or_legacy:
+        return ""
+    s = str(iso_or_legacy).strip()
+    out = None
+    # ISO from backend (UTC)
+    if "T" in s:
+        try:
+            dt = datetime.fromisoformat(s.replace("Z", "+00:00"))
+            ist = dt.astimezone(CHENNAI_TZ)
+            out = ist.strftime("%I:%M:%S %p")
+        except (ValueError, TypeError):
+            pass
+    # Legacy format "08:49:20 PM" was stored as server (UTC) time – convert to Chennai
+    if out is None:
+        m = re.match(r"^\s*(\d{1,2}):(\d{2}):(\d{2})\s*(AM|PM)\s*$", s, re.IGNORECASE)
+        if m:
+            try:
+                h, mi, sec, ampm = int(m.group(1)), int(m.group(2)), int(m.group(3)), m.group(4).upper()
+                if ampm == "PM" and h != 12:
+                    h += 12
+                elif ampm == "AM" and h == 12:
+                    h = 0
+                now_utc = datetime.now(timezone.utc)
+                dt_utc = now_utc.replace(hour=h, minute=mi, second=sec, microsecond=0)
+                ist = dt_utc.astimezone(CHENNAI_TZ)
+                out = ist.strftime("%I:%M:%S %p")
+            except (ValueError, TypeError):
+                pass
+    if out is not None:
+        return out + " IST"
+    return iso_or_legacy
+
+
 def seed_demo_requests():
     """Add demo requests if none exist."""
     if not help_requests:
-        now = datetime.now()
+        now = _utc_iso_now()
         demos = [
-            {"id": "1", "table": 2, "raised_at": now.strftime("%I:%M:%S %p")},
-            {"id": "2", "table": 5, "raised_at": now.strftime("%I:%M:%S %p")},
+            {"id": "1", "table": 2, "raised_at": now},
+            {"id": "2", "table": 5, "raised_at": now},
         ]
         help_requests.extend(demos)
         save_data()
@@ -158,9 +203,13 @@ def dashboard():
 @bp.route("/api/requests", methods=["GET"])
 @login_required
 def list_requests():
-    """Return pending help requests (not yet accepted)."""
+    """Return pending help requests (not yet accepted). Times in Chennai (IST)."""
     accepted_ids = {r["request_id"] for r in accepted_requests}
-    pending = [r for r in help_requests if r["id"] not in accepted_ids]
+    pending = [
+        {"id": r["id"], "table": r["table"], "raised_at": _to_chennai_time(r["raised_at"])}
+        for r in help_requests
+        if r["id"] not in accepted_ids
+    ]
     return jsonify({"requests": pending})
 
 
@@ -178,7 +227,7 @@ def accept_request():
     accepted_ids = {r["request_id"] for r in accepted_requests}
     if request_id in accepted_ids:
         return jsonify({"ok": False, "error": "Already accepted"}), 400
-    accepted_at = datetime.now().strftime("%I:%M:%S %p")
+    accepted_at = _utc_iso_now()
     accepted_requests.append(
         {
             "request_id": request_id,
@@ -189,7 +238,7 @@ def accept_request():
         }
     )
     save_data()
-    return jsonify({"ok": True, "accepted_at": accepted_at})
+    return jsonify({"ok": True, "accepted_at": _to_chennai_time(accepted_at)})
 
 
 @bp.route("/api/settings/token", methods=["GET"])
@@ -204,10 +253,14 @@ def get_token():
 @bp.route("/api/requests/accepted", methods=["GET"])
 @login_required
 def list_accepted():
-    """Return requests accepted by current user."""
+    """Return requests accepted by current user. Times in Chennai (IST)."""
     username = session["username"]
     mine = [
-        {"table": r["table"], "raised_at": r["raised_at"], "accepted_at": r["accepted_at"]}
+        {
+            "table": r["table"],
+            "raised_at": _to_chennai_time(r["raised_at"]),
+            "accepted_at": _to_chennai_time(r["accepted_at"]),
+        }
         for r in accepted_requests
         if r["accepted_by"] == username
     ]
@@ -351,7 +404,7 @@ def create_request():
     if table < 1 or table > NUM_TABLES:
         return jsonify({"ok": False, "error": f"table must be 1–{NUM_TABLES}"}), 400
     new_id = str(max((int(r.get("id", 0)) for r in help_requests), default=0) + 1)
-    raised_at = datetime.now().strftime("%I:%M:%S %p")
+    raised_at = _utc_iso_now()
     help_requests.append({"id": new_id, "table": table, "raised_at": raised_at})
     save_data()
     return jsonify({"ok": True, "id": new_id, "raised_at": raised_at})

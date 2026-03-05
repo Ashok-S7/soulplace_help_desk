@@ -1,0 +1,14 @@
+Times on the dashboard are now converted to Chennai (IST) in the code.
+If you still see wrong times (e.g. 08:51 PM instead of IST), redeploy so Vercel uses the latest code.
+
+  Option 1 – Push to GitHub (if Vercel is connected to your repo):
+    cd "c:\mini project\soulplace_help_desk"
+    git add -A
+    git commit -m "Chennai IST time on dashboard"
+    git push
+
+  Option 2 – Vercel dashboard:
+    Go to https://vercel.com/dashboard → your soulplace_help_desk project
+    → Deployments → ... on latest → Redeploy
+
+After redeploy, refresh the dashboard. Times will show like "02:21:45 AM IST" (Chennai).

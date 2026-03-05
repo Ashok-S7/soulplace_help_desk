@@ -1,52 +1,16 @@
 ================================================================================
-  SOULPLACE HELP DESK – HOW TO GET YOUR LOGIN LINK (Vercel + Chrome)
+  SOULPLACE HELP DESK – YOUR LINKS (Vercel + Chrome)
 ================================================================================
 
-  *** DO NOT type "your-real-url" or "YOUR-REAL-URL" in the browser. ***
-  *** That is only a placeholder. Your real link comes from Vercel. ***
+  Your live URL: https://soulplace-help-desk.vercel.app
 
---------------------------------------------------------------------------------
-  STEP 1 – Open your app on Vercel
---------------------------------------------------------------------------------
-1. Open Chrome and go to:   https://vercel.com/dashboard
-2. Sign in if needed.
-3. Click your Soulplace project (e.g. "soulplace_help_desk" or the name you gave it).
-4. On the project page, click the "Visit" button (or the main link under the project name).
-5. Your app will open. The address bar will show your REAL URL, for example:
-   https://soulplace-help-desk-abc123.vercel.app
-   or
-   https://soulplace_help_desk-username.vercel.app
+  • LOGIN (staff / admin):
+    https://soulplace-help-desk.vercel.app/soulplace/login
 
---------------------------------------------------------------------------------
-  STEP 2 – Your actual links (use the same domain you see in Step 1)
---------------------------------------------------------------------------------
-In the address bar, you will see something like:
-   https://something.vercel.app
-
-Your links are (replace "something.vercel.app" with what YOU see):
-
-  • Staff / Admin LOGIN:
-    https://something.vercel.app/soulplace/login
-
-  • Page to copy all links (with API token):
-    https://something.vercel.app/soulplace/links
+  • All links with API token:
+    https://soulplace-help-desk.vercel.app/soulplace/links
 
   • Tables (QR codes):
-    https://something.vercel.app/soulplace/tables
-
---------------------------------------------------------------------------------
-  STEP 3 – Bookmark or copy
---------------------------------------------------------------------------------
-• After you click "Visit" in Step 1, type /soulplace/login at the end of the URL
-  and press Enter. That page is your login. Bookmark it.
-• Or go to /soulplace/links and use "Copy" there to get every link with the
-  API token already in it.
-
-================================================================================
-  Example (your URL will be different – get it from Vercel Visit button)
-================================================================================
-If Vercel shows your site at:  https://soulplace-help-desk-xyz.vercel.app
-
-Then your login link is:       https://soulplace-help-desk-xyz.vercel.app/soulplace/login
+    https://soulplace-help-desk.vercel.app/soulplace/tables
 
 ================================================================================

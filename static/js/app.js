@@ -10,6 +10,11 @@
 
     let previousRequestIds = new Set();
 
+    /** Display time (backend sends Chennai IST already). */
+    function formatTime(val) {
+        return val != null ? String(val) : "";
+    }
+
     function playNewRequestSound() {
         try {
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -57,7 +62,7 @@
                     <div class="request-item" data-request-id="${r.id}">
                         <div class="request-info">
                             <strong>Table ${r.table}</strong>
-                            <span class="request-time">${r.raised_at}</span>
+                            <span class="request-time">${formatTime(r.raised_at)}</span>
                         </div>
                         <button type="button" class="btn-attend" data-id="${r.id}">I'm attending</button>
                     </div>
@@ -89,8 +94,8 @@
                         (r) => `
                     <tr>
                         <td>${r.table}</td>
-                        <td>${r.raised_at}</td>
-                        <td>${r.accepted_at}</td>
+                        <td>${formatTime(r.raised_at)}</td>
+                        <td>${formatTime(r.accepted_at)}</td>
                     </tr>
                 `
                     )
