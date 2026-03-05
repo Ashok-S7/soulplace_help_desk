@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Table QR Codes – Soulplace Boardgames</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="tables-page">
+    <div class="page-bg" aria-hidden="true"></div>
+    <header class="login-header">
+        <div class="logo">
+            <span class="logo-main">SOULPLACE</span>
+            <span class="logo-sub">BOARDGAMES – HELP DESK</span>
+        </div>
+        <div class="header-line"></div>
+        <p class="tables-intro">Scan the QR code at your table to request a Soul.</p>
+    </header>
+
+    <main class="tables-grid-wrap">
+        <div class="tables-grid">
+            {% for t in range(1, num_tables + 1) %}
+            <div class="table-qr-card card-elevated">
+                <span class="table-qr-label">Table {{ t }}</span>
+                <a href="{{ url_for('main.table_page', table=t) }}" class="table-qr-link" aria-label="Request help for Table {{ t }}">
+                    <img src="{{ url_for('main.qr_image', table_num=t) }}" alt="QR code for Table {{ t }}" class="table-qr-img" width="160" height="160">
+                </a>
+                <p class="table-qr-hint">Scan to request help</p>
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+    <p class="tables-footer">
+        <a href="{{ url_for('main.login') }}" class="staff-link">Staff / Admin login</a>
+        &nbsp;·&nbsp;
+        <a href="{{ url_for('main.links_page') }}" class="staff-link">Your login link (long-distance)</a>
+    </p>
+</body>
+</html>

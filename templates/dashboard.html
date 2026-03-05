@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soul – Soulplace Boardgames</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="dashboard-page">
+    <div class="page-bg" aria-hidden="true"></div>
+    <header class="dashboard-header" style="position:relative;z-index:2;">
+        <div class="logo logo-small">
+            <span class="logo-main">SOULPLACE</span>
+        </div>
+        <h1 class="welcome-title">Soul – Welcome, {{ username }}</h1>
+        <a href="{{ url_for('main.logout') }}" class="logout-link">Log out</a>
+    </header>
+
+    <main class="dashboard-main" style="position:relative;z-index:1;">
+        <section class="card help-requests-card card-elevated">
+            <div class="card-header">
+                <h2>Help requests</h2>
+                <button type="button" class="link-btn" id="enable-notifications" aria-label="Enable notifications">Enable notifications</button>
+            </div>
+            <div id="requests-list" class="requests-list">
+                <p class="empty-state">Loading…</p>
+            </div>
+        </section>
+
+        {% if is_admin %}
+        <section class="card api-token-card card-elevated">
+            <h2>API Token (for Vercel / external API)</h2>
+            <p class="card-subtitle">Use header <code>X-API-Token</code> or <code>Authorization: Bearer &lt;token&gt;</code> when calling <code>POST /api/request/create</code>.</p>
+            <div class="token-row">
+                <input type="password" id="api-token-input" class="token-input" readonly value="" placeholder="Click to load">
+                <button type="button" class="btn btn-primary btn-sm" id="show-token-btn">Show token</button>
+                <button type="button" class="btn btn-outline btn-sm" id="copy-token-btn" style="display:none;">Copy</button>
+            </div>
+            <p class="token-hint">Set <code>SOULPLACE_API_TOKEN</code> in Vercel environment variables to use your own token.</p>
+        </section>
+        {% endif %}
+
+        <section class="card accepted-card card-elevated">
+            <h2>Your accepted requests</h2>
+            <p class="card-subtitle">What you've attended and when.</p>
+            <div class="table-wrapper">
+                <table class="accepted-table">
+                    <thead>
+                        <tr>
+                            <th>Table #</th>
+                            <th>Raised at</th>
+                            <th>Accepted at</th>
+                        </tr>
+                    </thead>
+                    <tbody id="accepted-tbody">
+                        <tr><td colspan="3" class="empty-cell">Loading…</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script>window.SOULPLACE_BASE = "{{ url_for('main.index') }}".replace(/\/$/, '');</script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

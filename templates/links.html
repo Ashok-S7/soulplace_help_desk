@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your links – Soulplace Boardgames</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        .links-page { max-width: 560px; margin: 0 auto; padding: 1.5rem; }
+        .links-page h1 { font-size: 1.25rem; margin-bottom: 0.5rem; }
+        .links-page .link-box { background: var(--bg-warm, #faf8f5); border: 1px solid var(--border-light, #ebe8e2); border-radius: 10px; padding: 0.75rem 1rem; margin: 0.5rem 0 1rem; word-break: break-all; font-size: 0.95rem; }
+        .links-page .link-label { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
+        .links-page button.copy-btn { margin-top: 0.25rem; padding: 0.35rem 0.75rem; font-size: 0.85rem; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; }
+        .links-page button.copy-btn:hover { opacity: 0.9; }
+        .links-page a.back { display: inline-block; margin-top: 1.5rem; color: var(--primary); font-weight: 600; text-decoration: none; }
+        .links-page a.back:hover { text-decoration: underline; }
+    </style>
+</head>
+<body class="login-page">
+    <div class="page-bg" aria-hidden="true"></div>
+    <header class="login-header">
+        <div class="logo">
+            <span class="logo-main">SOULPLACE</span>
+            <span class="logo-sub">BOARDGAMES – HELP DESK</span>
+        </div>
+        <div class="header-line"></div>
+    </header>
+    <main class="links-page">
+        <h1>Your links (for long-distance use)</h1>
+        <p class="login-subtitle">Use these links when you are far away. After you deploy to Vercel, open this page from your Vercel URL and copy the login link.</p>
+
+        <p class="link-label">Staff / Admin login link</p>
+        <div class="link-box" id="login-link">{{ login_link }}</div>
+        <button type="button" class="copy-btn" onclick="copy('login-link')">Copy login link</button>
+
+        <p class="link-label" style="margin-top: 1.25rem;">Table QR codes page</p>
+        <div class="link-box" id="tables-link">{{ tables_link }}</div>
+        <button type="button" class="copy-btn" onclick="copy('tables-link')">Copy</button>
+
+        <p class="link-label" style="margin-top: 1.25rem;">Direct request-help links (Table 1–10)</p>
+        {% for item in table_links %}
+        <div class="link-box" id="table-{{ item.table }}">{{ item.url }}</div>
+        <button type="button" class="copy-btn" onclick="copy('table-{{ item.table }}')">Table {{ item.table }} – Copy</button>
+        {% endfor %}
+
+        <a href="{{ url_for('main.login') }}" class="back">← Back to login</a>
+    </main>
+    <script>
+        function copy(id) {
+            var el = document.getElementById(id);
+            var text = el.textContent.trim();
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(function() { alert('Copied!'); }).catch(function() { fallback(); });
+            } else { fallback(); }
+            function fallback() {
+                var sel = window.getSelection();
+                var range = document.createRange();
+                range.selectNodeContents(el);
+                sel.removeAllRanges();
+                sel.addRange(range);
+                document.execCommand('copy');
+                sel.removeAllRanges();
+                alert('Copied!');
+            }
+        }
+    </script>
+</body>
+</html>

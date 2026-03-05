@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if table %}Table {{ table }} – {% endif %}Request Help – Soulplace Boardgames</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="login-page">
+    <div class="page-bg" aria-hidden="true"></div>
+    <header class="login-header">
+        <div class="logo">
+            <span class="logo-main">SOULPLACE</span>
+            <span class="logo-sub">BOARDGAMES – HELP DESK</span>
+        </div>
+        <div class="header-line"></div>
+    </header>
+
+    <main class="login-main">
+        <div class="login-card card-elevated">
+            <h1 class="login-title">Request help</h1>
+            <p class="login-subtitle">Need a Soul? {% if table %}You’re at <strong>Table {{ table }}</strong>.{% else %}Enter your table number (1–{{ num_tables }}).{% endif %}</p>
+
+            <form id="request-form" class="login-form">
+                <label for="table">Table number</label>
+                <input type="number" id="table" name="table" min="1" max="{{ num_tables }}" placeholder="e.g. 5" value="{{ table or '' }}" required>
+                <button type="submit" class="btn btn-primary">Request help</button>
+            </form>
+            <p id="request-feedback" class="request-feedback" style="display:none;"></p>
+            <p class="staff-link-wrap">
+                <a href="{{ url_for('main.tables_page') }}" class="staff-link">View all table QR codes</a>
+                &nbsp;·&nbsp;
+                <a href="{{ url_for('main.login') }}" class="staff-link">Staff login</a>
+            </p>
+        </div>
+    </main>
+    <script>
+        window.SOULPLACE_BASE = "{{ url_for('main.index') }}".replace(/\/$/, '');
+        (function () {
+            var qs = new URLSearchParams(window.location.search);
+            window.SOULPLACE_API_TOKEN = qs.get('token') || {{ api_token|tojson if api_token else 'null' }};
+        })();
+        document.getElementById('request-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            var tableInput = document.getElementById('table');
+            var table = parseInt(tableInput.value, 10);
+            var maxTable = {{ num_tables }};
+            if (isNaN(table) || table < 1 || table > maxTable) {
+                var feedback = document.getElementById('request-feedback');
+                feedback.style.display = 'block';
+                feedback.className = 'request-feedback error';
+                feedback.textContent = 'Please enter a table number between 1 and ' + maxTable + '.';
+                return;
+            }
+            var feedback = document.getElementById('request-feedback');
+            feedback.style.display = 'block';
+            feedback.className = 'request-feedback';
+            feedback.textContent = 'Sending…';
+            var headers = { 'Content-Type': 'application/json' };
+            if (window.SOULPLACE_API_TOKEN) headers['X-API-Token'] = window.SOULPLACE_API_TOKEN;
+            fetch((window.SOULPLACE_BASE || '') + '/api/request/create', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify({ table: table })
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (data.ok) {
+                    feedback.className = 'request-feedback success';
+                    feedback.textContent = 'Help requested! A Soul will be with you soon.';
+                } else {
+                    feedback.className = 'request-feedback error';
+                    feedback.textContent = data.error || 'Something went wrong.';
+                }
+            })
+            .catch(function () {
+                feedback.className = 'request-feedback error';
+                feedback.textContent = 'Failed to send request.';
+            });
+        });
+    </script>
+</body>
+</html>

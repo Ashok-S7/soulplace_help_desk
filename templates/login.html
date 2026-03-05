@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soul Login – Soulplace Boardgames</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="login-page">
+    <div class="page-bg" aria-hidden="true"></div>
+
+    <header class="login-header">
+        <div class="logo">
+            <span class="logo-main">SOULPLACE</span>
+            <span class="logo-sub">BOARDGAMES – HELP DESK</span>
+        </div>
+        <div class="header-line"></div>
+    </header>
+
+    <main class="login-main">
+        <div class="login-card card-elevated">
+            <h1 class="login-title">Soul login</h1>
+            <p class="login-subtitle">Sign in to see help requests</p>
+
+            {% if error %}
+            <div class="error-message" role="alert">
+                <span class="error-icon" aria-hidden="true">!</span>
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <form method="post" action="{{ url_for('main.login') }}" class="login-form" id="login-form">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="e.g. ashok" autocomplete="username" required autofocus>
+
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter password" autocomplete="current-password" required>
+
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <span class="btn-text">Sign In</span>
+                </button>
+            </form>
+
+            <p class="demo-hint">
+                <span class="demo-hint-label">Admins:</span> ASHOK, BOO &nbsp;|&nbsp; <span class="demo-hint-label">Staff:</span> BALA MURUGAN, RAJESH, RITHISH, LOKESH, DILLI BABU. Use your assigned password.
+            </p>
+            <p class="demo-hint" style="margin-top:0.5rem;">
+                <a href="{{ url_for('main.tables_page') }}" class="staff-link">View table QR codes (1–10)</a>
+                &nbsp;·&nbsp;
+                <a href="{{ url_for('main.links_page') }}" class="staff-link">Your login link (long-distance)</a>
+            </p>
+        </div>
+    </main>
+</body>
+</html>

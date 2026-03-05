@@ -1,0 +1,41 @@
+========================================
+  HOW TO RUN THE WHOLE PROJECT
+========================================
+
+  1. Go to this folder on your PC:
+     c:\mini project\soulplace_help_desk
+
+  2. Double-click:
+     START_HERE.bat
+
+  3. Wait until you see in the black window:
+     "Running on http://127.0.0.1:5000"
+     and
+     "OPEN THIS LINK IN BROWSER (PC):"
+
+  4. A browser may open by itself. If not, open Chrome or Edge
+     and go to:
+     http://127.0.0.1:5000/soulplace/login
+
+  5. Log in (e.g. username: ASHOK   password: SoulOfBlue#7)
+
+  6. Keep the black window OPEN while you use the app.
+     Closing it will stop the project.
+
+----------------------------------------
+  On your phone (same Wi-Fi as PC)
+----------------------------------------
+
+  In the black window you will see a line like:
+  "On your phone:  http://192.168.x.x:5000/soulplace/login"
+
+  Type that exact address in your phone's browser.
+
+----------------------------------------
+  To stop the project
+----------------------------------------
+
+  Click the black window and press:  Ctrl + C
+  Or just close the window.
+
+========================================

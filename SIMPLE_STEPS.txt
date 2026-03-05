@@ -1,0 +1,67 @@
+========================================
+  SOULPLACE — GET A LINK (SIMPLE)
+========================================
+
+You want a link like:  https://something.vercel.app
+So you can open the app on your phone or PC.
+
+To get that link, you do 2 things:
+
+----------------------------------------
+  THING 1: Put your project on GitHub
+----------------------------------------
+
+  • GitHub = a website where you put your code so Vercel can use it.
+
+  1. Open:  https://github.com
+  2. Sign in (or create free account).
+  3. Click the green button "New" (or "New repository").
+  4. Write a name:  soulplace
+  5. Click "Create repository".
+  6. On the new page, you see "uploading an existing file" — click it.
+  7. Open on your PC:  c:\mini project\soulplace_help_desk
+  8. Select EVERYTHING inside that folder (all files and all folders).
+  9. Drag them into the browser (into the GitHub page).
+  10. Click the green "Commit" button at the bottom.
+
+  Done. Your code is now on GitHub.
+
+----------------------------------------
+  THING 2: Let Vercel turn it into a link
+----------------------------------------
+
+  • Vercel = a website that makes your code into a link you can open.
+
+  1. Open:  https://vercel.com/new
+  2. Click "Sign in" and choose "GitHub".
+  3. You will see a list. Find "soulplace" (or the name you used).
+  4. Click "Import" next to it.
+  5. Click the big "Deploy" button.
+  6. Wait 1–2 minutes.
+  7. When it says "Congratulations!" you will see a link, like:
+       https://soulplace-xxxxx.vercel.app
+  8. That is your link. Copy it.
+
+----------------------------------------
+  HOW TO USE YOUR LINK
+----------------------------------------
+
+  • To log in (staff):
+    Your link + /soulplace/login
+    Example:  https://soulplace-xxxxx.vercel.app/soulplace/login
+
+  • To see table QR codes:
+    Your link + /soulplace/tables
+    Example:  https://soulplace-xxxxx.vercel.app/soulplace/tables
+
+  Open that in your phone or computer. Use your staff name and password (e.g. ASHOK / SoulOfBlue#7).
+
+========================================
+  IN SHORT
+========================================
+
+  1) GitHub = upload your soulplace_help_desk folder there.
+  2) Vercel = connect to that GitHub repo and click Deploy.
+  3) Copy the link Vercel gives you. That is your app link.
+
+========================================
