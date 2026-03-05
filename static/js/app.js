@@ -7,17 +7,53 @@
     const requestsList = document.getElementById('requests-list');
     const acceptedTbody = document.getElementById('accepted-tbody');
     const enableNotificationsBtn = document.getElementById('enable-notifications');
+    const testSoundBtn = document.getElementById('test-sound-btn');
 
     let previousRequestIds = new Set();
+    let audioContext = null;
 
     /** Display time (backend sends Chennai IST already). */
     function formatTime(val) {
         return val != null ? String(val) : "";
     }
 
+    function getAudioContext() {
+        if (!audioContext) {
+            const Ctx = window.AudioContext || window.webkitAudioContext;
+            if (Ctx) audioContext = new Ctx();
+        }
+        return audioContext;
+    }
+
+    function getNotificationSoundUrl() {
+        var path = window.SOULPLACE_NOTIFICATION_SOUND || '/static/sounds/maroon_5_animals.mp3';
+        if (path.indexOf('http') === 0) return path;
+        var origin = window.location.origin || '';
+        var p = path.charAt(0) === '/' ? path : '/' + path;
+        return origin + p;
+    }
+
     function playNewRequestSound() {
+        var el = document.getElementById('notification-audio');
+        if (el && el.src) {
+            el.currentTime = 0;
+            el.volume = 0.7;
+            var played = el.play();
+            if (played && played.catch) played.catch(function () { playBeepFallback(); });
+            return;
+        }
+        var url = getNotificationSoundUrl();
+        var audio = new Audio(url);
+        audio.volume = 0.7;
+        audio.onerror = function () { playBeepFallback(); };
+        audio.play().catch(function () { playBeepFallback(); });
+    }
+
+    function playBeepFallback() {
         try {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const ctx = getAudioContext();
+            if (!ctx) return;
+            if (ctx.state === 'suspended') ctx.resume();
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
             osc.connect(gain);
@@ -41,6 +77,25 @@
         } catch (e) {}
     }
 
+    function showNewRequestNotification(requests) {
+        if (!('Notification' in window)) return;
+        if (Notification.permission !== 'granted') return;
+        try {
+            var title = 'Soulplace – New help request';
+            var body = requests.length === 1
+                ? 'Table ' + requests[0].table + ' needs a Soul.'
+                : requests.length + ' new help requests.';
+            var n = new Notification(title, { body: body, requireInteraction: false });
+            n.onclick = function () {
+                window.focus();
+                n.close();
+            };
+            setTimeout(function () { n.close(); }, 6000);
+        } catch (err) {
+            console.warn('Notification failed:', err);
+        }
+    }
+
     function loadPendingRequests() {
         fetch(BASE + '/api/requests')
             .then((res) => res.json())
@@ -48,7 +103,9 @@
                 const requests = data.requests || [];
                 const currentIds = new Set(requests.map((r) => r.id));
                 if (previousRequestIds.size > 0 && currentIds.size > previousRequestIds.size) {
+                    var newReqs = requests.filter(function (r) { return !previousRequestIds.has(r.id); });
                     playNewRequestSound();
+                    showNewRequestNotification(newReqs);
                 }
                 previousRequestIds = currentIds;
 
@@ -139,6 +196,14 @@
             });
     }
 
+    if (testSoundBtn) {
+        testSoundBtn.addEventListener('click', function () {
+            var ctx = getAudioContext();
+            if (ctx && ctx.state === 'suspended') ctx.resume();
+            playNewRequestSound();
+        });
+    }
+
     if (enableNotificationsBtn) {
         enableNotificationsBtn.addEventListener('click', function () {
             if (!('Notification' in window)) {
@@ -146,22 +211,44 @@
                 return;
             }
             if (Notification.permission === 'granted') {
-                alert('Notifications are already enabled.');
+                enableNotificationsBtn.textContent = 'Notifications enabled';
+                var ctx = getAudioContext();
+                if (ctx && ctx.state === 'suspended') ctx.resume();
+                playNewRequestSound();
+                showNewRequestNotification([{ table: 'Test' }]);
                 return;
             }
-            Notification.requestPermission().then((p) => {
+            if (Notification.permission === 'denied') {
+                alert('Notifications are blocked. Please allow them in your browser settings (e.g. Chrome: lock icon → Site settings → Notifications) and refresh.');
+                return;
+            }
+            Notification.requestPermission().then(function (p) {
                 if (p === 'granted') {
-                    this.textContent = 'Notifications enabled';
+                    enableNotificationsBtn.textContent = 'Notifications enabled';
+                    var ctx = getAudioContext();
+                    if (ctx && ctx.state === 'suspended') ctx.resume();
+                    playNewRequestSound();
+                    showNewRequestNotification([{ table: 'Test' }]);
+                } else if (p === 'denied') {
+                    alert('Notifications were blocked. You can allow them later in browser settings.');
                 }
             });
         });
+        if (Notification.permission === 'granted') {
+            enableNotificationsBtn.textContent = 'Notifications enabled';
+        }
+    }
+
+    var notificationAudio = document.getElementById('notification-audio');
+    if (notificationAudio) {
+        notificationAudio.onerror = function () { playBeepFallback(); };
     }
 
     loadPendingRequests();
     loadAcceptedRequests();
 
-    // Refresh pending list every 5 seconds (so new scans are noticed quickly)
-    setInterval(loadPendingRequests, 5000);
+    // Poll every 2 seconds so new requests trigger sound/notification with minimal delay
+    setInterval(loadPendingRequests, 2000);
 
     // API Token (admin only): show and copy
     const showTokenBtn = document.getElementById('show-token-btn');

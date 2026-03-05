@@ -24,7 +24,9 @@
             <div class="card-header">
                 <h2>Help requests</h2>
                 <button type="button" class="link-btn" id="enable-notifications" aria-label="Enable notifications">Enable notifications</button>
+                <button type="button" class="link-btn" id="test-sound-btn" aria-label="Test notification sound">Test sound</button>
             </div>
+            <p class="card-subtitle" style="margin-top:0.25rem;font-size:0.8rem;">Click «Test sound» once to allow the notification sound when new requests arrive.</p>
             <div id="requests-list" class="requests-list">
                 <p class="empty-state">Loading…</p>
             </div>
@@ -63,7 +65,11 @@
         </section>
     </main>
 
-    <script>window.SOULPLACE_BASE = "{{ url_for('main.index') }}".replace(/\/$/, '');</script>
+    <audio id="notification-audio" preload="auto" style="display:none;" src="{{ url_for('static', filename='sounds/maroon_5_animals.mp3', _external=True) }}"></audio>
+    <script>
+        window.SOULPLACE_BASE = "{{ url_for('main.index') }}".replace(/\/$/, '');
+        window.SOULPLACE_NOTIFICATION_SOUND = "{{ url_for('static', filename='sounds/maroon_5_animals.mp3') }}";
+    </script>
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>
