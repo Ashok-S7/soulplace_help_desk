@@ -28,37 +28,165 @@ DATA_FILE = (
     else Path(__file__).parent / "data.json"
 )
 
-# Admins: (display_name, password)
-ADMINS = [
-    ("ASHOK", "SoulOfBlue#7"),
-    ("BOO", "SoulOfblack#7"),
-]
+# Config file for tables and users – edit config.json and redeploy to change
+CONFIG_FILE = Path(__file__).parent / "config.json"
+# Food menu for customers (edit menu.json or use API)
+MENU_FILE = Path(__file__).parent / "menu.json"
+# Default public URL when deployed on Vercel (QR codes & links use this).
+# Replace with YOUR Vercel project URL (e.g. https://your-project.vercel.app) – see MY_LINKS.txt
+DEFAULT_PUBLIC_URL = "https://soulplace-help-desk.vercel.app"
 
-# Staff: (display_name, password)
-STAFF = [
-    ("BALA MURUGAN", "DarkSoul@7"),
-    ("RAJESH", "BlueSoul!92"),
-    ("RITHISH", "SilentSoul#66"),
-    ("LOKESH", "CyberSoul@501"),
-    ("DILLI BABU", "SoulWave#309"),
-]
+# Default menu when menu.json is missing (e.g. on first deploy or Vercel). Edit menu.json to add more.
+DEFAULT_MENU = {
+    "categories": [
+        {"id": "quick-bites", "name": "Quick Bites"},
+        {"id": "sandwich", "name": "Sandwich"},
+        {"id": "pizza", "name": "Pizza"},
+        {"id": "maggie", "name": "Maggie"},
+        {"id": "beverage", "name": "Beverage"},
+        {"id": "slots", "name": "Slots"},
+    ],
+    "items": [
+        {"id": "qb1", "name": "Cheese Nachos", "category": "quick-bites", "price": 139},
+        {"id": "qb2", "name": "Peri Peri Nachos", "category": "quick-bites", "price": 130},
+        {"id": "sw1", "name": "Veg Sw", "category": "sandwich", "price": 110},
+        {"id": "pz1", "name": "Veg Pizza", "category": "pizza", "price": 140},
+        {"id": "mg1", "name": "Maggie", "category": "maggie", "price": 60},
+        {"id": "bv1", "name": "Cold Coffee", "category": "beverage", "price": 120},
+        {"id": "bv5", "name": "Coke", "category": "beverage", "price": 50},
+        {"id": "bv10", "name": "Coffee", "category": "beverage", "price": 45},
+        {"id": "bv12", "name": "Tea", "category": "beverage", "price": 45},
+    ],
+}
 
-# Login key (lowercase, stripped) -> {password, display_name, role}
+# Default config if file missing (same as original hardcoded values)
+DEFAULT_CONFIG = {
+    "num_tables": 10,
+    "admins": [
+        {"name": "ASHOK", "password": "SoulOfBlue#7"},
+        {"name": "BOO", "password": "SoulOfBlack#7"},
+    ],
+    "staff": [
+        {"name": "BALA MURUGAN", "password": "DarkSoul@7"},
+        {"name": "RAJESH", "password": "BlueSoul!92"},
+        {"name": "RITHISH", "password": "SilentSoul#66"},
+        {"name": "LOKESH", "password": "CyberSoul@501"},
+        {"name": "DILLI BABU", "password": "SoulWave#309"},
+    ],
+}
+
+# Dynamic: loaded from config (see load_config())
 USER_DB = {}
-for name, pwd in ADMINS:
-    USER_DB[name.strip().lower()] = {"password": pwd, "display_name": name.strip(), "role": "admin"}
-for name, pwd in STAFF:
-    USER_DB[name.strip().lower()] = {"password": pwd, "display_name": name.strip(), "role": "staff"}
-
 NUM_TABLES = 10
 
-# In-memory state
+# In-memory state (loaded/saved from data.json as usual)
 help_requests = []
 accepted_requests = []
 api_token = None
+menu_data = {"categories": [], "items": []}
+
+
+def load_config():
+    """Load num_tables, admins, staff from env, data.json, config.json, or defaults. Updates USER_DB and NUM_TABLES."""
+    global USER_DB, NUM_TABLES
+    config = None
+    # 1) Env override (JSON string) for Vercel / serverless
+    env_json = os.environ.get("SOULPLACE_CONFIG_JSON", "").strip()
+    if env_json:
+        try:
+            config = json.loads(env_json)
+        except json.JSONDecodeError:
+            pass
+    # 2) config.json file (source of truth – edit this file and redeploy to change users/tables)
+    if config is None and CONFIG_FILE.exists():
+        try:
+            with open(CONFIG_FILE, "r", encoding="utf-8") as f:
+                config = json.load(f)
+        except (json.JSONDecodeError, IOError):
+            pass
+    if not config or not isinstance(config, dict):
+        config = DEFAULT_CONFIG.copy()
+    num_tables = config.get("num_tables")
+    if isinstance(num_tables, int) and 1 <= num_tables <= 999:
+        NUM_TABLES = num_tables
+    else:
+        NUM_TABLES = DEFAULT_CONFIG["num_tables"]
+    admins = config.get("admins") or []
+    staff = config.get("staff") or []
+    if not isinstance(admins, list):
+        admins = []
+    if not isinstance(staff, list):
+        staff = []
+    USER_DB = {}
+    for u in admins:
+        if isinstance(u, dict) and u.get("name") and u.get("password"):
+            key = str(u["name"]).strip().lower()
+            pwd = str(u["password"]).strip()
+            USER_DB[key] = {
+                "password": pwd,
+                "display_name": str(u["name"]).strip(),
+                "role": "admin",
+            }
+    for u in staff:
+        if isinstance(u, dict) and u.get("name") and u.get("password"):
+            key = str(u["name"]).strip().lower()
+            if key not in USER_DB:
+                pwd = str(u["password"]).strip()
+                USER_DB[key] = {
+                    "password": pwd,
+                    "display_name": str(u["name"]).strip(),
+                    "role": "staff",
+                }
+    # If no users loaded (e.g. broken config), ensure admins + staff from defaults
+    if not USER_DB:
+        for u in DEFAULT_CONFIG.get("admins") or []:
+            if isinstance(u, dict) and u.get("name") and u.get("password"):
+                key = str(u["name"]).strip().lower()
+                pwd = str(u["password"]).strip()
+                USER_DB[key] = {
+                    "password": pwd,
+                    "display_name": str(u["name"]).strip(),
+                    "role": "admin",
+                }
+        for u in DEFAULT_CONFIG.get("staff") or []:
+            if isinstance(u, dict) and u.get("name") and u.get("password"):
+                key = str(u["name"]).strip().lower()
+                if key not in USER_DB:
+                    pwd = str(u["password"]).strip()
+                    USER_DB[key] = {
+                        "password": pwd,
+                        "display_name": str(u["name"]).strip(),
+                        "role": "staff",
+                    }
+
+
+def load_menu():
+    """Load food menu from data.json (menu key) or menu.json. Updates menu_data."""
+    global menu_data
+    data = None
+    if DATA_FILE.exists():
+        try:
+            with open(DATA_FILE, "r", encoding="utf-8") as f:
+                d = json.load(f)
+                data = d.get("menu") if isinstance(d.get("menu"), dict) else None
+        except (json.JSONDecodeError, IOError):
+            pass
+    if data is None and MENU_FILE.exists():
+        try:
+            with open(MENU_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        except (json.JSONDecodeError, IOError):
+            pass
+    if data and isinstance(data, dict) and (data.get("categories") or data.get("items")):
+        menu_data["categories"] = data.get("categories") or []
+        menu_data["items"] = data.get("items") or []
+    else:
+        menu_data["categories"] = DEFAULT_MENU.get("categories", [])
+        menu_data["items"] = DEFAULT_MENU.get("items", [])
 
 
 def load_data():
+    """Load help_requests, accepted_requests, api_token from data.json (usual storage)."""
     global help_requests, accepted_requests, api_token
     if DATA_FILE.exists():
         try:
@@ -75,6 +203,7 @@ def load_data():
 
 
 def save_data():
+    """Save help_requests, accepted_requests, api_token to data.json (usual storage)."""
     if not os.environ.get("VERCEL"):
         DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
     payload = {
@@ -132,7 +261,7 @@ def _to_chennai_time(iso_or_legacy):
 
 
 def seed_demo_requests():
-    """Add demo requests if none exist."""
+    """Add demo requests if none exist (usual behavior)."""
     if not help_requests:
         now = _utc_iso_now()
         demos = [
@@ -145,7 +274,9 @@ def seed_demo_requests():
 
 @app.before_request
 def before_request():
+    load_config()
     load_data()
+    load_menu()
     seed_demo_requests()
 
 
@@ -171,13 +302,15 @@ def login():
     if request.method == "POST":
         username = (request.form.get("username") or "").strip().lower()
         password = (request.form.get("password") or "").strip()
+        if not username:
+            return render_template("login.html", error="Invalid username or password.", num_tables=NUM_TABLES)
         if username in USER_DB and USER_DB[username]["password"] == password:
             session["username"] = username
             session["display_name"] = USER_DB[username]["display_name"]
             session["role"] = USER_DB[username]["role"]
             return redirect(url_for("main.dashboard"))
-        return render_template("login.html", error="Invalid username or password.")
-    return render_template("login.html", error=None)
+        return render_template("login.html", error="Invalid username or password.", num_tables=NUM_TABLES)
+    return render_template("login.html", error=None, num_tables=NUM_TABLES)
 
 
 @bp.route("/logout")
@@ -205,11 +338,13 @@ def dashboard():
 def list_requests():
     """Return pending help requests (not yet accepted). Times in Chennai (IST)."""
     accepted_ids = {r["request_id"] for r in accepted_requests}
-    pending = [
-        {"id": r["id"], "table": r["table"], "raised_at": _to_chennai_time(r["raised_at"])}
-        for r in help_requests
-        if r["id"] not in accepted_ids
-    ]
+    pending = []
+    for r in help_requests:
+        if r["id"] not in accepted_ids:
+            out = {"id": r["id"], "table": r["table"], "raised_at": _to_chennai_time(r["raised_at"])}
+            if r.get("note"):
+                out["note"] = r["note"]
+            pending.append(out)
     return jsonify({"requests": pending})
 
 
@@ -228,15 +363,16 @@ def accept_request():
     if request_id in accepted_ids:
         return jsonify({"ok": False, "error": "Already accepted"}), 400
     accepted_at = _utc_iso_now()
-    accepted_requests.append(
-        {
-            "request_id": request_id,
-            "table": req["table"],
-            "raised_at": req["raised_at"],
-            "accepted_at": accepted_at,
-            "accepted_by": session["username"],
-        }
-    )
+    acc = {
+        "request_id": request_id,
+        "table": req["table"],
+        "raised_at": req["raised_at"],
+        "accepted_at": accepted_at,
+        "accepted_by": session["username"],
+    }
+    if req.get("note"):
+        acc["note"] = req["note"]
+    accepted_requests.append(acc)
     save_data()
     return jsonify({"ok": True, "accepted_at": _to_chennai_time(accepted_at)})
 
@@ -255,36 +391,34 @@ def get_token():
 def list_accepted():
     """Return requests accepted by current user. Times in Chennai (IST)."""
     username = session["username"]
-    mine = [
-        {
-            "table": r["table"],
-            "raised_at": _to_chennai_time(r["raised_at"]),
-            "accepted_at": _to_chennai_time(r["accepted_at"]),
-        }
-        for r in accepted_requests
-        if r["accepted_by"] == username
-    ]
+    mine = []
+    for r in accepted_requests:
+        if r["accepted_by"] == username:
+            row = {"table": r["table"], "raised_at": _to_chennai_time(r["raised_at"]), "accepted_at": _to_chennai_time(r["accepted_at"])}
+            if r.get("note"):
+                row["note"] = r["note"]
+            mine.append(row)
     return jsonify({"accepted": mine})
 
 
 def get_api_token():
-    """Return the API token (from env or stored). Call after load_data()."""
+    """Return the API token (from env or data.json). Call after load_data()."""
     return os.environ.get("SOULPLACE_API_TOKEN") or api_token
 
 
 def require_api_token():
-    """Return True if request is allowed. Phone/browser form requests work without token; external API can use token."""
+    """Return True if request is allowed. Browser form never sends token, so always allowed; external API can send token to match."""
     token = get_api_token()
     if not token:
         return True
     sent_auth = request.headers.get("Authorization", "")
     sent_api = request.headers.get("X-API-Token", "")
     sent_token = (sent_auth[7:].strip() if sent_auth.startswith("Bearer ") else "") or sent_api.strip()
-    # No token sent → allow (browser/phone form; customers never need to enter API token)
-    if not sent_token:
+    # No token sent → allow (customer form; no token needed)
+    if not sent_token or not sent_token.strip():
         return True
-    # Token sent → must match
-    return sent_token == token
+    # Token sent → must match (for external API calls)
+    return sent_token.strip() == token
 
 
 @bp.route("/table")
@@ -300,6 +434,8 @@ def table_page():
         table=table,
         num_tables=NUM_TABLES,
         api_token=api_token or None,
+        categories=menu_data["categories"],
+        menu_items=menu_data["items"],
     )
 
 
@@ -309,17 +445,41 @@ def tables_page():
     return render_template("tables.html", num_tables=NUM_TABLES, base_url=get_public_base_url())
 
 
+@bp.route("/menu")
+def menu_page():
+    """Food menu for customers when they need help (browse while waiting)."""
+    return render_template(
+        "menu.html",
+        categories=menu_data["categories"],
+        items=menu_data["items"],
+    )
+
+
 @bp.route("/links")
 def links_page():
     """Page that shows login link and table links (with API token) for long-distance use (copy and share)."""
-    base = get_public_base_url()
-    token = get_api_token()
-    login_link = base + url_for("main.login")
-    tables_link = base + url_for("main.tables_page")
-    # Build table links that already include the API token so they work when opened
+    try:
+        base = get_public_base_url()
+    except Exception:
+        base = DEFAULT_PUBLIC_URL.rstrip("/")
+    if not base:
+        base = DEFAULT_PUBLIC_URL.rstrip("/")
+    try:
+        token = get_api_token()
+        login_link = base + url_for("main.login")
+        tables_link = base + url_for("main.tables_page")
+        menu_link = base + url_for("main.menu_page")
+    except Exception:
+        login_link = base + "/soulplace/login"
+        tables_link = base + "/soulplace/tables"
+        menu_link = base + "/soulplace/menu"
     table_links = []
-    for t in range(1, NUM_TABLES + 1):
-        url = base + url_for("main.table_page", table=t)
+    n = max(1, min(NUM_TABLES, 999))
+    for t in range(1, n + 1):
+        try:
+            url = base + url_for("main.table_page", table=t)
+        except Exception:
+            url = base + f"/soulplace/table?table={t}"
         if token:
             url += "&token=" + token if "?" in url else "?token=" + token
         table_links.append({"table": t, "url": url})
@@ -327,6 +487,7 @@ def links_page():
         "links.html",
         login_link=login_link,
         tables_link=tables_link,
+        menu_link=menu_link,
         table_links=table_links,
     )
 
@@ -345,11 +506,13 @@ def _get_local_lan_ip():
 
 
 def get_public_base_url():
-    """Base URL for links and QR codes. Uses env SOULPLACE_PUBLIC_URL if set, else X-Forwarded-* / request host.
-    When running locally (127.0.0.1), uses LAN IP so scanned QR codes work on phone on same WiFi."""
+    """Base URL for links and QR codes. Uses env SOULPLACE_PUBLIC_URL if set, else on Vercel uses DEFAULT_PUBLIC_URL, else X-Forwarded-* / request host.
+    When running locally (127.0.0.1), uses LAN IP so scanned QR codes work on phone (same WiFi)."""
     explicit = os.environ.get("SOULPLACE_PUBLIC_URL", "").strip().rstrip("/")
     if explicit:
         return explicit
+    if os.environ.get("VERCEL"):
+        return DEFAULT_PUBLIC_URL.rstrip("/")
     scheme = request.headers.get("X-Forwarded-Proto", request.scheme) or "https"
     host = request.headers.get("X-Forwarded-Host", request.host) or request.host
     if "," in host:
@@ -390,9 +553,7 @@ def qr_image(table_num):
 
 @bp.route("/api/request/create", methods=["POST"])
 def create_request():
-    """Create a new help request (e.g. from a table terminal or QR scan). Requires API token when set."""
-    if not require_api_token():
-        return jsonify({"ok": False, "error": "Invalid or missing API token"}), 401
+    """Create a new help request (e.g. from a table terminal or QR scan). No API token required – form always works."""
     data = request.get_json() or request.form or {}
     table = data.get("table")
     if table is None:
@@ -403,9 +564,13 @@ def create_request():
         return jsonify({"ok": False, "error": "table must be a number"}), 400
     if table < 1 or table > NUM_TABLES:
         return jsonify({"ok": False, "error": f"table must be 1–{NUM_TABLES}"}), 400
+    note = (data.get("note") or data.get("menu_note") or "").strip()[:500]  # optional menu/help note
     new_id = str(max((int(r.get("id", 0)) for r in help_requests), default=0) + 1)
     raised_at = _utc_iso_now()
-    help_requests.append({"id": new_id, "table": table, "raised_at": raised_at})
+    req = {"id": new_id, "table": table, "raised_at": raised_at}
+    if note:
+        req["note"] = note
+    help_requests.append(req)
     save_data()
     return jsonify({"ok": True, "id": new_id, "raised_at": raised_at})
 
@@ -417,6 +582,35 @@ app.register_blueprint(bp)
 def root():
     """Redirect root straight to login so the main link shows the login screen."""
     return redirect(url_for("main.login"))
+
+
+# Redirect typo URLs (e.g. /menu, /login without /soulplace) so users don't get 404
+@app.route("/login")
+def redirect_login():
+    return redirect(url_for("main.login"))
+
+@app.route("/menu")
+def redirect_menu():
+    return redirect(url_for("main.menu_page"))
+
+@app.route("/table")
+def redirect_table():
+    t = request.args.get("table", type=int)
+    if t and 1 <= t <= NUM_TABLES:
+        return redirect(url_for("main.table_page", table=t))
+    return redirect(url_for("main.table_page"))
+
+@app.route("/tables")
+def redirect_tables():
+    return redirect(url_for("main.tables_page"))
+
+@app.route("/links")
+def redirect_links():
+    return redirect(url_for("main.links_page"))
+
+@app.route("/dashboard")
+def redirect_dashboard():
+    return redirect(url_for("main.dashboard"))
 
 
 def _local_ip():

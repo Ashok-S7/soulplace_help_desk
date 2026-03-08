@@ -1,0 +1,52 @@
+================================================================================
+  "Not Found" / "The requested URL was not found on the server"
+================================================================================
+
+Do these two checks:
+
+--------------------------------------------------------------------------------
+1. USE THE FULL URL (must include /soulplace/)
+--------------------------------------------------------------------------------
+
+  WRONG (will give 404):
+    https://soulplace-help-desk.vercel.app/menu
+    https://soulplace-help-desk.vercel.app/login
+
+  CORRECT:
+    https://soulplace-help-desk.vercel.app/soulplace/login
+    https://soulplace-help-desk.vercel.app/soulplace/menu
+    https://soulplace-help-desk.vercel.app/soulplace/table
+    https://soulplace-help-desk.vercel.app/soulplace/tables
+    https://soulplace-help-desk.vercel.app/soulplace/links
+
+  All app links must start with:  .../soulplace/  then the page name.
+
+--------------------------------------------------------------------------------
+2. SET VERCEL ROOT DIRECTORY (if you still get 404)
+--------------------------------------------------------------------------------
+
+  If your GitHub repo has the app inside a folder (e.g. "mini project" with
+  soulplace_help_desk inside), Vercel must build from that folder:
+
+  1. Open https://vercel.com/dashboard
+  2. Click your project (soulplace-help-desk)
+  3. Settings -> General
+  4. "Root Directory" -> Edit -> set to:  soulplace_help_desk
+  5. Save
+  6. Deployments -> "..." on latest deployment -> Redeploy
+  7. Wait for deploy to finish, then try the link again.
+
+  If your repo root already IS soulplace_help_desk (app.py at top level),
+  leave Root Directory EMPTY and redeploy.
+
+--------------------------------------------------------------------------------
+QUICK LINKS (copy and paste)
+--------------------------------------------------------------------------------
+
+  Login:   https://soulplace-help-desk.vercel.app/soulplace/login
+  Menu:    https://soulplace-help-desk.vercel.app/soulplace/menu
+  Tables:  https://soulplace-help-desk.vercel.app/soulplace/tables
+  Links:   https://soulplace-help-desk.vercel.app/soulplace/links
+  Request help: https://soulplace-help-desk.vercel.app/soulplace/table
+
+================================================================================

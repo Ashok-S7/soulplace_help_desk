@@ -4,20 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Table QR Codes – Soulplace Boardgames</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=2">
+    <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}" type="image/png">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/logo.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=5">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body class="tables-page">
     <div class="page-bg" aria-hidden="true"></div>
-    <header class="login-header">
+    <header class="login-header" style="opacity:1;visibility:visible;">
         <div class="logo">
             <div class="logo-img-wrap">
                 <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Soulplace logo" class="logo-img">
             </div>
-            <span class="logo-main">SOULPLACE</span>
-            <span class="logo-sub">BOARDGAMES – HELP DESK</span>
+            <span class="logo-main" style="display:block;font-size:2rem;font-weight:700;color:#0f172a;">SOULPLACE</span>
+            <span class="logo-sub" style="display:block;font-size:0.8rem;font-weight:600;color:#0369a1;">BOARDGAMES – HELP DESK</span>
+            <span class="brand-name-bar" style="display:block;margin:0.75rem auto 0;padding:0.4rem 1rem;font-size:1rem;font-weight:700;color:#0369a1;background:rgba(14,165,233,0.12);border:1px solid rgba(14,165,233,0.25);border-radius:999px;">Soulplace Boardgames</span>
         </div>
         <div class="header-line"></div>
         <p class="tables-intro">Scan the QR code at your table to request a Soul.</p>
@@ -40,6 +43,9 @@
         <a href="{{ url_for('main.login') }}" class="staff-link">Staff / Admin login</a>
         &nbsp;·&nbsp;
         <a href="{{ url_for('main.links_page') }}" class="staff-link">Your login link (long-distance)</a>
+        &nbsp;·&nbsp;
+        <a href="{{ url_for('main.menu_page') }}" class="staff-link">Menu</a>
     </p>
+    <p class="footer-brand">Soulplace Boardgames – Help Desk</p>
 </body>
 </html>

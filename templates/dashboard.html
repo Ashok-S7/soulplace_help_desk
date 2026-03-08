@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Soul – Soulplace Boardgames</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=2">
+    <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}" type="image/png">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/logo.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=5">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -16,7 +18,7 @@
             <div class="logo-img-wrap logo-img-wrap-sm">
                 <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Soulplace">
             </div>
-            <span class="logo-main">SOULPLACE</span>
+            <span class="logo-main" style="display:block;font-size:1.2rem;font-weight:700;color:#0f172a;">SOULPLACE</span>
         </div>
         <h1 class="welcome-title">Soul – Welcome, {{ username }}</h1>
         <a href="{{ url_for('main.logout') }}" class="logout-link">Log out</a>
@@ -56,12 +58,13 @@
                     <thead>
                         <tr>
                             <th>Table #</th>
+                            <th>Menu / note</th>
                             <th>Raised at</th>
                             <th>Accepted at</th>
                         </tr>
                     </thead>
                     <tbody id="accepted-tbody">
-                        <tr><td colspan="3" class="empty-cell">Loading…</td></tr>
+                        <tr><td colspan="4" class="empty-cell">Loading…</td></tr>
                     </tbody>
                 </table>
             </div>

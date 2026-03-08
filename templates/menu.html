@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu – Soulplace Boardgames</title>
+    <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}" type="image/png">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/logo.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=5">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .menu-page { padding: 0 1rem 5rem; max-width: 480px; margin: 0 auto; }
+        .menu-header { display: flex; align-items: center; gap: 0.5rem; padding: 1rem 0; }
+        .menu-header .logo-mini { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
+        .menu-header h1 { margin: 0; font-size: 1.35rem; color: #0f172a; }
+        .menu-categories { display: flex; gap: 0.5rem; overflow-x: auto; padding: 0.5rem 0 1rem; -webkit-overflow-scrolling: touch; }
+        .menu-categories::-webkit-scrollbar { height: 4px; }
+        .menu-cat-btn { flex-shrink: 0; padding: 0.5rem 1rem; border-radius: 999px; border: 1px solid var(--border); background: var(--card); color: var(--text); font-size: 0.9rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: background 0.2s, border-color 0.2s; }
+        .menu-cat-btn:hover, .menu-cat-btn.active { background: rgba(14, 165, 233, 0.12); border-color: var(--primary); color: var(--primary-dark); }
+        .menu-items { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+        .menu-item { background: var(--card); border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border-light); box-shadow: var(--shadow-sm); }
+        .menu-item-img { width: 100%; aspect-ratio: 1; background: linear-gradient(135deg, #e2e8f0 0%, #f1f5f9 100%); object-fit: cover; }
+        .menu-item-info { padding: 0.6rem 0.75rem; }
+        .menu-item-name { font-weight: 600; font-size: 0.95rem; color: var(--text); margin: 0 0 0.2rem; }
+        .menu-item-price { font-size: 0.9rem; font-weight: 700; color: var(--primary-dark); }
+        .menu-search-wrap { position: fixed; bottom: 0; left: 0; right: 0; padding: 0.75rem 1rem; background: var(--card); border-top: 1px solid var(--border); max-width: 480px; margin: 0 auto; }
+        .menu-search { width: 100%; padding: 0.6rem 1rem; border: 1px solid var(--border); border-radius: 999px; font-size: 0.9rem; }
+        .menu-back { display: inline-flex; align-items: center; gap: 0.35rem; margin-bottom: 0.5rem; color: var(--primary); font-weight: 600; text-decoration: none; font-size: 0.9rem; }
+        .menu-back:hover { text-decoration: underline; }
+        .menu-empty { text-align: center; padding: 2rem; color: var(--text-muted); }
+        /* Order card for customer view - sits above search bar */
+        .menu-order-card { position: fixed; bottom: 3.25rem; left: 0; right: 0; max-width: 480px; margin: 0 auto; padding: 0.75rem 1rem 1rem; background: var(--card); border-top: 2px solid var(--primary); box-shadow: 0 -4px 20px rgba(15,23,42,0.08); z-index: 10; }
+        .menu-order-card.hidden { display: none; }
+        .menu-order-card h3 { margin: 0 0 0.35rem; font-size: 0.95rem; color: var(--text); }
+        .menu-order-card .order-list { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; max-height: 3.2em; overflow-y: auto; }
+        .menu-order-card .order-btn { display: block; width: 100%; padding: 0.6rem 1rem; font-size: 0.95rem; font-weight: 600; color: white; background: var(--primary); border: none; border-radius: var(--radius-sm); cursor: pointer; transition: background 0.2s; }
+        .menu-order-card .order-btn:hover { background: var(--primary-dark); }
+        .menu-order-card .order-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .menu-item { position: relative; cursor: pointer; transition: box-shadow 0.2s, transform 0.15s ease; }
+        .menu-item:hover { box-shadow: var(--shadow-md); }
+        .menu-item .add-to-order { position: absolute; bottom: 0.6rem; right: 0.75rem; width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: white; border: none; font-size: 1.1rem; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow); transition: background 0.2s, transform 0.15s; }
+        .menu-item .add-to-order:hover { background: var(--primary-dark); transform: scale(1.08); }
+        .menu-item .add-to-order.added { background: var(--success); }
+        .menu-items { padding-bottom: 6.5rem; }
+    </style>
+</head>
+<body class="tables-page">
+    <div class="page-bg" aria-hidden="true"></div>
+    <div class="menu-page">
+        <a href="{{ url_for('main.table_page') }}" class="menu-back">← Back to request help</a>
+        <header class="menu-header">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="" class="logo-mini">
+            <h1>Menu</h1>
+        </header>
+
+        <div class="menu-categories" id="menu-categories">
+            <button type="button" class="menu-cat-btn active" data-category="">All</button>
+            {% for c in categories %}
+            <button type="button" class="menu-cat-btn" data-category="{{ c.id }}">{{ c.name }}</button>
+            {% endfor %}
+        </div>
+
+        <div class="menu-items" id="menu-items">
+            {% for item in items %}
+            <div class="menu-item" data-category="{{ item.category }}" data-name="{{ item.name }}" data-price="{{ item.price }}">
+                {% if item.image %}
+                <img src="{{ item.image }}" alt="" class="menu-item-img" onerror="this.style.background='linear-gradient(135deg,#e2e8f0,#f1f5f9)';this.src='';this.onerror=null;">
+                {% else %}
+                <div class="menu-item-img" style="background: linear-gradient(135deg, #e2e8f0, #f1f5f9); display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #94a3b8;" aria-hidden="true">🍽</div>
+                {% endif %}
+                <div class="menu-item-info">
+                    <p class="menu-item-name">{{ item.name }}</p>
+                    <p class="menu-item-price">₹{{ item.price }}</p>
+                </div>
+                <button type="button" class="add-to-order" aria-label="Add {{ item.name }} to order" title="Add to order">+</button>
+            </div>
+            {% endfor %}
+        </div>
+        {% if not items %}
+        <p class="menu-empty">No menu items yet. Add items in menu.json.</p>
+        {% endif %}
+    </div>
+
+    <div class="menu-order-card hidden" id="menu-order-card">
+        <h3>Your order <span id="order-count">(0 items)</span></h3>
+        <p class="order-list" id="order-list">Add items using the + button on each dish.</p>
+        <a href="{{ url_for('main.table_page') }}" class="order-btn" id="order-request-btn" style="text-decoration:none;text-align:center;">Request help with this order</a>
+    </div>
+
+    <div class="menu-search-wrap">
+        <input type="text" class="menu-search" id="menu-search" placeholder="Search for dishes..." aria-label="Search menu">
+    </div>
+
+    <script>
+        (function () {
+            var catBtns = document.querySelectorAll('.menu-cat-btn');
+            var items = document.querySelectorAll('.menu-item');
+            var searchInput = document.getElementById('menu-search');
+
+            function filterMenu() {
+                var cat = document.querySelector('.menu-cat-btn.active');
+                var category = cat ? cat.getAttribute('data-category') : '';
+                var q = (searchInput && searchInput.value) ? searchInput.value.trim().toLowerCase() : '';
+                items.forEach(function (el) {
+                    var itemCat = el.getAttribute('data-category');
+                    var name = (el.querySelector('.menu-item-name') || {}).textContent || '';
+                    var showCat = !category || itemCat === category;
+                    var showSearch = !q || name.toLowerCase().indexOf(q) !== -1;
+                    el.style.display = showCat && showSearch ? '' : 'none';
+                });
+            }
+
+            if (catBtns.length) {
+                catBtns.forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        catBtns.forEach(function (b) { b.classList.remove('active'); });
+                        btn.classList.add('active');
+                        filterMenu();
+                    });
+                });
+            }
+            if (searchInput) {
+                searchInput.addEventListener('input', filterMenu);
+            }
+            filterMenu();
+        })();
+
+        (function () {
+            var orderItems = [];
+            var card = document.getElementById('menu-order-card');
+            var countEl = document.getElementById('order-count');
+            var listEl = document.getElementById('order-list');
+            var btn = document.getElementById('order-request-btn');
+            var tablePageUrl = "{{ url_for('main.table_page') }}";
+
+            function updateOrderCard() {
+                if (orderItems.length === 0) {
+                    card.classList.add('hidden');
+                    countEl.textContent = '(0 items)';
+                    listEl.textContent = 'Add items using the + button on each dish.';
+                    if (btn) btn.href = tablePageUrl;
+                } else {
+                    card.classList.remove('hidden');
+                    countEl.textContent = '(' + orderItems.length + ' item' + (orderItems.length !== 1 ? 's' : '') + ')';
+                    listEl.textContent = orderItems.join(', ');
+                    if (btn) btn.href = tablePageUrl + '?note=' + encodeURIComponent(orderItems.join(', '));
+                }
+            }
+
+            document.querySelectorAll('.menu-item .add-to-order').forEach(function (btnAdd) {
+                btnAdd.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    var item = btnAdd.closest('.menu-item');
+                    var name = item && item.getAttribute('data-name');
+                    if (!name) return;
+                    orderItems.push(name);
+                    btnAdd.classList.add('added');
+                    btnAdd.textContent = '\u2713';
+                    updateOrderCard();
+                });
+            });
+
+            updateOrderCard();
+        })();
+    </script>
+</body>
+</html>

@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Your links – Soulplace Boardgames</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=2">
+    <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}" type="image/png">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/logo.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=5">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
@@ -21,13 +23,14 @@
 </head>
 <body class="login-page">
     <div class="page-bg" aria-hidden="true"></div>
-    <header class="login-header">
+    <header class="login-header" style="opacity:1;visibility:visible;">
         <div class="logo">
             <div class="logo-img-wrap">
                 <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Soulplace logo" class="logo-img">
             </div>
-            <span class="logo-main">SOULPLACE</span>
-            <span class="logo-sub">BOARDGAMES – HELP DESK</span>
+            <span class="logo-main" style="display:block;font-size:1.85rem;font-weight:700;color:#0f172a;">SOULPLACE</span>
+            <span class="logo-sub" style="display:block;font-size:0.75rem;font-weight:600;color:#475569;">BOARDGAMES – HELP DESK</span>
+            <span class="brand-name-bar" style="display:block;margin:0.75rem auto 0;padding:0.4rem 1rem;font-size:1rem;font-weight:700;color:#0369a1;background:rgba(14,165,233,0.12);border:1px solid rgba(14,165,233,0.25);border-radius:999px;">Soulplace Boardgames</span>
         </div>
         <div class="header-line"></div>
     </header>
@@ -35,13 +38,17 @@
         <h1>Your links (for long-distance use)</h1>
         <p class="login-subtitle">Use these links when you are far away. After you deploy to Vercel, open this page from your Vercel URL and copy the login link.</p>
 
-        <p class="link-label">Staff / Admin login link</p>
-        <div class="link-box" id="login-link">{{ login_link }}</div>
+        <p class="link-label">1. Staff / Admin login link</p>
+        <div class="link-box" id="login-link">{{ login_link or 'https://soulplace-help-desk.vercel.app/soulplace/login' }}</div>
         <button type="button" class="copy-btn" onclick="copy('login-link')">Copy login link</button>
 
-        <p class="link-label" style="margin-top: 1.25rem;">Table QR codes page</p>
-        <div class="link-box" id="tables-link">{{ tables_link }}</div>
+        <p class="link-label" style="margin-top: 1.25rem;">2. Table QR codes page</p>
+        <div class="link-box" id="tables-link">{{ tables_link or 'https://soulplace-help-desk.vercel.app/soulplace/tables' }}</div>
         <button type="button" class="copy-btn" onclick="copy('tables-link')">Copy</button>
+
+        <p class="link-label" style="margin-top: 1.25rem;">3. Menu (for customers when they need help)</p>
+        <div class="link-box" id="menu-link">{{ menu_link or 'https://soulplace-help-desk.vercel.app/soulplace/menu' }}</div>
+        <button type="button" class="copy-btn" onclick="copy('menu-link')">Copy menu link</button>
 
         <p class="link-label" style="margin-top: 1.25rem;">Direct request-help links (Table 1–10)</p>
         {% for item in table_links %}
@@ -50,6 +57,7 @@
         {% endfor %}
 
         <a href="{{ url_for('main.login') }}" class="back">← Back to login</a>
+        <p class="footer-brand" style="margin-top:1.5rem;text-align:center;font-size:0.8rem;font-weight:600;color:#475569;">Soulplace Boardgames – Help Desk</p>
     </main>
     <script>
         function copy(id) {
