@@ -433,6 +433,12 @@ def tables_page():
     return render_template("tables.html", num_tables=NUM_TABLES, base_url=get_public_base_url())
 
 
+@bp.route("/menu")
+def redirect_menu():
+    """Redirect /soulplace/menu to request-help (menu feature removed)."""
+    return redirect(url_for("main.table_page"))
+
+
 @bp.route("/links")
 def links_page():
     """Page that shows login link and table links (with API token) for long-distance use (copy and share). Works in live (Vercel) with explicit paths."""
@@ -561,6 +567,12 @@ def root():
 @app.route("/login")
 def redirect_login():
     return redirect(url_for("main.login"))
+
+
+@app.route("/menu")
+def redirect_menu_root():
+    return redirect(url_for("main.table_page"))
+
 
 @app.route("/table")
 def redirect_table():

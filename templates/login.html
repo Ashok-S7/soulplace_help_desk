@@ -65,5 +65,18 @@
             </p>
         </div>
     </main>
+    <script>
+    (function() {
+        // Remove any "Menu" link (fixes cached old login page)
+        document.querySelectorAll('.demo-hint a, a.staff-link').forEach(function(a) {
+            if (a.textContent.trim().toLowerCase() === 'menu') {
+                var prev = a.previousSibling;
+                while (prev && prev.nodeType === 3 && !prev.textContent.trim()) prev = prev.previousSibling;
+                if (prev && prev.textContent && prev.textContent.indexOf('\u00B7') !== -1) prev.remove();
+                a.remove();
+            }
+        });
+    })();
+    </script>
 </body>
 </html>
