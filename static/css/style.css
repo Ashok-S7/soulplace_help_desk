@@ -91,7 +91,22 @@ body {
 .login-header {
     text-align: center;
     margin-bottom: 2rem;
-    animation: fadeInDown 0.5s var(--ease-out);
+    opacity: 1;
+    visibility: visible;
+    /* No fade animation – keeps branding visible on refresh */
+}
+
+/* Sticky header so brand name is never hidden when scrolling */
+.login-page .login-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    padding: 0.5rem 0 1rem;
+    background: linear-gradient(to bottom, var(--bg) 0%, var(--bg) 90%, transparent 100%);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 
 @keyframes fadeInDown {
@@ -109,17 +124,28 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.35rem;
+    gap: 0.5rem;
+}
+
+/* Brand text always on top of glow/floating effects */
+.logo-main,
+.logo-sub,
+.header-brand-title,
+.brand-name-bar {
+    position: relative;
+    z-index: 1;
 }
 
 .logo-img-wrap {
     width: 80px;
     height: 80px;
-    margin: 0 auto 0.75rem;
+    margin: 0 auto 1rem;
     border-radius: 50%;
     overflow: hidden;
-    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2), 0 0 24px rgba(14, 165, 233, 0.35);
-    animation: logoGlow 2.5s ease-in-out infinite;
+    /* Contained glow so it doesn’t overlap brand text below */
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.25), 0 0 12px rgba(14, 165, 233, 0.2);
+    animation: logoGlow 6s ease-in-out infinite;
+    isolation: isolate;
 }
 
 .logo-img-wrap img {
@@ -130,32 +156,44 @@ body {
 }
 
 @keyframes logoGlow {
-    0%, 100% { box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2), 0 0 24px rgba(14, 165, 233, 0.35); transform: scale(1); }
-    50% { box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.35), 0 0 32px rgba(14, 165, 233, 0.5); transform: scale(1.02); }
+    0%, 100% { box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.25), 0 0 12px rgba(14, 165, 233, 0.2); transform: scale(1); }
+    50% { box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.35), 0 0 16px rgba(14, 165, 233, 0.3); transform: scale(1.02); }
 }
 
 .logo-main {
+    display: block !important;
     font-size: 1.85rem;
     font-weight: 700;
     letter-spacing: 0.1em;
-    color: var(--text);
+    color: #0f172a;
+    line-height: 1.2;
+    min-height: 1.2em;
+    visibility: visible;
+    opacity: 1;
 }
 
 .logo-sub {
-    font-size: 0.7rem;
+    display: block !important;
+    font-size: 0.75rem;
     font-weight: 600;
     letter-spacing: 0.18em;
-    color: var(--text-muted);
+    color: #475569;
+    line-height: 1.3;
+    min-height: 1em;
+    visibility: visible;
+    opacity: 1;
 }
 
 .header-line {
+    position: relative;
+    z-index: 1;
     width: 72px;
     height: 4px;
     background: linear-gradient(90deg, var(--primary), var(--primary-dark));
     margin: 1.25rem auto 0;
     border-radius: 2px;
-    box-shadow: 0 1px 2px rgba(14, 165, 233, 0.25);
-    animation: headerLineShine 3s var(--ease-in-out) infinite;
+    box-shadow: 0 1px 2px rgba(14, 165, 233, 0.2);
+    animation: headerLineShine 5s var(--ease-in-out) infinite;
 }
 
 @keyframes headerLineShine {
@@ -166,7 +204,7 @@ body {
 .login-main {
     width: 100%;
     max-width: 400px;
-    animation: fadeInUp 0.5s var(--ease-out) 0.1s both;
+    animation: fadeInUp 1s var(--ease-out) 0.2s both;
 }
 
 @keyframes fadeInUp {
@@ -196,13 +234,13 @@ body {
 
 .dashboard-main .card,
 .login-main .card-elevated {
-    animation: cardReveal 0.5s var(--ease-out) both;
+    animation: cardReveal 1s var(--ease-out) both;
 }
 
-.dashboard-main .card:nth-child(1) { animation-delay: 0.05s; }
-.dashboard-main .card:nth-child(2) { animation-delay: 0.12s; }
-.dashboard-main .card:nth-child(3) { animation-delay: 0.19s; }
-.dashboard-main .card:nth-child(4) { animation-delay: 0.26s; }
+.dashboard-main .card:nth-child(1) { animation-delay: 0.15s; }
+.dashboard-main .card:nth-child(2) { animation-delay: 0.35s; }
+.dashboard-main .card:nth-child(3) { animation-delay: 0.55s; }
+.dashboard-main .card:nth-child(4) { animation-delay: 0.75s; }
 
 @keyframes cardReveal {
     from {
@@ -213,6 +251,15 @@ body {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+.brand-tagline {
+    margin: 0 0 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--primary);
 }
 
 .login-title {
@@ -243,7 +290,7 @@ body {
     font-weight: 500;
     margin-bottom: 1.25rem;
     border: 1px solid rgba(181, 48, 32, 0.2);
-    animation: shake 0.4s var(--ease);
+    animation: shake 0.7s var(--ease);
 }
 
 .error-icon {
@@ -404,7 +451,7 @@ body {
     width: 40px;
     height: 40px;
     margin: 0;
-    animation: logoGlow 2.5s ease-in-out infinite;
+    animation: logoGlow 6s ease-in-out infinite;
 }
 
 .dashboard-header .logo-small .logo-main {
@@ -534,7 +581,7 @@ body {
     background: var(--primary);
     flex-shrink: 0;
     margin-right: 0.75rem;
-    animation: pulseDot 2s var(--ease-in-out) infinite;
+    animation: pulseDot 3s var(--ease-in-out) infinite;
 }
 
 @keyframes pulseDot {
@@ -558,6 +605,37 @@ body {
     color: var(--text-muted);
     font-size: 0.88rem;
     margin-left: 0.25rem;
+}
+
+.request-note {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--primary-dark);
+    margin-top: 0.2rem;
+}
+
+.request-order {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--text);
+    margin-top: 0.25rem;
+    font-weight: 500;
+}
+
+.form-hint {
+    margin: 0.25rem 0 0.75rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.accepted-note {
+    font-size: 0.85rem;
+    color: var(--text);
+    max-width: 200px;
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .btn-attend {
@@ -708,7 +786,55 @@ body {
 }
 
 .tables-page .login-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
     margin-bottom: 1rem;
+    padding: 1rem 0 1.25rem;
+    background: linear-gradient(to bottom, var(--bg) 0%, var(--bg) 85%, transparent 100%);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+}
+
+/* Brand name prominent on tables/QR page */
+.tables-page .logo-main {
+    font-size: 2rem;
+    color: #0f172a;
+}
+.tables-page .logo-sub {
+    font-size: 0.8rem;
+    color: #0369a1;
+    font-weight: 600;
+}
+
+.tables-page .header-brand-title {
+    display: block !important;
+    margin: 1rem auto 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: #0369a1;
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Prominent brand bar – always visible under logo */
+.brand-name-bar {
+    display: block !important;
+    margin: 0.75rem auto 0;
+    padding: 0.4rem 1rem;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #0369a1;
+    background: rgba(14, 165, 233, 0.12);
+    border: 1px solid rgba(14, 165, 233, 0.25);
+    border-radius: 999px;
+    visibility: visible;
+    opacity: 1;
+    position: relative;
+    z-index: 1;
 }
 
 .tables-intro {
@@ -740,19 +866,19 @@ body {
     border: 1px solid var(--border-light);
     box-shadow: var(--shadow);
     transition: box-shadow 0.3s var(--ease), transform 0.25s var(--ease), border-color 0.25s var(--ease);
-    animation: cardReveal 0.45s var(--ease-out) both;
+    animation: cardReveal 0.9s var(--ease-out) both;
 }
 
-.tables-grid .table-qr-card:nth-child(1) { animation-delay: 0.03s; }
-.tables-grid .table-qr-card:nth-child(2) { animation-delay: 0.06s; }
-.tables-grid .table-qr-card:nth-child(3) { animation-delay: 0.09s; }
-.tables-grid .table-qr-card:nth-child(4) { animation-delay: 0.12s; }
-.tables-grid .table-qr-card:nth-child(5) { animation-delay: 0.15s; }
-.tables-grid .table-qr-card:nth-child(6) { animation-delay: 0.18s; }
-.tables-grid .table-qr-card:nth-child(7) { animation-delay: 0.21s; }
-.tables-grid .table-qr-card:nth-child(8) { animation-delay: 0.24s; }
-.tables-grid .table-qr-card:nth-child(9) { animation-delay: 0.27s; }
-.tables-grid .table-qr-card:nth-child(10) { animation-delay: 0.3s; }
+.tables-grid .table-qr-card:nth-child(1) { animation-delay: 0.1s; }
+.tables-grid .table-qr-card:nth-child(2) { animation-delay: 0.22s; }
+.tables-grid .table-qr-card:nth-child(3) { animation-delay: 0.34s; }
+.tables-grid .table-qr-card:nth-child(4) { animation-delay: 0.46s; }
+.tables-grid .table-qr-card:nth-child(5) { animation-delay: 0.58s; }
+.tables-grid .table-qr-card:nth-child(6) { animation-delay: 0.7s; }
+.tables-grid .table-qr-card:nth-child(7) { animation-delay: 0.82s; }
+.tables-grid .table-qr-card:nth-child(8) { animation-delay: 0.94s; }
+.tables-grid .table-qr-card:nth-child(9) { animation-delay: 1.06s; }
+.tables-grid .table-qr-card:nth-child(10) { animation-delay: 1.18s; }
 
 .table-qr-card:hover {
     box-shadow: var(--shadow-md), 0 0 0 1px rgba(14, 165, 233, 0.08);
@@ -793,9 +919,45 @@ body {
     font-size: 0.9rem;
 }
 
+.footer-brand {
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+}
+
 /* API Token card (admin) */
-.api-token-card .card-subtitle {
+.api-token-card .card-subtitle,
+.config-card .card-subtitle {
     margin-bottom: 0.75rem;
+}
+
+.config-summary {
+    font-size: 0.95rem;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+}
+
+.config-form-wrap label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-top: 0.5rem;
+}
+
+.config-json {
+    display: block;
+    width: 100%;
+    min-height: 80px;
+    padding: 0.5rem 0.75rem;
+    font-family: ui-monospace, monospace;
+    font-size: 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-top: 0.25rem;
 }
 
 .token-row {

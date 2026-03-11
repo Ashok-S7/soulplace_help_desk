@@ -12,7 +12,7 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 import qrcode
-from flask import Flask, Blueprint, Response, render_template, request, redirect, url_for, session, jsonify
+from flask import Flask, Blueprint, Response, render_template, request, redirect, url_for, session, jsonify, make_response
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SOULPLACE_SECRET_KEY", "soulplace-help-desk-secret-key-change-in-production")
@@ -30,34 +30,9 @@ DATA_FILE = (
 
 # Config file for tables and users – edit config.json and redeploy to change
 CONFIG_FILE = Path(__file__).parent / "config.json"
-# Food menu for customers (edit menu.json or use API)
-MENU_FILE = Path(__file__).parent / "menu.json"
 # Default public URL when deployed on Vercel (QR codes & links use this).
 # Replace with YOUR Vercel project URL (e.g. https://your-project.vercel.app) – see MY_LINKS.txt
 DEFAULT_PUBLIC_URL = "https://soulplace-help-desk.vercel.app"
-
-# Default menu when menu.json is missing (e.g. on first deploy or Vercel). Edit menu.json to add more.
-DEFAULT_MENU = {
-    "categories": [
-        {"id": "quick-bites", "name": "Quick Bites"},
-        {"id": "sandwich", "name": "Sandwich"},
-        {"id": "pizza", "name": "Pizza"},
-        {"id": "maggie", "name": "Maggie"},
-        {"id": "beverage", "name": "Beverage"},
-        {"id": "slots", "name": "Slots"},
-    ],
-    "items": [
-        {"id": "qb1", "name": "Cheese Nachos", "category": "quick-bites", "price": 139},
-        {"id": "qb2", "name": "Peri Peri Nachos", "category": "quick-bites", "price": 130},
-        {"id": "sw1", "name": "Veg Sw", "category": "sandwich", "price": 110},
-        {"id": "pz1", "name": "Veg Pizza", "category": "pizza", "price": 140},
-        {"id": "mg1", "name": "Maggie", "category": "maggie", "price": 60},
-        {"id": "bv1", "name": "Cold Coffee", "category": "beverage", "price": 120},
-        {"id": "bv5", "name": "Coke", "category": "beverage", "price": 50},
-        {"id": "bv10", "name": "Coffee", "category": "beverage", "price": 45},
-        {"id": "bv12", "name": "Tea", "category": "beverage", "price": 45},
-    ],
-}
 
 # Default config if file missing (same as original hardcoded values)
 DEFAULT_CONFIG = {
@@ -83,7 +58,6 @@ NUM_TABLES = 10
 help_requests = []
 accepted_requests = []
 api_token = None
-menu_data = {"categories": [], "items": []}
 
 
 def load_config():
@@ -160,31 +134,6 @@ def load_config():
                     }
 
 
-def load_menu():
-    """Load food menu from data.json (menu key) or menu.json. Updates menu_data."""
-    global menu_data
-    data = None
-    if DATA_FILE.exists():
-        try:
-            with open(DATA_FILE, "r", encoding="utf-8") as f:
-                d = json.load(f)
-                data = d.get("menu") if isinstance(d.get("menu"), dict) else None
-        except (json.JSONDecodeError, IOError):
-            pass
-    if data is None and MENU_FILE.exists():
-        try:
-            with open(MENU_FILE, "r", encoding="utf-8") as f:
-                data = json.load(f)
-        except (json.JSONDecodeError, IOError):
-            pass
-    if data and isinstance(data, dict) and (data.get("categories") or data.get("items")):
-        menu_data["categories"] = data.get("categories") or []
-        menu_data["items"] = data.get("items") or []
-    else:
-        menu_data["categories"] = DEFAULT_MENU.get("categories", [])
-        menu_data["items"] = DEFAULT_MENU.get("items", [])
-
-
 def load_data():
     """Load help_requests, accepted_requests, api_token from data.json (usual storage)."""
     global help_requests, accepted_requests, api_token
@@ -223,6 +172,23 @@ CHENNAI_TZ = timezone(timedelta(hours=5, minutes=30))
 def _utc_iso_now():
     """Current time in UTC as ISO string."""
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def _parse_raised_at(iso_or_legacy):
+    """Parse raised_at to UTC datetime. Returns None if unparseable."""
+    if not iso_or_legacy:
+        return None
+    s = str(iso_or_legacy).strip()
+    if "T" in s:
+        try:
+            return datetime.fromisoformat(s.replace("Z", "+00:00"))
+        except (ValueError, TypeError):
+            pass
+    return None
+
+
+# Only show pending requests from the last N minutes (so refresh doesn't show very old ones)
+PENDING_REQUEST_MAX_AGE_MINUTES = int(os.environ.get("SOULPLACE_PENDING_MAX_AGE_MINUTES", "120"))
 
 
 def _to_chennai_time(iso_or_legacy):
@@ -276,7 +242,6 @@ def seed_demo_requests():
 def before_request():
     load_config()
     load_data()
-    load_menu()
     seed_demo_requests()
 
 
@@ -303,14 +268,20 @@ def login():
         username = (request.form.get("username") or "").strip().lower()
         password = (request.form.get("password") or "").strip()
         if not username:
-            return render_template("login.html", error="Invalid username or password.", num_tables=NUM_TABLES)
+            resp = make_response(render_template("login.html", error="Invalid username or password.", num_tables=NUM_TABLES, cache_bust="v2"))
+            resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+            return resp
         if username in USER_DB and USER_DB[username]["password"] == password:
             session["username"] = username
             session["display_name"] = USER_DB[username]["display_name"]
             session["role"] = USER_DB[username]["role"]
             return redirect(url_for("main.dashboard"))
-        return render_template("login.html", error="Invalid username or password.", num_tables=NUM_TABLES)
-    return render_template("login.html", error=None, num_tables=NUM_TABLES)
+        resp = make_response(render_template("login.html", error="Invalid username or password.", num_tables=NUM_TABLES, cache_bust="v2"))
+        resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        return resp
+    resp = make_response(render_template("login.html", error=None, num_tables=NUM_TABLES, cache_bust="v2"))
+    resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    return resp
 
 
 @bp.route("/logout")
@@ -326,26 +297,45 @@ def logout():
 def dashboard():
     display = session.get("display_name") or session.get("username", "").capitalize()
     is_admin = session.get("role") == "admin"
-    return render_template(
+    resp = make_response(render_template(
         "dashboard.html",
         username=display,
         is_admin=is_admin,
-    )
+    ))
+    # Avoid showing old dashboard (e.g. missing "Clear all pending") from cache
+    resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    return resp
 
 
 @bp.route("/api/requests", methods=["GET"])
 @login_required
 def list_requests():
-    """Return pending help requests (not yet accepted). Times in Chennai (IST)."""
+    """Return pending help requests (not yet accepted). Only recent ones (last N minutes) so refresh doesn't show old. Times in Chennai (IST)."""
     accepted_ids = {r["request_id"] for r in accepted_requests}
+    cutoff = datetime.now(timezone.utc) - timedelta(minutes=PENDING_REQUEST_MAX_AGE_MINUTES)
     pending = []
     for r in help_requests:
-        if r["id"] not in accepted_ids:
-            out = {"id": r["id"], "table": r["table"], "raised_at": _to_chennai_time(r["raised_at"])}
+        if r["id"] in accepted_ids:
+            continue
+        raised_dt = _parse_raised_at(r.get("raised_at"))
+        if raised_dt is None or raised_dt < cutoff:
+            continue  # Skip old or unparseable requests so refresh shows only current
+        out = {"id": r["id"], "table": r["table"], "raised_at": _to_chennai_time(r["raised_at"])}
             if r.get("note"):
                 out["note"] = r["note"]
             pending.append(out)
     return jsonify({"requests": pending})
+
+
+@bp.route("/api/requests/clear", methods=["POST"])
+@login_required
+def clear_all_requests():
+    """Clear all help requests and accepted records (for testing). Staff only."""
+    global help_requests, accepted_requests
+    help_requests.clear()
+    accepted_requests.clear()
+    save_data()
+    return jsonify({"ok": True, "message": "All requests cleared."})
 
 
 @bp.route("/api/requests/accept", methods=["POST"])
@@ -434,8 +424,6 @@ def table_page():
         table=table,
         num_tables=NUM_TABLES,
         api_token=api_token or None,
-        categories=menu_data["categories"],
-        menu_items=menu_data["items"],
     )
 
 
@@ -445,49 +433,34 @@ def tables_page():
     return render_template("tables.html", num_tables=NUM_TABLES, base_url=get_public_base_url())
 
 
-@bp.route("/menu")
-def menu_page():
-    """Food menu for customers when they need help (browse while waiting)."""
-    return render_template(
-        "menu.html",
-        categories=menu_data["categories"],
-        items=menu_data["items"],
-    )
-
-
 @bp.route("/links")
 def links_page():
-    """Page that shows login link and table links (with API token) for long-distance use (copy and share)."""
+    """Page that shows login link and table links (with API token) for long-distance use (copy and share). Works in live (Vercel) with explicit paths."""
+    base = ""
     try:
         base = get_public_base_url()
     except Exception:
+        pass
+    if not base or not base.startswith("http"):
         base = DEFAULT_PUBLIC_URL.rstrip("/")
-    if not base:
-        base = DEFAULT_PUBLIC_URL.rstrip("/")
-    try:
-        token = get_api_token()
-        login_link = base + url_for("main.login")
-        tables_link = base + url_for("main.tables_page")
-        menu_link = base + url_for("main.menu_page")
-    except Exception:
-        login_link = base + "/soulplace/login"
-        tables_link = base + "/soulplace/tables"
-        menu_link = base + "/soulplace/menu"
+    prefix = URL_PREFIX or "/soulplace"
+    # Build links with explicit paths so they work in live (no url_for dependency)
+    login_link = base.rstrip("/") + prefix + "/login"
+    dashboard_link = base.rstrip("/") + prefix + "/dashboard"
+    tables_link = base.rstrip("/") + prefix + "/tables"
+    token = get_api_token()
     table_links = []
     n = max(1, min(NUM_TABLES, 999))
     for t in range(1, n + 1):
-        try:
-            url = base + url_for("main.table_page", table=t)
-        except Exception:
-            url = base + f"/soulplace/table?table={t}"
+        url = base.rstrip("/") + prefix + "/table?table=" + str(t)
         if token:
-            url += "&token=" + token if "?" in url else "?token=" + token
+            url += "&token=" + token
         table_links.append({"table": t, "url": url})
     return render_template(
         "links.html",
         login_link=login_link,
+        dashboard_link=dashboard_link,
         tables_link=tables_link,
-        menu_link=menu_link,
         table_links=table_links,
     )
 
@@ -564,7 +537,7 @@ def create_request():
         return jsonify({"ok": False, "error": "table must be a number"}), 400
     if table < 1 or table > NUM_TABLES:
         return jsonify({"ok": False, "error": f"table must be 1–{NUM_TABLES}"}), 400
-    note = (data.get("note") or data.get("menu_note") or "").strip()[:500]  # optional menu/help note
+    note = (data.get("note") or "").strip()[:500]  # optional note
     new_id = str(max((int(r.get("id", 0)) for r in help_requests), default=0) + 1)
     raised_at = _utc_iso_now()
     req = {"id": new_id, "table": table, "raised_at": raised_at}
@@ -584,14 +557,10 @@ def root():
     return redirect(url_for("main.login"))
 
 
-# Redirect typo URLs (e.g. /menu, /login without /soulplace) so users don't get 404
+# Redirect typo URLs (e.g. /login without /soulplace) so users don't get 404
 @app.route("/login")
 def redirect_login():
     return redirect(url_for("main.login"))
-
-@app.route("/menu")
-def redirect_menu():
-    return redirect(url_for("main.menu_page"))
 
 @app.route("/table")
 def redirect_table():

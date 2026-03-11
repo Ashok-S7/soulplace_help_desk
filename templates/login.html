@@ -3,10 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta name="app-version" content="login-2024-no-menu">
     <title>Soul Login – Soulplace Boardgames</title>
     <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}" type="image/png">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/logo.png') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=6">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=8">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -27,7 +30,7 @@
     </header>
 
     <main class="login-main">
-        <div class="login-card card-elevated">
+        <div class="login-card card-elevated" data-page-version="{{ cache_bust|default('v2') }}">
             <p class="card-brand" style="margin:0 0 0.5rem;font-size:1.5rem;font-weight:700;letter-spacing:0.12em;color:#0f172a;text-align:center;">SOULPLACE</p>
             <p class="card-brand-sub" style="margin:0 0 1rem;font-size:0.8rem;font-weight:600;color:#0369a1;text-align:center;">Boardgames – Help Desk</p>
             <h1 class="login-title">Soul login</h1>
@@ -59,8 +62,6 @@
                 <a href="{{ url_for('main.tables_page') }}" class="staff-link">View table QR codes (1–{{ num_tables or 10 }})</a>
                 &nbsp;·&nbsp;
                 <a href="{{ url_for('main.links_page') }}" class="staff-link">Your login link (long-distance)</a>
-                &nbsp;·&nbsp;
-                <a href="{{ url_for('main.menu_page') }}" class="staff-link">Menu</a>
             </p>
         </div>
     </main>

@@ -42,13 +42,13 @@
         <div class="link-box" id="login-link">{{ login_link or 'https://soulplace-help-desk.vercel.app/soulplace/login' }}</div>
         <button type="button" class="copy-btn" onclick="copy('login-link')">Copy login link</button>
 
-        <p class="link-label" style="margin-top: 1.25rem;">2. Table QR codes page</p>
+        <p class="link-label" style="margin-top: 1.25rem;">2. Dashboard (after login – help requests, accepted, clear pending)</p>
+        <div class="link-box" id="dashboard-link">{{ dashboard_link or 'https://soulplace-help-desk.vercel.app/soulplace/dashboard' }}</div>
+        <button type="button" class="copy-btn" onclick="copy('dashboard-link')">Copy dashboard link</button>
+
+        <p class="link-label" style="margin-top: 1.25rem;">3. Table QR codes page</p>
         <div class="link-box" id="tables-link">{{ tables_link or 'https://soulplace-help-desk.vercel.app/soulplace/tables' }}</div>
         <button type="button" class="copy-btn" onclick="copy('tables-link')">Copy</button>
-
-        <p class="link-label" style="margin-top: 1.25rem;">3. Menu (for customers when they need help)</p>
-        <div class="link-box" id="menu-link">{{ menu_link or 'https://soulplace-help-desk.vercel.app/soulplace/menu' }}</div>
-        <button type="button" class="copy-btn" onclick="copy('menu-link')">Copy menu link</button>
 
         <p class="link-label" style="margin-top: 1.25rem;">Direct request-help links (Table 1–10)</p>
         {% for item in table_links %}

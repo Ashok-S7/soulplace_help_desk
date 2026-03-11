@@ -1,5 +1,5 @@
 """
-Vercel serverless entry: expose the Flask app so all routes (e.g. /soulplace/menu, /soulplace/links) work.
+Vercel serverless entry: expose the Flask app so all routes (e.g. /soulplace/links, /soulplace/table) work.
 """
 import os
 import sys

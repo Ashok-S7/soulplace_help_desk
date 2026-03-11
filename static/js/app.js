@@ -9,7 +9,11 @@
     const enableNotificationsBtn = document.getElementById('enable-notifications');
     const testSoundBtn = document.getElementById('test-sound-btn');
 
+    // Only run dashboard logic on the dashboard (avoid running on login or other pages)
+    if (!requestsList || !acceptedTbody) return;
+
     let previousRequestIds = new Set();
+    let hasInitialLoad = false;  // Don't fire notification/sound on first load when opening login→dashboard
     let audioContext = null;
 
     /** Display time (backend sends Chennai IST already). */
@@ -82,9 +86,15 @@
         if (Notification.permission !== 'granted') return;
         try {
             var title = 'Soulplace – New help request';
-            var body = requests.length === 1
-                ? 'Table ' + requests[0].table + ' needs a Soul.'
-                : requests.length + ' new help requests.';
+            var body;
+            if (requests.length === 1) {
+                var r = requests[0];
+                body = 'Table ' + r.table;
+                if (r.note) body += ' – ' + r.note;
+                body += ' – needs a Soul.';
+            } else {
+                body = requests.length + ' new help requests.';
+            }
             var n = new Notification(title, { body: body, requireInteraction: false });
             n.onclick = function () {
                 window.focus();
@@ -102,11 +112,15 @@
             .then((data) => {
                 const requests = data.requests || [];
                 const currentIds = new Set(requests.map((r) => r.id));
-                if (previousRequestIds.size > 0 && currentIds.size > previousRequestIds.size) {
+                // Only play sound/show notification after first load, and only when NEW requests appear (not when opening the page)
+                if (hasInitialLoad && previousRequestIds.size > 0 && currentIds.size > previousRequestIds.size) {
                     var newReqs = requests.filter(function (r) { return !previousRequestIds.has(r.id); });
-                    playNewRequestSound();
-                    showNewRequestNotification(newReqs);
+                    if (newReqs.length) {
+                        playNewRequestSound();
+                        showNewRequestNotification(newReqs);
+                    }
                 }
+                hasInitialLoad = true;
                 previousRequestIds = currentIds;
 
                 if (requests.length === 0) {
@@ -119,6 +133,7 @@
                     <div class="request-item" data-request-id="${r.id}">
                         <div class="request-info">
                             <strong>Table ${r.table}</strong>
+                            ${r.note ? '<span class="request-note">' + (r.note.replace(/</g, '&lt;')) + '</span>' : ''}
                             <span class="request-time">${formatTime(r.raised_at)}</span>
                         </div>
                         <button type="button" class="btn-attend" data-id="${r.id}">I'm attending</button>
@@ -143,24 +158,28 @@
                 const accepted = data.accepted || [];
                 if (accepted.length === 0) {
                     acceptedTbody.innerHTML =
-                        '<tr><td colspan="3" class="empty-cell">No accepted requests yet.</td></tr>';
+                        '<tr><td colspan="4" class="empty-cell">No accepted requests yet.</td></tr>';
                     return;
                 }
                 acceptedTbody.innerHTML = accepted
                     .map(
-                        (r) => `
+                        (r) => {
+                            var noteHtml = r.note ? (r.note.replace(/</g, '&lt;')) : '—';
+                            return `
                     <tr>
                         <td>${r.table}</td>
+                        <td><span class="accepted-note">${noteHtml}</span></td>
                         <td>${formatTime(r.raised_at)}</td>
                         <td>${formatTime(r.accepted_at)}</td>
                     </tr>
-                `
+                `;
+                        }
                     )
                     .join('');
             })
             .catch(() => {
                 acceptedTbody.innerHTML =
-                    '<tr><td colspan="3" class="empty-cell">Failed to load.</td></tr>';
+                    '<tr><td colspan="4" class="empty-cell">Failed to load.</td></tr>';
             });
     }
 
@@ -249,6 +268,26 @@
 
     // Poll every 2 seconds so new requests trigger sound/notification with minimal delay
     setInterval(loadPendingRequests, 2000);
+
+    // Clear all pending (for testing – so you see only the request you just raised)
+    const clearAllPendingBtn = document.getElementById('clear-all-pending-btn');
+    if (clearAllPendingBtn) {
+        clearAllPendingBtn.addEventListener('click', function () {
+            if (!confirm('Clear all help requests and accepted list? Use this to reset when testing.')) return;
+            clearAllPendingBtn.disabled = true;
+            fetch(BASE + '/api/requests/clear', { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    if (data.ok) {
+                        previousRequestIds = new Set();
+                        loadPendingRequests();
+                        loadAcceptedRequests();
+                    }
+                    clearAllPendingBtn.disabled = false;
+                })
+                .catch(function () { clearAllPendingBtn.disabled = false; });
+        });
+    }
 
     // API Token (admin only): show and copy
     const showTokenBtn = document.getElementById('show-token-btn');

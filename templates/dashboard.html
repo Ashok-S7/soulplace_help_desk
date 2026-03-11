@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <title>Soul – Soulplace Boardgames</title>
     <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}" type="image/png">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/logo.png') }}">
@@ -21,6 +22,7 @@
             <span class="logo-main" style="display:block;font-size:1.2rem;font-weight:700;color:#0f172a;">SOULPLACE</span>
         </div>
         <h1 class="welcome-title">Soul – Welcome, {{ username }}</h1>
+        <a href="{{ url_for('main.links_page') }}" class="link-btn" style="margin-right:0.5rem;">Your links</a>
         <a href="{{ url_for('main.logout') }}" class="logout-link">Log out</a>
     </header>
 
@@ -31,10 +33,14 @@
                 <button type="button" class="link-btn" id="enable-notifications" aria-label="Enable notifications">Enable notifications</button>
                 <button type="button" class="link-btn" id="test-sound-btn" aria-label="Test notification sound">Test sound</button>
             </div>
-            <p class="card-subtitle" style="margin-top:0.25rem;font-size:0.8rem;">Click «Test sound» once to allow the notification sound when new requests arrive.</p>
+            <p class="card-subtitle" style="margin-top:0.25rem;font-size:0.8rem;">Shows <strong>all</strong> tables that have requested help (each table can raise one request). Click «I'm attending» when you go to that table. Click «Test sound» once to allow the notification sound when new requests arrive.</p>
+            <p class="card-subtitle" style="margin-top:0.25rem;font-size:0.75rem;color:var(--text-muted);">Only requests from the last 2 hours are shown (so refresh doesn’t show old ones). To reset the list, use «Clear all pending» below.</p>
             <div id="requests-list" class="requests-list">
                 <p class="empty-state">Loading…</p>
             </div>
+            <p style="margin-top:0.75rem;">
+                <button type="button" class="btn btn-outline btn-sm" id="clear-all-pending-btn" aria-label="Clear all pending requests">Clear all pending</button>
+            </p>
         </section>
 
         {% if is_admin %}
@@ -58,7 +64,7 @@
                     <thead>
                         <tr>
                             <th>Table #</th>
-                            <th>Menu / note</th>
+                            <th>Note</th>
                             <th>Raised at</th>
                             <th>Accepted at</th>
                         </tr>
@@ -76,6 +82,6 @@
         window.SOULPLACE_BASE = "{{ url_for('main.index') }}".replace(/\/$/, '');
         window.SOULPLACE_NOTIFICATION_SOUND = "{{ url_for('static', filename='sounds/maroon_5_animals.mp3') }}";
     </script>
-    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}?v=4"></script>
 </body>
 </html>
