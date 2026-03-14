@@ -499,13 +499,11 @@ def _get_local_lan_ip():
 
 
 def get_public_base_url():
-    """Base URL for links and QR codes. Uses env SOULPLACE_PUBLIC_URL if set, else on Vercel uses DEFAULT_PUBLIC_URL, else X-Forwarded-* / request host.
+    """Base URL for links and QR codes. Uses env SOULPLACE_PUBLIC_URL if set, else the host you're visiting (so links work on kappa or any domain), else DEFAULT_PUBLIC_URL.
     When running locally (127.0.0.1), uses LAN IP so scanned QR codes work on phone (same WiFi)."""
     explicit = os.environ.get("SOULPLACE_PUBLIC_URL", "").strip().rstrip("/")
     if explicit:
         return explicit
-    if os.environ.get("VERCEL"):
-        return DEFAULT_PUBLIC_URL.rstrip("/")
     scheme = request.headers.get("X-Forwarded-Proto", request.scheme) or "https"
     host = request.headers.get("X-Forwarded-Host", request.host) or request.host
     if "," in host:
@@ -520,7 +518,10 @@ def get_public_base_url():
             lan = _get_local_lan_ip()
             if lan:
                 host = lan + port
-    return f"{scheme}://{host}".rstrip("/")
+    base = f"{scheme}://{host}".rstrip("/")
+    if not host or not base.startswith("http"):
+        base = DEFAULT_PUBLIC_URL.rstrip("/")
+    return base
 
 
 @bp.route("/qr/<int:table_num>")
