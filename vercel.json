@@ -1,6 +1,6 @@
 {
   "buildCommand": "pip install -r requirements.txt",
   "rewrites": [
-    { "source": "/(.*)", "destination": "/api/index" }
+    { "source": "/(.*)", "destination": "/api/index?__path=/$1" }
   ]
 }
