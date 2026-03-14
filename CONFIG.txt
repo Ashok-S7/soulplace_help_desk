@@ -1,0 +1,31 @@
+============================================
+  CONFIG – TABLES & USERS (config.json only)
+============================================
+
+The app uses config.json for number of tables and admin/staff users.
+There is no in-app Settings page: edit the file and redeploy.
+
+HOW TO CHANGE CONFIG
+--------------------
+1. Edit config.json in the project:
+
+   {
+     "num_tables": 10,
+     "admins": [
+       {"name": "ASHOK", "password": "SoulOfBlue#7"},
+       {"name": "BOO", "password": "SoulOfBlack#7"}
+     ],
+     "staff": [
+       {"name": "BALA MURUGAN", "password": "DarkSoul@7"},
+       {"name": "RAJESH", "password": "BlueSoul!92"},
+       ...
+     ]
+   }
+
+2. Restart the server (local) or push to GitHub so Vercel redeploys.
+
+That’s it. One source of truth – no dynamic config stored in the app.
+
+LOGIN – ALL USERS: Admins ASHOK, BOO; Staff BALA MURUGAN, RAJESH, RITHISH, LOKESH, DILLI BABU. Passwords in config.json. All 7 work; username case-insensitive.
+
+============================================

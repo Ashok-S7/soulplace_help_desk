@@ -1,0 +1,38 @@
+================================================================================
+  FIX: Links not working (404 / blank page on Vercel)
+================================================================================
+
+If you see "Not Found" on /soulplace/links or the links page is blank
+(only logo, no link boxes), do this:
+
+1. ROOT DIRECTORY (most important)
+   -------------------------------
+   In Vercel: Project → Settings → General → Root Directory
+
+   Set to:  soulplace_help_desk
+
+   (The folder that contains app.py, templates/, static/, config.json.
+    It must be the deployment root so Vercel detects the Flask app.)
+
+   Then: Deployments → ... → Redeploy (or push a new commit).
+
+2. AFTER REDEPLOY
+   ---------------
+   • Login:   https://soulplace-help-desk.vercel.app/soulplace/login
+   • Request help: https://soulplace-help-desk.vercel.app/soulplace/table
+   • Links:   https://soulplace-help-desk.vercel.app/soulplace/links
+   • Tables:  https://soulplace-help-desk.vercel.app/soulplace/tables
+
+   All of these must be served by the same Flask app. If Root Directory was
+   wrong, only the homepage might work and the rest would 404 or show a
+   static shell.
+
+3. IF STILL BROKEN
+   ----------------
+   • Confirm your GitHub repo: when Vercel builds, the Root Directory is
+     relative to the repo root. So if the repo is "soulplace_help_desk" and
+     app.py is at the repo root, leave Root Directory empty.
+   • If the repo is "mini project" (or similar) and app.py is inside
+     soulplace_help_desk/, set Root Directory to: soulplace_help_desk
+
+================================================================================

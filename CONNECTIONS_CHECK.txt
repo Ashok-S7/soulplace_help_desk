@@ -1,0 +1,59 @@
+============================================
+  SOULPLACE HELP DESK – CONNECTION CHECKLIST
+============================================
+
+Run the automated check (recommended):
+   cd "c:\mini project\soulplace_help_desk"
+   python check_connections.py
+
+This script hits every route and API and reports OK or FAIL.
+
+--------------------------------------------
+ROUTES (all under prefix /soulplace)
+--------------------------------------------
+  /soulplace/              → redirects to /soulplace/login
+  /soulplace/login         → login page (GET) / submit login (POST)
+  /soulplace/logout        → log out, redirect to login
+  /soulplace/dashboard     → staff dashboard (login required)
+  /soulplace/table         → request-help page (?table=N optional)
+  /soulplace/tables        → all table QR codes
+  /soulplace/links         → copy links (login, tables, table 1–N)
+  /soulplace/qr/<N>        → QR code image for table N
+
+--------------------------------------------
+API ENDPOINTS (all under /soulplace)
+--------------------------------------------
+  GET  /soulplace/api/requests         → pending help requests (login required)
+  POST /soulplace/api/requests/accept  → accept a request (login required)
+  GET  /soulplace/api/requests/accepted → accepted list (login required)
+  GET  /soulplace/api/settings/token   → get API token (login required, admin)
+  POST /soulplace/api/request/create   → create help request (no token required)
+
+--------------------------------------------
+PAGE-TO-PAGE LINKS (all use url_for, so they stay correct)
+--------------------------------------------
+  login.html      → tables_page, links_page; form → login (POST)
+  table.html      → tables_page, login; JS → /api/request/create
+  tables.html     → table_page(table=N), login, links_page; qr_image(N)
+  links.html      → login (back)
+  dashboard.html  → logout; JS → /api/requests, /api/requests/accept, /api/requests/accepted, /api/settings/token
+
+--------------------------------------------
+STATIC FILES (served at /static/...)
+--------------------------------------------
+  /static/images/logo.png
+  /static/css/style.css
+  /static/js/app.js
+  /static/sounds/maroon_5_animals.mp3
+
+--------------------------------------------
+QUICK MANUAL CHECK (browser)
+--------------------------------------------
+1. Open http://127.0.0.1:5000/soulplace/login (or your Vercel URL).
+2. Click "View table QR codes" → should show /soulplace/tables.
+3. Click a QR or "Request help for Table N" → /soulplace/table?table=N.
+4. From login click "Your login link" → /soulplace/links. Copy login link and open in new tab.
+5. Log in (staff or admin). Dashboard should load. "Log out" → back to login.
+6. On table page submit "Request help" → should succeed (no token error).
+
+============================================

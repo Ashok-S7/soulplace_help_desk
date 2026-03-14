@@ -1,0 +1,70 @@
+================================================================================
+  SOULPLACE HELP DESK – ALL PROPER WORKING LINKS
+================================================================================
+
+  Base URL (Vercel):
+  https://soulplace-help-desk.vercel.app
+
+  All routes are under: /soulplace
+  So full base = https://soulplace-help-desk.vercel.app/soulplace
+
+--------------------------------------------------------------------------------
+  PUBLIC / CUSTOMER LINKS
+--------------------------------------------------------------------------------
+
+  • Request help (no table – customer picks or enters table):
+    https://soulplace-help-desk.vercel.app/soulplace/table
+
+  • Request help – Table 1:
+    https://soulplace-help-desk.vercel.app/soulplace/table?table=1
+
+  • Request help – Table 2:
+    https://soulplace-help-desk.vercel.app/soulplace/table?table=2
+
+  • Request help – Table N (replace N with 1–10):
+    https://soulplace-help-desk.vercel.app/soulplace/table?table=N
+
+  • Request help with API token (for sharing / QR):
+    https://soulplace-help-desk.vercel.app/soulplace/table?token=g22Z8PHpN6f8oJ0cmpMXvI5YzREUSaOYB1R_7PtXM0c
+
+  • Request help – Table 1 with token:
+    https://soulplace-help-desk.vercel.app/soulplace/table?table=1&token=g22Z8PHpN6f8oJ0cmpMXvI5YzREUSaOYB1R_7PtXM0c
+
+  • All table QR codes (scan to open request-help for that table):
+    https://soulplace-help-desk.vercel.app/soulplace/tables
+
+  • QR code for a specific table (e.g. Table 3):
+    https://soulplace-help-desk.vercel.app/soulplace/qr/3
+
+--------------------------------------------------------------------------------
+  STAFF / ADMIN LINKS
+--------------------------------------------------------------------------------
+
+  • Staff / Admin login (primary):
+    https://soulplace-help-desk.vercel.app/soulplace/login
+
+  • Dashboard (after login):
+    https://soulplace-help-desk.vercel.app/soulplace/dashboard
+
+  • Links page (all shareable links with token):
+    https://soulplace-help-desk.vercel.app/soulplace/links
+
+--------------------------------------------------------------------------------
+  QUICK COPY (most used)
+--------------------------------------------------------------------------------
+
+  Login:     https://soulplace-help-desk.vercel.app/soulplace/login
+  Dashboard: https://soulplace-help-desk.vercel.app/soulplace/dashboard
+  Tables:    https://soulplace-help-desk.vercel.app/soulplace/tables
+  Links:     https://soulplace-help-desk.vercel.app/soulplace/links
+  Request:   https://soulplace-help-desk.vercel.app/soulplace/table
+
+--------------------------------------------------------------------------------
+  NOTES
+--------------------------------------------------------------------------------
+
+  • Root Directory on Vercel must be: soulplace_help_desk (so links work).
+  • API token env on Vercel: SOULPLACE_API_TOKEN = g22Z8PHpN6f8oJ0cmpMXvI5YzREUSaOYB1R_7PtXM0c
+  • After changing code or env, push and redeploy so links use the latest build.
+
+================================================================================

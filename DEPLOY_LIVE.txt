@@ -1,0 +1,50 @@
+================================================================================
+  MAKE IT LIVE – Vercel deployment checklist
+================================================================================
+
+If the live site (soulplace-help-desk.vercel.app) shows:
+  • Links not working (404 or blank)
+  • Dashboard or request-help not loading
+
+Do this:
+
+1. PUSH LATEST CODE
+   ----------------
+   • Commit all changes (app.py, templates, static, config.json, etc.)
+   • Push to your Git repo (GitHub/GitLab) that is connected to Vercel
+
+2. VERCEL PROJECT SETTINGS
+   -----------------------
+   • Project → Settings → General
+   • Root Directory: set to   soulplace_help_desk
+     (the folder that contains app.py, templates, static)
+   • Save
+
+3. REDEPLOY
+   --------
+   • Deployments → latest deployment → ⋮ → Redeploy
+   • Or push a small commit to trigger a new deploy
+
+4. AFTER DEPLOY
+   ------------
+   • Open: https://soulplace-help-desk.vercel.app/soulplace/table
+   • Hard refresh: Ctrl+F5 (Windows) or Cmd+Shift+R (Mac)
+
+5. IF STILL WRONG
+   --------------
+   • Clear browser cache for that site
+   • Try in an incognito/private window
+   • In Vercel → Project → Settings → Environment Variables, add (optional):
+     SOULPLACE_PUBLIC_URL = https://soulplace-help-desk.vercel.app
+
+6. RE-CHECK ALL WORKING (after deploy + hard refresh)
+   --------------------------------------------------
+   ✓ Request help: https://soulplace-help-desk.vercel.app/soulplace/table
+     → Enter table number and optional note, submit "Request help".
+   ✓ Staff login: https://soulplace-help-desk.vercel.app/soulplace/login
+     → Log in, open dashboard. New help requests show Table # and note.
+   ✓ Dashboard: Table #, Note, Raised at, Accepted at. "I'm attending" and "Clear all pending" work.
+   ✓ Links page: https://soulplace-help-desk.vercel.app/soulplace/links
+     → All URLs point to soulplace-help-desk.vercel.app. Copy and open each to confirm.
+
+================================================================================

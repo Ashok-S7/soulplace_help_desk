@@ -1,0 +1,80 @@
+================================================================================
+  ALL CORRECTED – WORKING WITHOUT ERROR (what you can change)
+================================================================================
+
+YES – everything below is corrected in the code. After you PUSH + REDEPLOY
+and do a hard refresh (Ctrl+F5), the live site should work as described.
+
+--------------------------------------------------------------------------------
+  WHAT IS IN PLACE (all in your project – you have full access to change)
+--------------------------------------------------------------------------------
+
+1. REQUEST HELP (customer) – table + optional note
+   • templates/table.html: Form with table number and "What you need" (note).
+   • On submit, payload includes table and note.
+   • app.py: create_request() accepts table and note, saves with the request.
+
+2. STAFF / ADMIN DASHBOARD – table number + note shown
+   • app.py: list_requests() returns table, raised_at, note for each pending request.
+   • app.py: accept_request() copies note into the accepted record.
+   • app.py: list_accepted() returns table, note, raised_at, accepted_at.
+   • static/js/app.js: Pending and accepted show Table # and Note.
+   • templates/dashboard.html: "Your links" in header; Clear all pending; Test sound.
+
+3. LINKS PAGE (live URLs)
+   • app.py: links_page() builds URLs with base + prefix + path so links work on Vercel.
+   • Base = DEFAULT_PUBLIC_URL or env SOULPLACE_PUBLIC_URL. Table links include token if set.
+
+4. DATA STORAGE
+   • app.py: help_requests and accepted_requests saved to data.json (local)
+     or /tmp/soulplace_data.json on Vercel. On Vercel, /tmp is ephemeral.
+
+--------------------------------------------------------------------------------
+  FILES YOU CAN EDIT (full access to change)
+--------------------------------------------------------------------------------
+
+  • app.py              – routes, create/accept/list requests
+  • config.json         – num_tables, admins, staff (passwords)
+  • data.json           – help_requests, accepted_requests, api_token (local)
+  • templates/*.html    – table.html, dashboard.html, links.html, login.html, tables.html
+  • static/css/style.css
+  • static/js/app.js
+  • vercel.json         – rewrites, buildCommand
+  • api/index.py        – Vercel serverless entry
+  • requirements.txt
+
+--------------------------------------------------------------------------------
+  GET ALL WORKING WITHOUT ERROR (3 steps)
+--------------------------------------------------------------------------------
+
+  Step 1 – Push latest code
+    • Commit all changes in soulplace_help_desk (and parent if needed).
+    • Push to the Git repo connected to Vercel.
+
+  Step 2 – Vercel
+    • Root Directory: soulplace_help_desk
+    • Redeploy (Deployments → Redeploy, or push again).
+    • Optional: SOULPLACE_PUBLIC_URL, SOULPLACE_API_TOKEN in Environment Variables.
+
+  Step 3 – After deploy
+    • Open the live site and hard refresh: Ctrl+F5 (Windows) or Cmd+Shift+R (Mac).
+    • Test: /soulplace/table (submit table + note), /soulplace/login → dashboard
+      (see Table # and Note), accept → Your accepted requests.
+
+--------------------------------------------------------------------------------
+  QUICK LINKS (live)
+--------------------------------------------------------------------------------
+
+  Login:    https://soulplace-help-desk.vercel.app/soulplace/login
+  Request:  https://soulplace-help-desk.vercel.app/soulplace/table
+  Tables:   https://soulplace-help-desk.vercel.app/soulplace/tables
+  Links:    https://soulplace-help-desk.vercel.app/soulplace/links
+
+--------------------------------------------------------------------------------
+  IF SOMETHING STILL FAILS
+--------------------------------------------------------------------------------
+
+  • 404 or blank page → Root Directory = soulplace_help_desk, redeploy.
+  • Dashboard not updating → Hard refresh; check app.js loads (cache-bust ?v= in template).
+
+================================================================================

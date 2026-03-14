@@ -1,0 +1,19 @@
+================================================================================
+  API TOKEN MISSING? – FIX FOR VERCEL
+================================================================================
+
+  On Vercel the token is not saved between deployments. Set it in the dashboard:
+
+  1. Vercel → your project → Settings → Environment Variables
+
+  2. Add:
+     Name:   SOULPLACE_API_TOKEN
+     Value:  g22Z8PHpN6f8oJ0cmpMXvI5YzREUSaOYB1R_7PtXM0c
+
+  3. Redeploy (Deployments → ... → Redeploy).
+
+  After that, the API token will show on the dashboard and be used in QR codes
+  and the "All links" page. Your original token is already in data.json for
+  local runs.
+
+================================================================================
