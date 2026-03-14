@@ -36,11 +36,20 @@ Live site:    https://soulplace-help-desk.vercel.app
   OPTION 2 – Use the deploy script
 --------------------------------------------------------------------------------
 
-  From File Explorer:  double-click  deploy_and_push.bat
+  IMPORTANT: Run from the PROJECT FOLDER. If your prompt shows
+  "PS C:\Windows\System32>" or another folder, the script won't be found.
 
-  From PowerShell (in project folder):  run:
+  Step 1 – Go to project folder (copy-paste this line):
+    cd "c:\mini project\soulplace_help_desk"
+
+  Step 2 – Run the script:
     .\deploy_and_push.bat
-  (The ".\" is required in PowerShell for scripts in the current folder.)
+
+  Or run from ANY folder (full path):
+    & "c:\mini project\soulplace_help_desk\deploy_and_push.bat"
+
+  From File Explorer:  open the folder soulplace_help_desk, then
+  double-click  deploy_and_push.bat
 
 --------------------------------------------------------------------------------
   IF GIT PUSH ASKS FOR LOGIN
