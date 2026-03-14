@@ -7,6 +7,19 @@ Git remote:   https://github.com/Ashok-S7/soulplace_help_desk.git
 Live site:    https://soulplace-help-desk.vercel.app
 
 --------------------------------------------------------------------------------
+  IF VERCEL SAYS "FAILED PRODUCTION DEPLOYMENT"
+--------------------------------------------------------------------------------
+
+1. Open the email link "See deployment details" (or Vercel Dashboard → Deployments).
+2. Open the failed deployment and read the BUILD LOG. Find the red error line.
+3. Root Directory (most common fix):
+   - Vercel → Your project → Settings → General → Root Directory
+   - If your GitHub repo is ONLY the soulplace_help_desk folder: leave it BLANK.
+   - If your repo has other folders and soulplace_help_desk is inside it: set to
+     soulplace_help_desk
+4. Click "Redeploy" on the latest deployment after changing settings.
+
+--------------------------------------------------------------------------------
   OPTION 1 – Deploy using PowerShell (run these one by one)
 --------------------------------------------------------------------------------
 
