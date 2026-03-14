@@ -1,0 +1,73 @@
+================================================================================
+  DEPLOY TO VERCEL – Step-by-step (PowerShell / Git / GitHub)
+================================================================================
+
+Your project: soulplace_help_desk
+Git remote:   https://github.com/Ashok-S7/soulplace_help_desk.git
+Live site:    https://soulplace-help-desk.vercel.app
+
+--------------------------------------------------------------------------------
+  OPTION 1 – Deploy using PowerShell (run these one by one)
+--------------------------------------------------------------------------------
+
+1. Open PowerShell
+   - Press Win + X, click "Windows PowerShell" or "Terminal"
+   - Or: Start menu → type "PowerShell" → open it
+
+2. Go to your project folder:
+   cd "c:\mini project\soulplace_help_desk"
+
+3. Check status:
+   git status
+
+4. Add all changed files:
+   git add -A
+
+5. Commit (use any message you like):
+   git commit -m "Update project"
+
+6. Push to GitHub:
+   git push origin main
+
+7. Wait 1–2 minutes, then open:
+   https://soulplace-help-desk.vercel.app/soulplace/login
+
+--------------------------------------------------------------------------------
+  OPTION 2 – Use the deploy script (double-click)
+--------------------------------------------------------------------------------
+
+Double-click:  deploy_and_push.bat
+
+(This runs the same git add, commit, push for you.)
+
+--------------------------------------------------------------------------------
+  IF GIT PUSH ASKS FOR LOGIN
+--------------------------------------------------------------------------------
+
+- GitHub may ask for username and password.
+- Password = use a "Personal Access Token" (not your GitHub password).
+- Create token: GitHub.com → Settings → Developer settings → Personal access tokens → Generate new token. Give it "repo" scope. Copy the token and paste it when Git asks for password.
+
+--------------------------------------------------------------------------------
+  IF VERCEL DOES NOT UPDATE
+--------------------------------------------------------------------------------
+
+1. Check Vercel is linked to the correct repo:
+   - Vercel Dashboard → your project "soulplace-help-desk" → Settings → Git
+   - Connected Repository should be: Ashok-S7/soulplace_help_desk (or your repo)
+
+2. Root Directory in Vercel must be: soulplace_help_desk
+   - Vercel → Project → Settings → General → Root Directory → soulplace_help_desk
+
+3. Trigger a redeploy manually:
+   - Vercel → Deployments → three dots (⋯) on latest → Redeploy
+
+--------------------------------------------------------------------------------
+  QUICK LINKS
+--------------------------------------------------------------------------------
+
+  GitHub repo:  https://github.com/Ashok-S7/soulplace_help_desk
+  Vercel:       https://vercel.com/dashboard
+  Live login:   https://soulplace-help-desk.vercel.app/soulplace/login
+
+================================================================================

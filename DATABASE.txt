@@ -1,0 +1,25 @@
+================================================================================
+  SOULPLACE HELP DESK – STORAGE
+================================================================================
+
+The app uses data.json for help_requests, accepted_requests, and api_token.
+No database is required.
+
+  • help_requests   – customer help requests (table, time, optional note)
+  • accepted_requests – requests accepted by staff (who, when)
+  • api_token      – for API / QR links (optional)
+
+WHERE DATA IS STORED
+--------------------
+  • Local:  data.json in the project folder (soulplace_help_desk)
+  • Vercel: /tmp/soulplace_data.json (ephemeral; can reset on new deployments)
+
+CONFIG
+------
+  • Users (admins/staff) and num_tables: from config.json.
+
+BACKUP (local)
+--------------
+  • Copy data.json to back up. Restore by putting it back before starting the app.
+
+================================================================================
