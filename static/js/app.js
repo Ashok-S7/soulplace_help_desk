@@ -275,17 +275,29 @@
         clearAllPendingBtn.addEventListener('click', function () {
             if (!confirm('Clear all help requests and accepted list? Use this to reset when testing.')) return;
             clearAllPendingBtn.disabled = true;
-            fetch(BASE + '/api/requests/clear', { method: 'POST', headers: { 'Content-Type': 'application/json' } })
-                .then(function (res) { return res.json(); })
+            fetch(BASE + '/api/requests/clear', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'same-origin'
+            })
+                .then(function (res) {
+                    if (!res.ok) throw new Error('Clear failed');
+                    return res.json();
+                })
                 .then(function (data) {
                     if (data.ok) {
                         previousRequestIds = new Set();
                         loadPendingRequests();
                         loadAcceptedRequests();
+                        clearAllPendingBtn.textContent = 'Cleared';
+                        setTimeout(function () { clearAllPendingBtn.textContent = 'Clear all pending'; }, 2000);
                     }
                     clearAllPendingBtn.disabled = false;
                 })
-                .catch(function () { clearAllPendingBtn.disabled = false; });
+                .catch(function () {
+                    clearAllPendingBtn.disabled = false;
+                    alert('Could not clear. If you were logged out, sign in again and try again.');
+                });
         });
     }
 
