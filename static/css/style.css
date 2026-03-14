@@ -89,15 +89,15 @@ body {
 .live-bg__blob {
     position: absolute;
     border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.5;
+    filter: blur(70px);
+    opacity: 0.65;
     animation: live-bg-float 18s ease-in-out infinite;
 }
 
 .live-bg__blob--1 {
-    width: min(80vw, 420px);
-    height: min(80vw, 420px);
-    background: rgba(14, 165, 233, 0.25);
+    width: min(85vw, 480px);
+    height: min(85vw, 480px);
+    background: rgba(14, 165, 233, 0.35);
     top: -10%;
     left: -5%;
     animation-delay: 0s;
@@ -105,9 +105,9 @@ body {
 }
 
 .live-bg__blob--2 {
-    width: min(60vw, 320px);
-    height: min(60vw, 320px);
-    background: rgba(2, 132, 199, 0.2);
+    width: min(65vw, 360px);
+    height: min(65vw, 360px);
+    background: rgba(2, 132, 199, 0.28);
     bottom: -5%;
     right: -10%;
     animation-delay: -7s;
@@ -115,9 +115,9 @@ body {
 }
 
 .live-bg__blob--3 {
-    width: min(50vw, 280px);
-    height: min(50vw, 280px);
-    background: rgba(56, 189, 248, 0.18);
+    width: min(55vw, 320px);
+    height: min(55vw, 320px);
+    background: rgba(56, 189, 248, 0.25);
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
@@ -157,13 +157,13 @@ body {
     background: linear-gradient(
         105deg,
         transparent 0%,
-        transparent 40%,
-        rgba(255, 255, 255, 0.03) 50%,
-        transparent 60%,
+        transparent 38%,
+        rgba(255, 255, 255, 0.06) 50%,
+        transparent 62%,
         transparent 100%
     );
     background-size: 200% 200%;
-    animation: live-bg-shimmer 12s ease-in-out infinite;
+    animation: live-bg-shimmer 10s ease-in-out infinite;
 }
 
 @keyframes live-bg-shimmer {
