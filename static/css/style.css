@@ -77,6 +77,100 @@ body {
     pointer-events: none;
 }
 
+/* ----- Live background (login) – animated blobs + shimmer ----- */
+.live-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.live-bg__blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.5;
+    animation: live-bg-float 18s ease-in-out infinite;
+}
+
+.live-bg__blob--1 {
+    width: min(80vw, 420px);
+    height: min(80vw, 420px);
+    background: rgba(14, 165, 233, 0.25);
+    top: -10%;
+    left: -5%;
+    animation-delay: 0s;
+    animation-duration: 22s;
+}
+
+.live-bg__blob--2 {
+    width: min(60vw, 320px);
+    height: min(60vw, 320px);
+    background: rgba(2, 132, 199, 0.2);
+    bottom: -5%;
+    right: -10%;
+    animation-delay: -7s;
+    animation-duration: 20s;
+}
+
+.live-bg__blob--3 {
+    width: min(50vw, 280px);
+    height: min(50vw, 280px);
+    background: rgba(56, 189, 248, 0.18);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation-delay: -14s;
+    animation-duration: 25s;
+}
+
+@keyframes live-bg-float {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    25% { transform: translate(5%, -8%) scale(1.05); }
+    50% { transform: translate(-6%, 4%) scale(0.98); }
+    75% { transform: translate(4%, 6%) scale(1.02); }
+}
+
+.live-bg__blob--2 {
+    animation-name: live-bg-float-alt;
+}
+
+@keyframes live-bg-float-alt {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(-8%, 5%) scale(1.08); }
+    66% { transform: translate(6%, -4%) scale(0.95); }
+}
+
+.live-bg__blob--3 {
+    animation-name: live-bg-float-slow;
+}
+
+@keyframes live-bg-float-slow {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(calc(-50% + 6%), calc(-50% - 5%)) scale(1.06); }
+}
+
+.live-bg__shimmer {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        105deg,
+        transparent 0%,
+        transparent 40%,
+        rgba(255, 255, 255, 0.03) 50%,
+        transparent 60%,
+        transparent 100%
+    );
+    background-size: 200% 200%;
+    animation: live-bg-shimmer 12s ease-in-out infinite;
+}
+
+@keyframes live-bg-shimmer {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
 /* ----- Login page ----- */
 .login-page {
     position: relative;
