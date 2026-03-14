@@ -33,12 +33,14 @@ Live site:    https://soulplace-help-desk.vercel.app
    https://soulplace-help-desk.vercel.app/soulplace/login
 
 --------------------------------------------------------------------------------
-  OPTION 2 – Use the deploy script (double-click)
+  OPTION 2 – Use the deploy script
 --------------------------------------------------------------------------------
 
-Double-click:  deploy_and_push.bat
+  From File Explorer:  double-click  deploy_and_push.bat
 
-(This runs the same git add, commit, push for you.)
+  From PowerShell (in project folder):  run:
+    .\deploy_and_push.bat
+  (The ".\" is required in PowerShell for scripts in the current folder.)
 
 --------------------------------------------------------------------------------
   IF GIT PUSH ASKS FOR LOGIN
@@ -61,6 +63,17 @@ Double-click:  deploy_and_push.bat
 
 3. Trigger a redeploy manually:
    - Vercel → Deployments → three dots (⋯) on latest → Redeploy
+
+--------------------------------------------------------------------------------
+  IF VERCEL DEPLOYMENT FAILS (email: "error deploying")
+--------------------------------------------------------------------------------
+
+1. Open the deployment link from the Vercel email: "See deployment details".
+2. In the build log, find the red error line (e.g. "ModuleNotFoundError", "No such file", "Build failed").
+3. Check Root Directory: Vercel → Project → Settings → General → Root Directory
+   must be:  soulplace_help_desk  (so Vercel builds from that folder).
+4. If the error is about Python or pip: ensure requirements.txt has no typos and
+   build command in vercel.json is:  pip install -r requirements.txt
 
 --------------------------------------------------------------------------------
   QUICK LINKS

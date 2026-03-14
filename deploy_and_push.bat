@@ -1,10 +1,11 @@
 @echo off
+REM In PowerShell run as:  .\deploy_and_push.bat
 echo ========================================
 echo  Soulplace Help Desk - Deploy to Vercel
 echo ========================================
 echo.
 
-cd /d "c:\mini project\soulplace_help_desk"
+cd /d "%~dp0"
 
 echo Adding all changes...
 git add -A
