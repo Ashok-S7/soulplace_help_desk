@@ -77,13 +77,31 @@ body {
     pointer-events: none;
 }
 
-/* ----- Live background (login) – animated blobs + shimmer ----- */
+/* ----- Live background – board games style: blobs + grid + shimmer ----- */
 .live-bg {
     position: fixed;
     inset: 0;
     z-index: 0;
     pointer-events: none;
     overflow: hidden;
+}
+
+/* Subtle game-board grid */
+.live-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(15, 23, 42, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(15, 23, 42, 0.04) 1px, transparent 1px);
+    background-size: 32px 32px;
+    animation: live-bg-grid-drift 25s linear infinite;
+    opacity: 0.8;
+}
+
+@keyframes live-bg-grid-drift {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(32px, 32px); }
 }
 
 .live-bg__blob {
@@ -123,6 +141,32 @@ body {
     transform: translate(-50%, -50%);
     animation-delay: -14s;
     animation-duration: 25s;
+}
+
+/* Board-game warm accent (amber / table felt) */
+.live-bg__blob--4 {
+    width: min(45vw, 260px);
+    height: min(45vw, 260px);
+    background: rgba(180, 83, 9, 0.12);
+    top: 60%;
+    left: 10%;
+    animation-delay: -5s;
+    animation-duration: 24s;
+}
+
+.live-bg__blob--5 {
+    width: min(40vw, 220px);
+    height: min(40vw, 220px);
+    background: rgba(22, 163, 74, 0.1);
+    top: 15%;
+    right: 15%;
+    animation-delay: -12s;
+    animation-duration: 21s;
+}
+
+.live-bg__blob--4,
+.live-bg__blob--5 {
+    animation-name: live-bg-float-alt;
 }
 
 @keyframes live-bg-float {
