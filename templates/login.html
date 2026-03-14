@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
-    <meta name="app-version" content="login-2024-no-menu">
+    <meta name="app-version" content="login-v3-links-only">
     <title>Soul Login – Soulplace Boardgames</title>
     <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}" type="image/png">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/logo.png') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=9">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -58,9 +58,9 @@
             <p class="demo-hint">
                 <span class="demo-hint-label">Admins:</span> ASHOK, BOO &nbsp;|&nbsp; <span class="demo-hint-label">Staff:</span> BALA MURUGAN, RAJESH, RITHISH, LOKESH, DILLI BABU. Use your assigned password. Passwords are case-sensitive.
             </p>
-            <p class="demo-hint" style="margin-top:0.5rem;">
+            <p class="demo-hint" style="margin-top:0.5rem;" id="login-links">
                 <a href="{{ url_for('main.tables_page') }}" class="staff-link">View table QR codes (1–{{ num_tables or 10 }})</a>
-                &nbsp;·&nbsp;
+                <span aria-hidden="true"> &nbsp;·&nbsp; </span>
                 <a href="{{ url_for('main.links_page') }}" class="staff-link">Your login link (long-distance)</a>
             </p>
         </div>
@@ -68,15 +68,15 @@
     <script>
     (function() {
         try {
-            var links = document.querySelectorAll('.demo-hint a, a.staff-link');
-            for (var i = 0; i < links.length; i++) {
+            var container = document.getElementById('login-links');
+            if (!container) return;
+            var links = container.querySelectorAll('a');
+            for (var i = links.length - 1; i >= 0; i--) {
                 var a = links[i];
-                if (a && a.textContent && a.textContent.trim().toLowerCase() === 'menu') {
-                    var prev = a.previousSibling;
-                    while (prev && prev.nodeType === 3 && (!prev.textContent || !prev.textContent.trim())) prev = prev.previousSibling;
-                    if (prev && prev.remove) prev.remove();
-                    if (a.remove) a.remove();
-                    break;
+                if (a && /^\s*menu\s*$/i.test(a.textContent || '')) {
+                    var sep = a.previousElementSibling;
+                    if (sep && sep.textContent && sep.textContent.indexOf('·') !== -1) sep.remove();
+                    a.remove();
                 }
             }
         } catch (e) {}
