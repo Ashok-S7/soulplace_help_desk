@@ -1,0 +1,14 @@
+{
+  "num_tables": 10,
+  "admins": [
+    {"name": "ASHOK", "password": "SoulOfBlue#7"},
+    {"name": "BOO", "password": "SoulOfBlack#7"}
+  ],
+  "staff": [
+    {"name": "BALA MURUGAN", "password": "DarkSoul@7"},
+    {"name": "RAJESH", "password": "BlueSoul!92"},
+    {"name": "RITHISH", "password": "SilentSoul#66"},
+    {"name": "LOKESH", "password": "CyberSoul@501"},
+    {"name": "DILLI BABU", "password": "SoulWave#309"}
+  ]
+}

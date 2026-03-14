@@ -153,16 +153,19 @@ def load_data():
 
 def save_data():
     """Save help_requests, accepted_requests, api_token to data.json (usual storage)."""
-    if not os.environ.get("VERCEL"):
-        DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
-    payload = {
-        "help_requests": help_requests,
-        "accepted_requests": accepted_requests,
-    }
-    if api_token is not None and not os.environ.get("SOULPLACE_API_TOKEN"):
-        payload["api_token"] = api_token
-    with open(DATA_FILE, "w", encoding="utf-8") as f:
-        json.dump(payload, f, indent=2)
+    try:
+        if not os.environ.get("VERCEL"):
+            DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
+        payload = {
+            "help_requests": help_requests,
+            "accepted_requests": accepted_requests,
+        }
+        if api_token is not None and not os.environ.get("SOULPLACE_API_TOKEN"):
+            payload["api_token"] = api_token
+        with open(DATA_FILE, "w", encoding="utf-8") as f:
+            json.dump(payload, f, indent=2)
+    except Exception:
+        pass  # Don't crash on Vercel if /tmp write fails
 
 
 # Chennai (IST) = UTC+5:30
@@ -240,9 +243,12 @@ def seed_demo_requests():
 
 @app.before_request
 def before_request():
-    load_config()
-    load_data()
-    seed_demo_requests()
+    try:
+        load_config()
+        load_data()
+        seed_demo_requests()
+    except Exception:
+        pass  # Don't crash live; use in-memory defaults
 
 
 def login_required(f):
@@ -260,6 +266,12 @@ def login_required(f):
 @bp.route("/")
 def index():
     return redirect(url_for("main.login"))
+
+
+@bp.route("/health")
+def health():
+    """Health check for Vercel/live; returns 200 so you can verify the app is running."""
+    return jsonify({"ok": True, "status": "live"}), 200
 
 
 @bp.route("/login", methods=["GET", "POST"])
@@ -321,9 +333,9 @@ def list_requests():
         if raised_dt is None or raised_dt < cutoff:
             continue  # Skip old or unparseable requests so refresh shows only current
         out = {"id": r["id"], "table": r["table"], "raised_at": _to_chennai_time(r["raised_at"])}
-            if r.get("note"):
-                out["note"] = r["note"]
-            pending.append(out)
+        if r.get("note"):
+            out["note"] = r["note"]
+        pending.append(out)
     return jsonify({"requests": pending})
 
 
