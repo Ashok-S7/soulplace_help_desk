@@ -47,14 +47,27 @@ Set env vars in Vercel → Settings → Environment Variables, then redeploy.
   SOULPLACE_SMS_TO = +919876543210
 
 --------------------------------------------------------------------------------
-  4. WHATSAPP (free)
+  4. WHATSAPP (free – use ONE of these)
 --------------------------------------------------------------------------------
 
-  WhatsApp: add +34 644 37 67 94, send: I allow callmebot to send me messages
-  Use the API key you receive.
+  Option A – CallMeBot:
+    Add +34 644 37 67 94 on WhatsApp, send: I allow callmebot to send me messages
+    CALLMEBOT_WHATSAPP_PHONE  = your number (country code, no +)
+    CALLMEBOT_WHATSAPP_APIKEY = key from CallMeBot
 
-  CALLMEBOT_WHATSAPP_PHONE  = your number with country code (no +)
-  CALLMEBOT_WHATSAPP_APIKEY = key from CallMeBot
+  Option B – WA Bridge:
+    Register at https://wabridge.cloud. Get API key. Scan QR with WhatsApp.
+    SOULPLACE_WHATSAPP_TO = 918148565035
+    WABRIDGE_API_KEY      = your API key
+
+  Option C – Green API (free Developer plan, 3 chats):
+    Register at https://console.green-api.com. Create instance, scan QR.
+    Copy idInstance and apiTokenInstance from console.
+    SOULPLACE_WHATSAPP_TO   = 918148565035
+    GREEN_API_ID_INSTANCE   = from console (e.g. 110100001)
+    GREEN_API_TOKEN         = from console (apiTokenInstance)
+
+  If one option doesn't work, try another. You already have Gmail + Telegram + SMS.
 
 --------------------------------------------------------------------------------
   For unlimited free: set Gmail + Telegram. Add SMS/WhatsApp if you want.

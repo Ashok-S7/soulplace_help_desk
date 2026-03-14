@@ -5,6 +5,13 @@ Flask backend: login (admins + staff), dashboard, help requests, QR codes, API t
 import io
 import json
 import os
+
+# Load .env so Gmail, Telegram, SMS, WhatsApp vars work when running locally
+try:
+    from dotenv import load_dotenv
+    load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
+except ImportError:
+    pass
 import re
 import secrets
 import socket
@@ -468,7 +475,10 @@ def notification_status():
         email_ok = bool(_env("SOULPLACE_SMTP_USER") or _cfg("email", "smtp_user"))
         telegram_ok = bool(_env("TELEGRAM_BOT_TOKEN") or _cfg("telegram", "bot_token"))
         sms_ok = bool(_env("SOULPLACE_SMS_TO") or _cfg("sms", "to"))
-        wa_ok = bool((_env("CALLMEBOT_WHATSAPP_PHONE") or _cfg("whatsapp", "phone")) and (_env("CALLMEBOT_WHATSAPP_APIKEY") or _cfg("whatsapp", "apikey")))
+        callme = (_env("CALLMEBOT_WHATSAPP_PHONE") or _cfg("whatsapp", "phone")) and (_env("CALLMEBOT_WHATSAPP_APIKEY") or _cfg("whatsapp", "apikey"))
+        wabridge = (_env("WABRIDGE_API_KEY") or _cfg("whatsapp", "wabridge_api_key")) and (_env("SOULPLACE_WHATSAPP_TO") or _cfg("whatsapp", "to") or _env("SOULPLACE_SMS_TO") or _cfg("sms", "to"))
+        green = (_env("GREEN_API_ID_INSTANCE") or _cfg("whatsapp", "green_api_id_instance")) and (_env("GREEN_API_TOKEN") or _cfg("whatsapp", "green_api_token")) and (_env("SOULPLACE_WHATSAPP_TO") or _cfg("whatsapp", "to") or _env("SOULPLACE_SMS_TO") or _cfg("sms", "to"))
+        wa_ok = bool(callme or wabridge or green)
     except Exception:
         email_ok = telegram_ok = sms_ok = wa_ok = False
     return jsonify({
