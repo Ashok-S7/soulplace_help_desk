@@ -456,23 +456,22 @@ def redirect_menu():
 @bp.route("/links")
 def links_page():
     """Page that shows login link and table links (with API token) for long-distance use (copy and share). Works in live (Vercel) with explicit paths."""
-    base = ""
     try:
         base = get_public_base_url()
     except Exception:
-        pass
+        base = DEFAULT_PUBLIC_URL.rstrip("/")
     if not base or not base.startswith("http"):
         base = DEFAULT_PUBLIC_URL.rstrip("/")
-    prefix = URL_PREFIX or "/soulplace"
-    # Build links with explicit paths so they work in live (no url_for dependency)
-    login_link = base.rstrip("/") + prefix + "/login"
-    dashboard_link = base.rstrip("/") + prefix + "/dashboard"
-    tables_link = base.rstrip("/") + prefix + "/tables"
+    base = base.rstrip("/")
+    prefix = (URL_PREFIX or "/soulplace").rstrip("/")
+    login_link = base + prefix + "/login"
+    dashboard_link = base + prefix + "/dashboard"
+    tables_link = base + prefix + "/tables"
     token = get_api_token()
     table_links = []
     n = max(1, min(NUM_TABLES, 999))
     for t in range(1, n + 1):
-        url = base.rstrip("/") + prefix + "/table?table=" + str(t)
+        url = base + prefix + "/table?table=" + str(t)
         if token:
             url += "&token=" + token
         table_links.append({"table": t, "url": url})
