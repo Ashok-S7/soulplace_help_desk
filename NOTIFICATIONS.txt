@@ -1,0 +1,61 @@
+================================================================================
+  UNLIMITED FREE NOTIFICATIONS (Gmail + Telegram + SMS + WhatsApp)
+================================================================================
+
+Import your details in one of two ways:
+  • In the app: open "Import notification details" (login page link) or
+    https://your-app.vercel.app/soulplace/notification-setup
+  • File: copy notifications.example.json → notifications.json and fill in.
+
+All free, no paid API. When someone requests help, every channel you set up will get a message.
+
+  • Gmail      – unlimited (normal Gmail sending limit, e.g. 500/day)
+  • Telegram   – unlimited free, no daily cap
+  • SMS        – free tier (TextBelt: 1/day)
+  • WhatsApp   – free (CallMeBot, to your number)
+
+Set env vars in Vercel → Settings → Environment Variables, then redeploy.
+
+--------------------------------------------------------------------------------
+  1. GMAIL (unlimited free)
+--------------------------------------------------------------------------------
+
+  Google Account → Security → 2-Step Verification → App passwords → Create.
+
+  SOULPLACE_SMTP_HOST       = smtp.gmail.com
+  SOULPLACE_SMTP_PORT       = 587
+  SOULPLACE_SMTP_USER       = yourmail@gmail.com
+  SOULPLACE_SMTP_PASSWORD   = 16-char app password
+  SOULPLACE_EMAIL_FROM      = yourmail@gmail.com
+  SOULPLACE_EMAIL_TO        = you@mail.com,staff@mail.com
+  SOULPLACE_SMTP_TLS        = 1
+
+--------------------------------------------------------------------------------
+  2. TELEGRAM (unlimited free)
+--------------------------------------------------------------------------------
+
+  @BotFather → /newbot → copy token. Add bot to a group, send a message, then:
+  https://api.telegram.org/bot<TOKEN>/getUpdates → find "chat":{"id": -123} → that id.
+
+  TELEGRAM_BOT_TOKEN = token from BotFather
+  TELEGRAM_CHAT_ID   = your chat or group id (e.g. -123456789)
+
+--------------------------------------------------------------------------------
+  3. SMS (free, 1 per day)
+--------------------------------------------------------------------------------
+
+  SOULPLACE_SMS_TO = +919876543210
+
+--------------------------------------------------------------------------------
+  4. WHATSAPP (free)
+--------------------------------------------------------------------------------
+
+  WhatsApp: add +34 644 37 67 94, send: I allow callmebot to send me messages
+  Use the API key you receive.
+
+  CALLMEBOT_WHATSAPP_PHONE  = your number with country code (no +)
+  CALLMEBOT_WHATSAPP_APIKEY = key from CallMeBot
+
+--------------------------------------------------------------------------------
+  For unlimited free: set Gmail + Telegram. Add SMS/WhatsApp if you want.
+================================================================================

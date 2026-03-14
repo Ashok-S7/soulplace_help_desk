@@ -41,43 +41,44 @@
         var el = document.getElementById('notification-audio');
         if (el && el.src) {
             el.currentTime = 0;
-            el.volume = 0.7;
+            el.volume = 1;
             var played = el.play();
             if (played && played.catch) played.catch(function () { playBeepFallback(); });
             return;
         }
         var url = getNotificationSoundUrl();
         var audio = new Audio(url);
-        audio.volume = 0.7;
+        audio.volume = 1;
         audio.onerror = function () { playBeepFallback(); };
         audio.play().catch(function () { playBeepFallback(); });
     }
 
     function playBeepFallback() {
         try {
-            const ctx = getAudioContext();
+            var ctx = getAudioContext();
             if (!ctx) return;
             if (ctx.state === 'suspended') ctx.resume();
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.frequency.value = 880;
-            osc.type = 'sine';
-            gain.gain.setValueAtTime(0.15, ctx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
-            osc.start(ctx.currentTime);
-            osc.stop(ctx.currentTime + 0.15);
-            const osc2 = ctx.createOscillator();
-            const gain2 = ctx.createGain();
+            var t = ctx.currentTime;
+            var osc1 = ctx.createOscillator();
+            var gain1 = ctx.createGain();
+            osc1.connect(gain1);
+            gain1.connect(ctx.destination);
+            osc1.frequency.value = 880;
+            osc1.type = 'sine';
+            gain1.gain.setValueAtTime(0.5, t);
+            gain1.gain.exponentialRampToValueAtTime(0.01, t + 0.2);
+            osc1.start(t);
+            osc1.stop(t + 0.2);
+            var osc2 = ctx.createOscillator();
+            var gain2 = ctx.createGain();
             osc2.connect(gain2);
             gain2.connect(ctx.destination);
             osc2.frequency.value = 1100;
             osc2.type = 'sine';
-            gain2.gain.setValueAtTime(0.12, ctx.currentTime + 0.2);
-            gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
-            osc2.start(ctx.currentTime + 0.2);
-            osc2.stop(ctx.currentTime + 0.35);
+            gain2.gain.setValueAtTime(0.45, t + 0.25);
+            gain2.gain.exponentialRampToValueAtTime(0.01, t + 0.45);
+            osc2.start(t + 0.25);
+            osc2.stop(t + 0.45);
         } catch (e) {}
     }
 

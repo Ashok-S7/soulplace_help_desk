@@ -453,6 +453,33 @@ def redirect_menu():
     return redirect(url_for("main.table_page"))
 
 
+@bp.route("/notification-setup")
+def notification_setup_page():
+    """Show where to import notification details (file or Vercel env vars)."""
+    return render_template("notification_setup.html")
+
+
+@bp.route("/notification-status")
+def notification_status():
+    """Show which notification channels are configured (no secrets). Helps debug 'not working'."""
+    try:
+        from notify import _env, _cfg, _get_config
+        _get_config()
+        email_ok = bool(_env("SOULPLACE_SMTP_USER") or _cfg("email", "smtp_user"))
+        telegram_ok = bool(_env("TELEGRAM_BOT_TOKEN") or _cfg("telegram", "bot_token"))
+        sms_ok = bool(_env("SOULPLACE_SMS_TO") or _cfg("sms", "to"))
+        wa_ok = bool((_env("CALLMEBOT_WHATSAPP_PHONE") or _cfg("whatsapp", "phone")) and (_env("CALLMEBOT_WHATSAPP_APIKEY") or _cfg("whatsapp", "apikey")))
+    except Exception:
+        email_ok = telegram_ok = sms_ok = wa_ok = False
+    return jsonify({
+        "email": email_ok,
+        "telegram": telegram_ok,
+        "sms": sms_ok,
+        "whatsapp": wa_ok,
+        "hint": "Set env vars or notifications.json. See /soulplace/notification-setup",
+    })
+
+
 @bp.route("/links")
 def links_page():
     """Page that shows login link and table links (with API token) for long-distance use (copy and share). Works in live (Vercel) with explicit paths."""
@@ -565,6 +592,11 @@ def create_request():
         req["note"] = note
     help_requests.append(req)
     save_data()
+    try:
+        from notify import notify_new_help_request
+        notify_new_help_request(table, note)
+    except Exception:
+        pass
     return jsonify({"ok": True, "id": new_id, "raised_at": raised_at})
 
 
@@ -606,6 +638,14 @@ def redirect_links():
 @app.route("/dashboard")
 def redirect_dashboard():
     return redirect(url_for("main.dashboard"))
+
+@app.route("/notification-setup")
+def redirect_notification_setup():
+    return redirect(url_for("main.notification_setup_page"))
+
+@app.route("/notification-status")
+def redirect_notification_status():
+    return redirect(url_for("main.notification_status"))
 
 
 def _local_ip():

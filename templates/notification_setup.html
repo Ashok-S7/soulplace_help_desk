@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Import your notification details – Soulplace</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=11">
+</head>
+<body class="login-page">
+    <div class="page-bg" aria-hidden="true"></div>
+    <div class="live-bg" aria-hidden="true">
+        <div class="live-bg__blob live-bg__blob--1"></div>
+        <div class="live-bg__blob live-bg__blob--2"></div>
+        <div class="live-bg__blob live-bg__blob--3"></div>
+        <div class="live-bg__blob live-bg__blob--4"></div>
+        <div class="live-bg__blob live-bg__blob--5"></div>
+        <div class="live-bg__shimmer"></div>
+    </div>
+    <main style="max-width: 620px; margin: 2rem auto; padding: 1.5rem; background: rgba(255,255,255,0.96); border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); position: relative; z-index: 2;">
+        <h1 style="font-size: 1.35rem; color: #0f172a; margin-bottom: 0.5rem;">Import your notification details</h1>
+        <p style="color: #475569; font-size: 0.9rem; margin-bottom: 1.5rem;">Use <strong>one</strong> of these. Then new help requests will notify you by Gmail, Telegram, SMS, or WhatsApp (all free).</p>
+
+        <section style="margin-bottom: 1.5rem;">
+            <h2 style="font-size: 1.1rem; color: #0369a1; margin-bottom: 0.5rem;">Option A – File (local or deploy with repo)</h2>
+            <p style="font-size: 0.9rem; color: #475569;">1. Copy <code style="background:#f1f5f9; padding: 0.15rem 0.4rem; border-radius: 4px;">notifications.example.json</code> and rename to <code style="background:#f1f5f9; padding: 0.15rem 0.4rem; border-radius: 4px;">notifications.json</code> in the same folder.<br>
+            2. Fill in your email, Telegram, SMS, WhatsApp details in that file.<br>
+            3. For Vercel: add <code style="background:#f1f5f9; padding: 0.15rem 0.4rem; border-radius: 4px;">notifications.json</code> to the repo and deploy (or use Option B).</p>
+        </section>
+
+        <section style="margin-bottom: 1.5rem;">
+            <h2 style="font-size: 1.1rem; color: #0369a1; margin-bottom: 0.5rem;">Option B – Vercel Environment Variables</h2>
+            <p style="font-size: 0.9rem; color: #475569; margin-bottom: 0.75rem;">Vercel → your project → Settings → Environment Variables. Add these names and your values:</p>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; font-size: 0.85rem; font-family: ui-monospace, monospace; overflow-x: auto;">
+                <div style="color: #0f172a;">Gmail:</div>
+                <div>SOULPLACE_SMTP_HOST &nbsp; SOULPLACE_SMTP_PORT &nbsp; SOULPLACE_SMTP_USER &nbsp; SOULPLACE_SMTP_PASSWORD</div>
+                <div>SOULPLACE_EMAIL_FROM &nbsp; SOULPLACE_EMAIL_TO &nbsp; SOULPLACE_SMTP_TLS</div>
+                <div style="margin-top: 0.5rem; color: #0f172a;">Telegram:</div>
+                <div>TELEGRAM_BOT_TOKEN &nbsp; TELEGRAM_CHAT_ID</div>
+                <div style="margin-top: 0.5rem; color: #0f172a;">SMS:</div>
+                <div>SOULPLACE_SMS_TO</div>
+                <div style="margin-top: 0.5rem; color: #0f172a;">WhatsApp:</div>
+                <div>CALLMEBOT_WHATSAPP_PHONE &nbsp; CALLMEBOT_WHATSAPP_APIKEY</div>
+            </div>
+        </section>
+
+        <p style="font-size: 0.85rem; color: #64748b;">Only set the channels you want. See <strong>NOTIFICATIONS.txt</strong> in the project for how to get Telegram token, Gmail app password, CallMeBot key, etc.</p>
+        <p style="margin-top: 1rem;"><a href="{{ url_for('main.notification_status') }}" style="color: #0ea5e9; font-weight: 600;">Check if my details are loaded →</a></p>
+        <p style="margin-top: 1.25rem;"><a href="{{ url_for('main.login') }}" style="color: #0ea5e9; font-weight: 600;">← Back to login</a></p>
+    </main>
+</body>
+</html>

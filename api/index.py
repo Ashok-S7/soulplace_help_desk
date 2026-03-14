@@ -18,19 +18,21 @@ from app import app as flask_app
 def app(environ, start_response):
     """WSGI wrapper: fix PATH_INFO when Vercel rewrite sends original path in __path query."""
     path_info = environ.get("PATH_INFO", "") or "/"
-    qs = environ.get("QUERY_STRING", "")
+    qs = environ.get("QUERY_STRING", "") or ""
+    path_was_set = False
     if qs and "__path=" in qs:
         try:
             params = parse_qs(qs, keep_blank_values=True)
             if "__path" in params and params["__path"]:
                 path = params["__path"][0]
-                path = (unquote(path).split("?")[0] or "/").strip() or "/"
+                path = (unquote(path).split("?")[0] or "/").strip().rstrip("/") or "/"
                 environ["PATH_INFO"] = path
+                path_was_set = True
                 parts = [p for p in qs.split("&") if not p.startswith("__path=")]
                 environ["QUERY_STRING"] = "&".join(parts)
         except Exception:
             pass
-    # If we still have /api/index as path (e.g. no __path in query), send to app root
-    if path_info.strip("/") in ("api", "api/index"):
+    # Only fallback when we did NOT set path from __path (direct hit on /api/index)
+    if not path_was_set and path_info.strip("/") in ("api", "api/index"):
         environ["PATH_INFO"] = "/soulplace/"
     return flask_app(environ, start_response)
