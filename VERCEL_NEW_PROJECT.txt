@@ -1,0 +1,66 @@
+================================================================================
+  RESET VERCEL – DELETE OLD PROJECT & CREATE NEW ONE FROM GITHUB
+================================================================================
+
+Your GitHub repo:  https://github.com/Ashok-S7/soulplace_help_desk
+
+--------------------------------------------------------------------------------
+  STEP 1 – Delete the current Vercel project (optional)
+--------------------------------------------------------------------------------
+
+1. Go to:  https://vercel.com/dashboard
+2. Open the project:  soulplace-help-desk
+3. Click  Settings  (top tab)
+4. Scroll to the bottom →  "Delete Project"
+5. Type the project name to confirm →  Delete
+
+   (If you prefer to keep the old project and only create a new one, skip to Step 2.)
+
+--------------------------------------------------------------------------------
+  STEP 2 – Create a new Vercel project from GitHub
+--------------------------------------------------------------------------------
+
+1. Go to:  https://vercel.com/new
+
+2. Under "Import Git Repository":
+   - If you see  Ashok-S7/soulplace_help_desk, click  Import
+   - If not, click  "Adjust GitHub App Permissions"  and allow Vercel access to
+     your repos, then select  soulplace_help_desk  and  Import
+
+3. Configure the project:
+   - Project Name:  soulplace-help-desk  (or any name you like)
+   - Root Directory:  LEAVE BLANK  (your repo root already has app.py, api/, requirements.txt)
+   - Framework Preset:  Other  (or leave as detected)
+   - Build Command:  pip install -r requirements.txt   (or leave if already set)
+   - Output Directory:  leave default
+   - Install Command:  leave default (or leave empty)
+
+4. Click  Deploy
+
+5. Wait for the build to finish. If it succeeds, you’ll get a live URL like:
+   https://soulplace-help-desk.vercel.app
+
+--------------------------------------------------------------------------------
+  STEP 3 – Use your app URLs
+--------------------------------------------------------------------------------
+
+After deploy, use:
+
+  Login:    https://soulplace-help-desk.vercel.app/soulplace/login
+  Health:   https://soulplace-help-desk.vercel.app/soulplace/health
+
+If you used a different project name, replace  soulplace-help-desk  in the URL
+with your project name.
+
+--------------------------------------------------------------------------------
+  IF ROOT DIRECTORY WAS WRONG
+--------------------------------------------------------------------------------
+
+If the repo you imported has the app in a subfolder (e.g. only soulplace_help_desk
+inside the repo):
+
+  - In the new project go to  Settings → General
+  - Root Directory:  set to  soulplace_help_desk  (with underscore)
+  - Save →  Deployments →  Redeploy latest
+
+================================================================================

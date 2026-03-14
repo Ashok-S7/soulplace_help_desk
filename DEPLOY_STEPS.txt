@@ -6,6 +6,8 @@ Your project: soulplace_help_desk
 Git remote:   https://github.com/Ashok-S7/soulplace_help_desk.git
 Live site:    https://soulplace-help-desk.vercel.app
 
+  → To RESET and create a NEW Vercel project from GitHub, see:  VERCEL_NEW_PROJECT.txt
+
 --------------------------------------------------------------------------------
   IF VERCEL SAYS "FAILED PRODUCTION DEPLOYMENT"
 --------------------------------------------------------------------------------
