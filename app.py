@@ -230,7 +230,9 @@ def _to_chennai_time(iso_or_legacy):
 
 
 def seed_demo_requests():
-    """Add demo requests if none exist (usual behavior)."""
+    """Add demo requests only when running locally (not on Vercel). On production, never re-add so «Clear all pending» stays cleared."""
+    if os.environ.get("VERCEL"):
+        return
     if not help_requests:
         now = _utc_iso_now()
         demos = [
