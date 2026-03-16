@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script>try{var t=localStorage.getItem('soulplace-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -23,6 +24,7 @@
         <div class="live-bg__shimmer"></div>
     </div>
     <header class="dashboard-header" style="position:relative;z-index:2;">
+        <button type="button" id="theme-toggle" title="Dark / Light" style="position:absolute;top:0.5rem;right:0.5rem;z-index:11;width:2.5rem;height:2.5rem;border-radius:50%;border:1px solid #e2e8f0;background:#fff;color:#0f172a;font-size:1.2rem;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.1);line-height:1;">☽</button>
         <div class="logo logo-small">
             <div class="logo-img-wrap logo-img-wrap-sm">
                 <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Soulplace">
@@ -30,11 +32,16 @@
             <span class="logo-main" style="display:block;font-size:1.2rem;font-weight:700;color:#0f172a;">SOULPLACE</span>
         </div>
         <h1 class="welcome-title">Soul – Welcome, {{ username }}</h1>
-        <a href="{{ url_for('main.links_page') }}" class="link-btn" style="margin-right:0.5rem;">Your links</a>
-        <a href="{{ url_for('main.logout') }}" class="logout-link">Log out</a>
+        <a href="{{ base_url }}{{ url_for('main.links_page') }}" class="link-btn" style="margin-right:0.5rem;">Your links</a>
+        <a href="{{ base_url }}{{ url_for('main.logout') }}" class="logout-link">Log out</a>
     </header>
 
     <main class="dashboard-main" style="position:relative;z-index:1;">
+        <section class="card table-grid-card card-elevated">
+            <h2>Tables (1–<span id="num-tables">{{ num_tables or 10 }}</span>)</h2>
+            <p class="card-subtitle">Green = no request, Orange = pending, Blue = being attended.</p>
+            <div id="table-grid" class="table-grid" aria-label="Table status grid" data-num-tables="{{ num_tables or 10 }}"></div>
+        </section>
         <section class="card help-requests-card card-elevated">
             <div class="card-header">
                 <h2>Help requests</h2>
@@ -52,6 +59,11 @@
         </section>
 
         {% if is_admin %}
+        <section class="card card-elevated">
+            <h2>Quiet hours</h2>
+            <p class="card-subtitle">When paused, customers cannot submit new help requests.</p>
+            <button type="button" class="btn btn-outline" id="pause-requests-btn">Loading…</button>
+        </section>
         <section class="card api-token-card card-elevated">
             <h2>API Token (for Vercel / external API)</h2>
             <p class="card-subtitle">Use header <code>X-API-Token</code> or <code>Authorization: Bearer &lt;token&gt;</code> when calling <code>POST /api/request/create</code>.</p>
@@ -66,15 +78,15 @@
 
         <section class="card accepted-card card-elevated">
             <h2>Your accepted requests</h2>
-            <p class="card-subtitle">What you've attended and when.</p>
+            <p class="card-subtitle">Update status: On the way → At table → Done.</p>
             <div class="table-wrapper">
                 <table class="accepted-table">
                     <thead>
                         <tr>
                             <th>Table #</th>
-                            <th>Note</th>
+                            <th>Note / Category</th>
                             <th>Raised at</th>
-                            <th>Accepted at</th>
+                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody id="accepted-tbody">
@@ -83,13 +95,36 @@
                 </table>
             </div>
         </section>
+        <section class="card card-elevated">
+            <h2>Request history (analytics)</h2>
+            <p class="card-subtitle">Last 30 days: requests per day and per table.</p>
+            <div id="analytics-content">Loading…</div>
+            <p style="margin-top:0.5rem;"><a href="#" id="analytics-csv-link" class="link-btn">Download CSV</a></p>
+        </section>
+        <section class="card card-elevated">
+            <h2>Change my password</h2>
+            <form id="change-password-form" class="login-form" style="max-width:320px;">
+                <label for="current-password">Current password</label>
+                <input type="password" id="current-password" name="current" required autocomplete="current-password">
+                <label for="new-password">New password</label>
+                <input type="password" id="new-password" name="new" required autocomplete="new-password">
+                <button type="submit" class="btn btn-primary btn-sm">Update password</button>
+            </form>
+            <p id="change-password-feedback" class="request-feedback" style="display:none;margin-top:0.5rem;"></p>
+        </section>
+        <section class="card card-elevated">
+            <h2>Quick open (scan to request help)</h2>
+            <p class="card-subtitle">Scan this QR to open the request-help page on your phone.</p>
+            <img id="dashboard-qr" src="{{ base_url }}{{ url_for('main.qr_image_general') }}" alt="QR code for request help page" style="max-width:160px;height:auto;display:block;">
+        </section>
     </main>
 
-    <audio id="notification-audio" preload="auto" style="display:none;" src="{{ url_for('static', filename='sounds/maroon_5_animals.mp3', _external=True) }}"></audio>
+    <audio id="notification-audio" preload="auto" style="display:none;" src="{{ base_url }}{{ url_for('static', filename='sounds/maroon_5_animals.mp3') }}"></audio>
     <script>
         window.SOULPLACE_BASE = "{{ url_for('main.index') }}".replace(/\/$/, '');
-        window.SOULPLACE_NOTIFICATION_SOUND = "{{ url_for('static', filename='sounds/maroon_5_animals.mp3') }}";
+        window.SOULPLACE_NOTIFICATION_SOUND = "{{ base_url }}{{ url_for('static', filename='sounds/maroon_5_animals.mp3') }}";
     </script>
-    <script src="{{ url_for('static', filename='js/app.js') }}?v=6"></script>
+    <script src="{{ base_url }}{{ url_for('static', filename='js/app.js') }}?v=8"></script>
+    <script>(function(){var k='soulplace-theme',s='\u2600',m='\u263D';function g(){try{var t=localStorage.getItem(k);return t==='dark'||t==='light'?t:'light';}catch(e){return 'light';}}function set(t){document.documentElement.setAttribute('data-theme',t);try{localStorage.setItem(k,t);}catch(e){}var b=document.getElementById('theme-toggle');if(b)b.textContent=t==='dark'?s:m;}set(g());var b=document.getElementById('theme-toggle');if(b)b.onclick=function(){var n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';set(n);};})();</script>
 </body>
 </html>

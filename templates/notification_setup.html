@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script>try{var t=localStorage.getItem('soulplace-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Import your notification details – Soulplace</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=11">
+    <title>Import notification details – Soulplace</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=12">
 </head>
 <body class="login-page">
     <div class="page-bg" aria-hidden="true"></div>
@@ -17,37 +18,19 @@
         <div class="live-bg__shimmer"></div>
     </div>
     <main style="max-width: 620px; margin: 2rem auto; padding: 1.5rem; background: rgba(255,255,255,0.96); border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); position: relative; z-index: 2;">
-        <h1 style="font-size: 1.35rem; color: #0f172a; margin-bottom: 0.5rem;">Import your notification details</h1>
-        <p style="color: #475569; font-size: 0.9rem; margin-bottom: 1.5rem;">Use <strong>one</strong> of these. Then new help requests will notify you by Gmail, Telegram, SMS, or WhatsApp (all free).</p>
-
+        <button type="button" id="theme-toggle" title="Dark / Light" style="position:absolute;top:0.75rem;right:0.75rem;z-index:10;width:2.5rem;height:2.5rem;border-radius:50%;border:1px solid #e2e8f0;background:#fff;color:#0f172a;font-size:1.2rem;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.1);line-height:1;">☽</button>
+        <h1 style="font-size: 1.35rem; color: #0f172a; margin-bottom: 0.5rem;">Import notification details</h1>
+        <p style="color: #475569; font-size: 0.9rem; margin-bottom: 1.5rem;">Use <strong>one</strong> of these so new help requests can notify you (Gmail, Telegram, SMS, WhatsApp).</p>
         <section style="margin-bottom: 1.5rem;">
-            <h2 style="font-size: 1.1rem; color: #0369a1; margin-bottom: 0.5rem;">Option A – File (local or deploy with repo)</h2>
-            <p style="font-size: 0.9rem; color: #475569;">1. Copy <code style="background:#f1f5f9; padding: 0.15rem 0.4rem; border-radius: 4px;">notifications.example.json</code> and rename to <code style="background:#f1f5f9; padding: 0.15rem 0.4rem; border-radius: 4px;">notifications.json</code> in the same folder.<br>
-            2. Fill in your email, Telegram, SMS, WhatsApp details in that file.<br>
-            3. For Vercel: add <code style="background:#f1f5f9; padding: 0.15rem 0.4rem; border-radius: 4px;">notifications.json</code> to the repo and deploy (or use Option B).</p>
+            <h2 style="font-size: 1.1rem; color: #0369a1; margin-bottom: 0.5rem;">Option A – File</h2>
+            <p style="font-size: 0.9rem; color: #475569;">Copy <code style="background:#f1f5f9; padding: 0.15rem 0.4rem; border-radius: 4px;">notifications.example.json</code> to <code style="background:#f1f5f9; padding: 0.15rem 0.4rem; border-radius: 4px;">notifications.json</code>, fill in your details. For Vercel: add the file to the repo and deploy.</p>
         </section>
-
         <section style="margin-bottom: 1.5rem;">
             <h2 style="font-size: 1.1rem; color: #0369a1; margin-bottom: 0.5rem;">Option B – Vercel Environment Variables</h2>
-            <p style="font-size: 0.9rem; color: #475569; margin-bottom: 0.75rem;">Vercel → your project → Settings → Environment Variables. Add these names and your values:</p>
-            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; font-size: 0.85rem; font-family: ui-monospace, monospace; overflow-x: auto;">
-                <div style="color: #0f172a;">Gmail:</div>
-                <div>SOULPLACE_SMTP_HOST &nbsp; SOULPLACE_SMTP_PORT &nbsp; SOULPLACE_SMTP_USER &nbsp; SOULPLACE_SMTP_PASSWORD</div>
-                <div>SOULPLACE_EMAIL_FROM &nbsp; SOULPLACE_EMAIL_TO &nbsp; SOULPLACE_SMTP_TLS</div>
-                <div style="margin-top: 0.5rem; color: #0f172a;">Telegram:</div>
-                <div>TELEGRAM_BOT_TOKEN &nbsp; TELEGRAM_CHAT_ID</div>
-                <div style="margin-top: 0.5rem; color: #0f172a;">SMS:</div>
-                <div>SOULPLACE_SMS_TO</div>
-                <div style="margin-top: 0.5rem; color: #0f172a;">WhatsApp (use one):</div>
-                <div>CallMeBot: CALLMEBOT_WHATSAPP_PHONE &nbsp; CALLMEBOT_WHATSAPP_APIKEY</div>
-                <div>WA Bridge: SOULPLACE_WHATSAPP_TO &nbsp; WABRIDGE_API_KEY &nbsp; <a href="https://wabridge.cloud" target="_blank" rel="noopener">wabridge.cloud</a></div>
-                <div>Green API: SOULPLACE_WHATSAPP_TO &nbsp; GREEN_API_ID_INSTANCE &nbsp; GREEN_API_TOKEN &nbsp; <a href="https://console.green-api.com" target="_blank" rel="noopener">console.green-api.com</a></div>
-            </div>
+            <p style="font-size: 0.9rem; color: #475569;">Vercel → Project → Settings → Environment Variables. Add: SOULPLACE_SMTP_*, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, SOULPLACE_SMS_TO, GREEN_API_* (see NOTIFICATIONS.txt).</p>
         </section>
-
-        <p style="font-size: 0.85rem; color: #64748b;">Only set the channels you want. See <strong>NOTIFICATIONS.txt</strong> in the project for how to get Telegram token, Gmail app password, CallMeBot key, etc.</p>
-        <p style="margin-top: 1rem;"><a href="{{ url_for('main.notification_status') }}" style="color: #0ea5e9; font-weight: 600;">Check if my details are loaded →</a></p>
-        <p style="margin-top: 1.25rem;"><a href="{{ url_for('main.login') }}" style="color: #0ea5e9; font-weight: 600;">← Back to login</a></p>
+        <p style="margin-top: 1.25rem;"><a href="{{ base_url }}{{ url_for('main.dashboard') }}" style="color: #0ea5e9; font-weight: 600;">← Back to dashboard</a></p>
     </main>
+    <script>(function(){var k='soulplace-theme',s='\u2600',m='\u263D';function g(){try{var t=localStorage.getItem(k);return t==='dark'||t==='light'?t:'light';}catch(e){return 'light';}}function set(t){document.documentElement.setAttribute('data-theme',t);try{localStorage.setItem(k,t);}catch(e){}var b=document.getElementById('theme-toggle');if(b)b.textContent=t==='dark'?s:m;}set(g());var b=document.getElementById('theme-toggle');if(b)b.onclick=function(){var n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';set(n);};})();</script>
 </body>
 </html>

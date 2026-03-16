@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script>try{var t=localStorage.getItem('soulplace-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Your links – Soulplace Boardgames</title>
@@ -42,7 +43,8 @@
         </div>
         <div class="header-line"></div>
     </header>
-    <main class="links-page">
+    <main class="links-page" style="position:relative;">
+        <button type="button" id="theme-toggle" title="Dark / Light" style="position:absolute;top:0.5rem;right:0.5rem;z-index:10;width:2.5rem;height:2.5rem;border-radius:50%;border:1px solid #e2e8f0;background:#fff;color:#0f172a;font-size:1.2rem;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.1);line-height:1;">☽</button>
         <h1>Your links (for long-distance use)</h1>
         <p class="login-subtitle">Use these links when you are far away. After you deploy to Vercel, open this page from your Vercel URL and copy the login link.</p>
 
@@ -64,7 +66,7 @@
         <button type="button" class="copy-btn" onclick="copy('table-{{ item.table }}')">Table {{ item.table }} – Copy</button>
         {% endfor %}
 
-        <a href="{{ url_for('main.login') }}" class="back">← Back to login</a>
+        <a href="{{ base_url }}{{ url_for('main.login') }}" class="back">← Back to login</a>
         <p class="footer-brand" style="margin-top:1.5rem;text-align:center;font-size:0.8rem;font-weight:600;color:#475569;">Soulplace Boardgames – Help Desk</p>
     </main>
     <script>
@@ -86,5 +88,6 @@
             }
         }
     </script>
+    <script>(function(){var k='soulplace-theme',s='\u2600',m='\u263D';function g(){try{var t=localStorage.getItem(k);return t==='dark'||t==='light'?t:'light';}catch(e){return 'light';}}function set(t){document.documentElement.setAttribute('data-theme',t);try{localStorage.setItem(k,t);}catch(e){}var b=document.getElementById('theme-toggle');if(b)b.textContent=t==='dark'?s:m;}set(g());var b=document.getElementById('theme-toggle');if(b)b.onclick=function(){var n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';set(n);};})();</script>
 </body>
 </html>

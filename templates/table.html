@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script>try{var t=localStorage.getItem('soulplace-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% if table %}Table {{ table }} – {% endif %}Request Help – Soulplace Boardgames</title>
@@ -13,7 +14,7 @@
     <style>
     </style>
 </head>
-<body class="login-page">
+<body class="login-page table-request-page">
     <div class="page-bg" aria-hidden="true"></div>
     <div class="live-bg" aria-hidden="true">
         <div class="live-bg__blob live-bg__blob--1"></div>
@@ -36,7 +37,8 @@
     </header>
 
     <main class="login-main">
-        <div class="login-card card-elevated">
+        <div class="login-card card-elevated" style="position:relative;">
+            <button type="button" id="theme-toggle" title="Dark / Light" style="position:absolute;top:0.75rem;right:0.75rem;z-index:10;width:2.5rem;height:2.5rem;border-radius:50%;border:1px solid #e2e8f0;background:#fff;color:#0f172a;font-size:1.2rem;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.1);line-height:1;">☽</button>
             <p class="brand-tagline">Soulplace Boardgames</p>
             <h1 class="login-title">Request help</h1>
             <p class="login-subtitle">Need a Soul? {% if table %}You’re at <strong>Table {{ table }}</strong>.{% else %}Enter your table number (1–{{ num_tables }}).{% endif %} We'll send a Soul to your table.</p>
@@ -44,17 +46,27 @@
             <form id="request-form" class="login-form">
                 <label for="table">Table number</label>
                 <input type="number" id="table" name="table" min="1" max="{{ num_tables }}" placeholder="e.g. 5" value="{{ table or '' }}" required>
+                <label for="request-category">Reason (optional)</label>
+                <select id="request-category" name="category">
+                    <option value="">— Select —</option>
+                    <option value="Rules question">Rules question</option>
+                    <option value="Order">Order</option>
+                    <option value="Other">Other</option>
+                </select>
                 <label for="request-note">What you need (optional)</label>
                 <input type="text" id="request-note" name="note" placeholder="Type here" maxlength="500" autocomplete="off">
-
+                <label class="checkbox-label">
+                    <input type="checkbox" id="request-urgent" name="urgent" value="1"> Mark as urgent
+                </label>
                 <button type="submit" class="btn btn-primary">Request help</button>
+                <button type="button" class="btn btn-outline" id="refresh-btn" style="margin-left:0.5rem;">Refresh</button>
             </form>
 
             <p id="request-feedback" class="request-feedback" style="display:none;"></p>
             <p class="staff-link-wrap">
-                <a href="{{ url_for('main.tables_page') }}" class="staff-link">View all table QR codes</a>
+                <a href="{{ base_url }}{{ url_for('main.tables_page') }}" class="staff-link">View all table QR codes</a>
                 &nbsp;·&nbsp;
-                <a href="{{ url_for('main.login') }}" class="staff-link">Staff login</a>
+                <a href="{{ base_url }}{{ url_for('main.login') }}" class="staff-link">Staff login</a>
             </p>
             <p class="footer-brand">Soulplace Boardgames – Help Desk</p>
         </div>
@@ -88,8 +100,14 @@
             feedback.textContent = 'Sending…';
             var noteEl = document.getElementById('request-note');
             var note = noteEl && noteEl.value ? noteEl.value.trim() : '';
+            var catEl = document.getElementById('request-category');
+            var category = catEl && catEl.value ? catEl.value.trim() : '';
+            var urgentEl = document.getElementById('request-urgent');
+            var urgent = urgentEl && urgentEl.checked;
             var payload = { table: table };
             if (note) payload.note = note;
+            if (category) payload.category = category;
+            if (urgent) payload.urgent = true;
             var headers = { 'Content-Type': 'application/json' };
             /* Do not send API token from form – server allows when no token sent, so request always works */
             fetch((window.SOULPLACE_BASE || '') + '/api/request/create', {
@@ -101,18 +119,21 @@
             .then(function (data) {
                 if (data.ok) {
                     feedback.className = 'request-feedback success';
-                    feedback.textContent = 'Help requested! A Soul will be with you soon.';
+                    feedback.textContent = 'Request #' + (data.id || '') + ' received – a Soul will be with you soon.';
                 } else {
                     feedback.className = 'request-feedback error';
                     feedback.textContent = data.error || 'Something went wrong.';
                 }
             })
-            .catch(function () {
+            .catch(function (err) {
                 feedback.className = 'request-feedback error';
                 feedback.textContent = 'Failed to send request.';
             });
         });
-
+        document.getElementById('refresh-btn').addEventListener('click', function () {
+            window.location.reload();
+        });
     </script>
+    <script>(function(){var k='soulplace-theme',s='\u2600',m='\u263D';function g(){try{var t=localStorage.getItem(k);return t==='dark'||t==='light'?t:'light';}catch(e){return 'light';}}function set(t){document.documentElement.setAttribute('data-theme',t);try{localStorage.setItem(k,t);}catch(e){}var b=document.getElementById('theme-toggle');if(b)b.textContent=t==='dark'?s:m;}set(g());var b=document.getElementById('theme-toggle');if(b)b.onclick=function(){var n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';set(n);};})();</script>
 </body>
 </html>

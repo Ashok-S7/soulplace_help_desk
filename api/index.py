@@ -24,12 +24,17 @@ def app(environ, start_response):
         try:
             params = parse_qs(qs, keep_blank_values=True)
             if "__path" in params and params["__path"]:
-                path = params["__path"][0]
-                path = (unquote(path).split("?")[0] or "/").strip().rstrip("/") or "/"
-                environ["PATH_INFO"] = path
+                raw_path = params["__path"][0]
+                decoded = unquote(raw_path)
+                path_part = (decoded.split("?")[0] or "/").strip().rstrip("/") or "/"
+                query_part = decoded.split("?", 1)[1].strip() if "?" in decoded else ""
+                environ["PATH_INFO"] = path_part
                 path_was_set = True
-                parts = [p for p in qs.split("&") if not p.startswith("__path=")]
-                environ["QUERY_STRING"] = "&".join(parts)
+                # Keep other query params (e.g. ?foo=bar) and any query from __path value
+                other = [p for p in qs.split("&") if p and not p.startswith("__path=")]
+                if query_part:
+                    other.append(query_part)
+                environ["QUERY_STRING"] = "&".join(other)
         except Exception:
             pass
     # Only fallback when we did NOT set path from __path (direct hit on /api/index)

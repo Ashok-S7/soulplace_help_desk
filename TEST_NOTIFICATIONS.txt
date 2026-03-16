@@ -1,0 +1,55 @@
+================================================================================
+  HOW TO TEST NOTIFICATIONS (step by step)
+================================================================================
+
+LOCAL (on your PC)
+------------------
+1. Open PowerShell or Command Prompt.
+
+2. Go to the project folder:
+   cd "c:\mini project\soulplace_help_desk"
+
+3. Start the app:
+   python app.py
+
+4. Wait until you see "SERVER RUNNING" and the login URL.
+
+5. Open your browser and go to:
+   http://127.0.0.1:5000/soulplace/notification-test
+
+   (Or open http://127.0.0.1:5000/soulplace/login and click "Test notifications".)
+
+6. On the test page you will see 4 buttons:
+   - 1. Test Email
+   - 2. Test Telegram
+   - 3. Test SMS
+   - 4. Test WhatsApp
+
+7. Click ONE button (e.g. "1. Test Email").
+   The result appears below: either "✓ EMAIL: Email sent." or "✗ EMAIL: ..." with an error.
+
+8. Click the other buttons one by one to test each channel.
+
+9. Your .env file must be in the same folder as app.py (soulplace_help_desk\.env).
+   If you see "Request failed. Is the server running?" then start the server (step 3).
+
+
+LIVE (Vercel)
+-------------
+1. Open: https://YOUR-APP.vercel.app/soulplace/notification-test
+
+   (Replace YOUR-APP with your real Vercel URL, e.g. soulplace-help-desk-kappa.)
+
+2. Click each button (Email, Telegram, SMS, WhatsApp) and check the result.
+
+3. If only Telegram works: add the other env vars (Gmail, SMS, Green API) in
+   Vercel → Project → Settings → Environment Variables, then redeploy.
+
+
+WHAT EACH RESULT MEANS
+----------------------
+✓ Sent   = Test message was delivered to that channel. Check your inbox/Telegram/SMS/WhatsApp.
+✗ Failed = That channel is not configured correctly or the service rejected the request.
+           Fix the credentials in .env (local) or Vercel env vars (live), then test again.
+
+================================================================================

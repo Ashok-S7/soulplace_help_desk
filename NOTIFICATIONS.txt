@@ -3,9 +3,8 @@
 ================================================================================
 
 Import your details in one of two ways:
-  • In the app: open "Import notification details" (login page link) or
-    https://your-app.vercel.app/soulplace/notification-setup
   • File: copy notifications.example.json → notifications.json and fill in.
+  • Vercel: Project → Settings → Environment Variables (see variable names below).
 
 All free, no paid API. When someone requests help, every channel you set up will get a message.
 

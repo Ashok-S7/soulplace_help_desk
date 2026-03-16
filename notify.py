@@ -206,3 +206,35 @@ def notify_new_help_request(table, note=None):
     wa_green = send_whatsapp_greenapi(body)
     wa_ok = wa_callme or wa_wabridge or wa_green
     return email_ok or telegram_ok or sms_ok or wa_ok
+
+
+def test_all_channels():
+    """Try sending a test message to each channel; returns dict of channel -> True/False."""
+    body = "Soulplace test: notifications check. Table 0 requested help."
+    return {
+        "email": send_email(body),
+        "telegram": send_telegram(body),
+        "sms": send_sms_free(body),
+        "whatsapp": (
+            send_whatsapp_free(body) or send_whatsapp_wabridge(body) or send_whatsapp_greenapi(body)
+        ),
+    }
+
+
+def test_one_channel(channel):
+    """Test a single channel: 'email', 'telegram', 'sms', or 'whatsapp'. Returns (success: bool, message: str)."""
+    body = "Soulplace test: notifications check. Table 0 requested help."
+    ch = (channel or "").strip().lower()
+    if ch == "email":
+        ok = send_email(body)
+        return ok, "Email sent." if ok else "Email failed (check SMTP user/password / App Password)."
+    if ch == "telegram":
+        ok = send_telegram(body)
+        return ok, "Telegram sent." if ok else "Telegram failed (check bot token and chat ID)."
+    if ch == "sms":
+        ok = send_sms_free(body)
+        return ok, "SMS sent." if ok else "SMS failed (TextBelt limit or number)."
+    if ch == "whatsapp":
+        ok = send_whatsapp_free(body) or send_whatsapp_wabridge(body) or send_whatsapp_greenapi(body)
+        return ok, "WhatsApp sent." if ok else "WhatsApp failed (CallMeBot/WA Bridge/Green API)."
+    return False, "Unknown channel. Use: email, telegram, sms, whatsapp"

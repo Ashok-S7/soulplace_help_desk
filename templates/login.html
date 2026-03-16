@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script>try{var t=localStorage.getItem('soulplace-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
-    <meta name="app-version" content="login-v3-links-only">
+    <meta name="app-version" content="login-v4-no-import-noti">
     <title>Soul Login – Soulplace Boardgames</title>
     <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}" type="image/png">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/logo.png') }}">
@@ -38,7 +39,8 @@
     </header>
 
     <main class="login-main">
-        <div class="login-card card-elevated" data-page-version="{{ cache_bust|default('v2') }}">
+        <div class="login-card card-elevated" data-page-version="{{ cache_bust|default('v2') }}" style="position:relative;">
+            <button type="button" id="theme-toggle" title="Dark / Light" style="position:absolute;top:0.75rem;right:0.75rem;z-index:10;width:2.5rem;height:2.5rem;border-radius:50%;border:1px solid #e2e8f0;background:#fff;color:#0f172a;font-size:1.2rem;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.1);line-height:1;">☽</button>
             <p class="card-brand" style="margin:0 0 0.5rem;font-size:1.5rem;font-weight:700;letter-spacing:0.12em;color:#0f172a;text-align:center;">SOULPLACE</p>
             <p class="card-brand-sub" style="margin:0 0 1rem;font-size:0.8rem;font-weight:600;color:#0369a1;text-align:center;">Boardgames – Help Desk</p>
             <h1 class="login-title">Soul login</h1>
@@ -51,7 +53,7 @@
             </div>
             {% endif %}
 
-            <form method="post" action="{{ url_for('main.login') }}" class="login-form" id="login-form">
+            <form method="post" action="{{ base_url }}{{ url_for('main.login') }}" class="login-form" id="login-form">
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username" placeholder="e.g. ashok" autocomplete="username" required autofocus>
 
@@ -67,11 +69,12 @@
                 <span class="demo-hint-label">Admins:</span> ASHOK, BOO &nbsp;|&nbsp; <span class="demo-hint-label">Staff:</span> BALA MURUGAN, RAJESH, RITHISH, LOKESH, DILLI BABU. Use your assigned password. Passwords are case-sensitive.
             </p>
             <p class="demo-hint" style="margin-top:0.5rem;" id="login-links">
-                <a href="{{ url_for('main.tables_page') }}" class="staff-link">View table QR codes (1–{{ num_tables or 10 }})</a>
+                <a href="{{ base_url }}{{ url_for('main.tables_page') }}" class="staff-link">View table QR codes (1–{{ num_tables or 10 }})</a>
                 <span aria-hidden="true"> &nbsp;·&nbsp; </span>
-                <a href="{{ url_for('main.links_page') }}" class="staff-link">Your login link (long-distance)</a>
-                <span aria-hidden="true"> &nbsp;·&nbsp; </span>
-                <a href="{{ url_for('main.notification_setup_page') }}" class="staff-link">Import notification details</a>
+                <a href="{{ base_url }}{{ url_for('main.links_page') }}" class="staff-link">Your login link (long-distance)</a>
+            </p>
+            <p class="demo-hint" style="margin-top:0.5rem;font-size:0.85rem;">
+                Scan to open request-help: <img src="{{ base_url }}{{ url_for('main.qr_image_general') }}" alt="QR for request help" style="width:64px;height:64px;vertical-align:middle;">
             </p>
         </div>
     </main>
@@ -91,6 +94,9 @@
             }
         } catch (e) {}
     })();
+    </script>
+    <script>
+    (function(){var k='soulplace-theme',s='\u2600',m='\u263D';function g(){try{var t=localStorage.getItem(k);return t==='dark'||t==='light'?t:'light';}catch(e){return 'light';}}function set(t){document.documentElement.setAttribute('data-theme',t);try{localStorage.setItem(k,t);}catch(e){}var b=document.getElementById('theme-toggle');if(b)b.textContent=t==='dark'?s:m;}set(g());var b=document.getElementById('theme-toggle');if(b)b.onclick=function(){var n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';set(n);};})();
     </script>
 </body>
 </html>

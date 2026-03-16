@@ -21,6 +21,23 @@
       "table": 1,
       "raised_at": "2026-03-08T06:20:09Z",
       "note": "connection-check"
+    },
+    {
+      "id": "5",
+      "table": 1,
+      "raised_at": "2026-03-15T09:05:45Z"
+    },
+    {
+      "id": "6",
+      "table": 3,
+      "raised_at": "2026-03-15T09:06:05Z",
+      "category": "Rules question",
+      "urgent": true
+    },
+    {
+      "id": "7",
+      "table": 1,
+      "raised_at": "2026-03-16T02:47:24Z"
     }
   ],
   "accepted_requests": [
@@ -39,5 +56,33 @@
       "accepted_by": "ashok"
     }
   ],
+  "request_history": [
+    {
+      "id": "5",
+      "table": 1,
+      "raised_at": "2026-03-15T09:05:45Z",
+      "note": "",
+      "category": null,
+      "urgent": false
+    },
+    {
+      "id": "6",
+      "table": 3,
+      "raised_at": "2026-03-15T09:06:05Z",
+      "note": "",
+      "category": "Rules question",
+      "urgent": true
+    },
+    {
+      "id": "7",
+      "table": 1,
+      "raised_at": "2026-03-16T02:47:24Z",
+      "note": "",
+      "category": null,
+      "urgent": false
+    }
+  ],
+  "requests_paused": false,
+  "password_overrides": {},
   "api_token": "g22Z8PHpN6f8oJ0cmpMXvI5YzREUSaOYB1R_7PtXM0c"
 }

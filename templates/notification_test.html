@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>try{var t=localStorage.getItem('soulplace-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test notifications – Soulplace</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=12">
+    <style>
+        body { font-family: system-ui, sans-serif; max-width: 520px; margin: 2rem auto; padding: 1rem; background: #f8fafc; }
+        h1 { font-size: 1.25rem; color: #0f172a; }
+        .btn { display: inline-block; margin: 0.5rem 0.5rem 0.5rem 0; padding: 0.6rem 1rem; font-size: 1rem; cursor: pointer; border: 1px solid #0ea5e9; background: #0ea5e9; color: #fff; border-radius: 8px; }
+        .btn:hover { background: #0284c7; }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        #result { margin-top: 1.5rem; padding: 1rem; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; min-height: 3rem; white-space: pre-wrap; }
+        .ok { color: #059669; font-weight: 600; }
+        .fail { color: #dc2626; font-weight: 600; }
+        a { color: #0ea5e9; }
+    </style>
+</head>
+<body style="position:relative;">
+    <button type="button" id="theme-toggle" title="Dark / Light" style="position:absolute;top:0.5rem;right:0.5rem;z-index:9999;width:2.5rem;height:2.5rem;border-radius:50%;border:1px solid #e2e8f0;background:#fff;color:#0f172a;font-size:1.2rem;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.1);line-height:1;">☽</button>
+    <h1>Test notifications</h1>
+    <p>Click one button. The result will appear below. No login needed.</p>
+    <p>
+        <button type="button" class="btn" id="btn-email">1. Test Email</button><br>
+        <button type="button" class="btn" id="btn-telegram">2. Test Telegram</button><br>
+        <button type="button" class="btn" id="btn-sms">3. Test SMS</button><br>
+        <button type="button" class="btn" id="btn-whatsapp">4. Test WhatsApp</button>
+    </p>
+    <div id="result">Click a button above. Result will appear here.</div>
+    <p style="margin-top: 1.5rem;"><a href="{{ base_url }}{{ url_for('main.login') }}">← Back to login</a></p>
+    <script>
+        var base = "{{ url_for('main.index') }}".replace(/\/$/, '');
+        var resultEl = document.getElementById('result');
+        function test(channel, btn) {
+            resultEl.innerHTML = 'Sending…';
+            btn.disabled = true;
+            fetch(base + '/test-notify?channel=' + encodeURIComponent(channel))
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    var msg = data.message || (data.error || 'Unknown response');
+                    var ok = data.ok !== false && !data.error;
+                    resultEl.innerHTML = (ok ? '<span class="ok">✓ ' : '<span class="fail">✗ ') + channel.toUpperCase() + ': ' + msg + '</span>';
+                    btn.disabled = false;
+                })
+                .catch(function (err) {
+                    resultEl.innerHTML = '<span class="fail">✗ Request failed. Is the server running?</span>';
+                    btn.disabled = false;
+                });
+        }
+        document.getElementById('btn-email').onclick = function () { test('email', this); };
+        document.getElementById('btn-telegram').onclick = function () { test('telegram', this); };
+        document.getElementById('btn-sms').onclick = function () { test('sms', this); };
+        document.getElementById('btn-whatsapp').onclick = function () { test('whatsapp', this); };
+    </script>
+    <script>(function(){var k='soulplace-theme',s='\u2600',m='\u263D';function g(){try{var t=localStorage.getItem(k);return t==='dark'||t==='light'?t:'light';}catch(e){return 'light';}}function set(t){document.documentElement.setAttribute('data-theme',t);try{localStorage.setItem(k,t);}catch(e){}var b=document.getElementById('theme-toggle');if(b)b.textContent=t==='dark'?s:m;}set(g());var b=document.getElementById('theme-toggle');if(b)b.onclick=function(){var n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';set(n);};})();</script>
+</body>
+</html>
