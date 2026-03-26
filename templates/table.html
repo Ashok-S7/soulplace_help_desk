@@ -54,7 +54,68 @@
                     <option value="Other">Other</option>
                 </select>
                 <label for="request-note">What you need (optional)</label>
-                <input type="text" id="request-note" name="note" placeholder="Type here" maxlength="500" autocomplete="off">
+                <select id="request-note" name="note">
+                    <option value="">— Select from menu —</option>
+                    <optgroup label="Quick Bites – Nachos">
+                        <option value="Cheese Nachos – ₹139">Cheese Nachos – ₹139</option>
+                        <option value="Peri Peri Nachos – ₹130">Peri Peri Nachos – ₹130</option>
+                        <option value="Jalapeno Nachos – ₹130">Jalapeno Nachos – ₹130</option>
+                    </optgroup>
+                    <optgroup label="Quick Bites – Fries">
+                        <option value="Classic Fries – ₹130">Classic Fries – ₹130</option>
+                        <option value="Peri Peri Fries – ₹150">Peri Peri Fries – ₹150</option>
+                    </optgroup>
+                    <optgroup label="Quick Bites – Momos">
+                        <option value="Paneer Momos – ₹170">Paneer Momos – ₹170</option>
+                        <option value="Corn Momos – ₹170">Corn Momos – ₹170</option>
+                        <option value="Mushroom Momos – ₹170">Mushroom Momos – ₹170</option>
+                    </optgroup>
+                    <optgroup label="Quick Bites – Others">
+                        <option value="Nuggets – ₹150">Nuggets – ₹150</option>
+                        <option value="Crispy Shots – ₹150">Crispy Shots – ₹150</option>
+                    </optgroup>
+                    <optgroup label="Sandwich">
+                        <option value="Veg Sandwich – ₹110">Veg Sandwich – ₹110</option>
+                        <option value="Corn Sandwich – ₹140">Corn Sandwich – ₹140</option>
+                        <option value="Paneer Sandwich – ₹140">Paneer Sandwich – ₹140</option>
+                        <option value="Chilli Sandwich – ₹140">Chilli Sandwich – ₹140</option>
+                    </optgroup>
+                    <optgroup label="Pizza">
+                        <option value="Veg Pizza – ₹140">Veg Pizza – ₹140</option>
+                        <option value="Paneer Pizza – ₹170">Paneer Pizza – ₹170</option>
+                        <option value="Olive Pizza – ₹170">Olive Pizza – ₹170</option>
+                        <option value="Jalapeno Pizza – ₹170">Jalapeno Pizza – ₹170</option>
+                    </optgroup>
+                    <optgroup label="Maggie">
+                        <option value="Maggie – ₹60">Maggie – ₹60</option>
+                        <option value="Cheese Maggie – ₹80">Cheese Maggie – ₹80</option>
+                    </optgroup>
+                    <optgroup label="Beverage – Cold">
+                        <option value="Rose Shake – ₹90">Rose Shake – ₹90</option>
+                        <option value="Oreo Shake – ₹120">Oreo Shake – ₹120</option>
+                        <option value="Kitkat Shake – ₹120">Kitkat Shake – ₹120</option>
+                        <option value="Cold Coffee – ₹120">Cold Coffee – ₹120</option>
+                        <option value="Blue Virgin Mojito – ₹90">Blue Virgin Mojito – ₹90</option>
+                        <option value="Lime Mint Mojito – ₹90">Lime Mint Mojito – ₹90</option>
+                        <option value="Lime Soda – ₹60">Lime Soda – ₹60</option>
+                        <option value="Coke – ₹50">Coke – ₹50</option>
+                        <option value="Sprite – ₹50">Sprite – ₹50</option>
+                    </optgroup>
+                    <optgroup label="Beverage – Hot">
+                        <option value="Coffee – ₹45">Coffee – ₹45</option>
+                        <option value="Black Coffee – ₹35">Black Coffee – ₹35</option>
+                        <option value="Tea – ₹45">Tea – ₹45</option>
+                        <option value="Ginger Tea – ₹45">Ginger Tea – ₹45</option>
+                        <option value="Black Tea – ₹35">Black Tea – ₹35</option>
+                        <option value="Lemon Tea – ₹45">Lemon Tea – ₹45</option>
+                    </optgroup>
+                    <optgroup label="Other help">
+                        <option value="Need explanation of rules">Need explanation of rules</option>
+                        <option value="Help choosing a game">Help choosing a game</option>
+                        <option value="Bill / payment">Bill / payment</option>
+                        <option value="Other (please come)">Other (please come)</option>
+                    </optgroup>
+                </select>
                 <label class="checkbox-label">
                     <input type="checkbox" id="request-urgent" name="urgent" value="1"> Mark as urgent
                 </label>

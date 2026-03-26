@@ -1,0 +1,25 @@
+Web Push (notifications when mobile screen is off)
+=================================================
+
+1. Generate VAPID keys (one-time, on your PC):
+   pip install pywebpush
+   vapid --applicationServerKey
+
+   This creates private_key.pem and public_key.pem in the current folder.
+
+2. Set environment variables (Vercel: Project → Settings → Environment Variables):
+
+   VAPID_PUBLIC_KEY  = contents of public_key.pem (the long base64 string, one line)
+   VAPID_PRIVATE_KEY = contents of private_key.pem (the full PEM text, including -----BEGIN... and -----END...)
+   VAPID_SUB         = mailto:your@email.com   (optional; used in push claims)
+
+   For VAPID_PUBLIC_KEY: copy only the key part from the PEM file (the line between BEGIN and END), or use the output of:
+   vapid --applicationServerKey
+   and copy the "Public Key" line.
+
+3. On the dashboard, staff click "Enable notifications" and allow. The app will then:
+   - Subscribe to Web Push (stored on the server)
+   - When a new help request is created, the server sends a push to all subscribed devices
+   - The notification appears even when the phone screen is off or the browser is in the background
+
+4. No VAPID keys? Then in-app sound and pop-up still work when the dashboard is open; only "screen off" push won't work until you set the keys.

@@ -37,6 +37,11 @@
     </header>
 
     <main class="dashboard-main" style="position:relative;z-index:1;">
+        <div id="enable-sound-banner" style="display:none;position:relative;z-index:10;margin-bottom:1rem;padding:0.75rem 1rem;background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.2);text-align:center;border:2px solid #f59e0b;">
+            <p style="margin:0 0 0.25rem 0;font-size:1rem;">🔔 <strong>You won’t hear sound until you click below once.</strong></p>
+            <p style="margin:0 0 0.5rem 0;font-size:0.9rem;opacity:0.95;">Tap or click <strong>«Allow notification sound»</strong> now. You’ll hear a beep + Maroon. After that, every new table request will play sound.</p>
+            <button type="button" id="enable-sound-btn" class="btn btn-primary" style="padding:0.6rem 1.5rem;font-size:1rem;min-height:44px;font-weight:600;" aria-label="Allow notification sound access">Allow notification sound</button>
+        </div>
         <section class="card table-grid-card card-elevated">
             <h2>Tables (1–<span id="num-tables">{{ num_tables or 10 }}</span>)</h2>
             <p class="card-subtitle">Green = no request, Orange = pending, Blue = being attended.</p>
@@ -45,10 +50,10 @@
         <section class="card help-requests-card card-elevated">
             <div class="card-header">
                 <h2>Help requests</h2>
-                <button type="button" class="link-btn" id="enable-notifications" aria-label="Enable notifications">Enable notifications</button>
+                <button type="button" class="link-btn" id="enable-notifications" aria-label="Allow website notifications and sound" title="Allow browser notifications for this site (in-app + lock screen)">Enable website notifications</button>
                 <button type="button" class="link-btn" id="test-sound-btn" aria-label="Test notification sound">Test sound</button>
             </div>
-            <p class="card-subtitle" style="margin-top:0.25rem;font-size:0.8rem;">Shows <strong>all</strong> tables that have requested help (each table can raise one request). Click «I'm attending» when you go to that table. Click «Test sound» once to allow the notification sound when new requests arrive.</p>
+            <p class="card-subtitle" style="margin-top:0.25rem;font-size:0.8rem;">Shows <strong>all</strong> tables that have requested help. <span id="sound-unlock-tip" style="display:inline;">Tap or click once (or «Test sound») for <strong>sound</strong>. Click <strong>«Enable website notifications»</strong> when the browser asks so you also get alerts (Maroon sound on <strong>lock screen</strong> where supported).</span></p>
             <p class="card-subtitle" style="margin-top:0.25rem;font-size:0.75rem;color:var(--text-muted);">Only requests from the last 2 hours are shown (so refresh doesn’t show old ones). To reset the list, use «Clear all pending» below.</p>
             <div id="requests-list" class="requests-list">
                 <p class="empty-state">Loading…</p>
@@ -63,6 +68,17 @@
             <h2>Quiet hours</h2>
             <p class="card-subtitle">When paused, customers cannot submit new help requests.</p>
             <button type="button" class="btn btn-outline" id="pause-requests-btn">Loading…</button>
+        </section>
+        <section class="card card-elevated">
+            <h2>Push (lock-screen) debug</h2>
+            <p class="card-subtitle">Subscriptions saved: <strong id="push-count">Loading…</strong></p>
+            <p class="card-subtitle" style="margin-top:0.25rem;">
+                VAPID keys: <span id="vapid-keys">Loading…</span>
+            </p>
+            <p style="margin-top:0.75rem;">
+                <button type="button" class="btn btn-outline btn-sm" id="push-test-btn">Send test push</button>
+            </p>
+            <p class="card-subtitle" id="push-debug-result" style="margin-top:0.25rem;font-size:0.85rem;"></p>
         </section>
         <section class="card api-token-card card-elevated">
             <h2>API Token (for Vercel / external API)</h2>
@@ -119,12 +135,12 @@
         </section>
     </main>
 
-    <audio id="notification-audio" preload="auto" style="display:none;" src="{{ base_url }}{{ url_for('static', filename='sounds/maroon_5_animals.mp3') }}"></audio>
+    <audio id="notification-audio" preload="auto" playsinline style="display:none;" src="{{ base_url }}{{ url_for('static', filename='sounds/maroon_5_animals.mp3') }}"></audio>
     <script>
         window.SOULPLACE_BASE = "{{ url_for('main.index') }}".replace(/\/$/, '');
         window.SOULPLACE_NOTIFICATION_SOUND = "{{ base_url }}{{ url_for('static', filename='sounds/maroon_5_animals.mp3') }}";
     </script>
-    <script src="{{ base_url }}{{ url_for('static', filename='js/app.js') }}?v=8"></script>
+    <script src="{{ base_url }}{{ url_for('static', filename='js/app.js') }}?v=34"></script>
     <script>(function(){var k='soulplace-theme',s='\u2600',m='\u263D';function g(){try{var t=localStorage.getItem(k);return t==='dark'||t==='light'?t:'light';}catch(e){return 'light';}}function set(t){document.documentElement.setAttribute('data-theme',t);try{localStorage.setItem(k,t);}catch(e){}var b=document.getElementById('theme-toggle');if(b)b.textContent=t==='dark'?s:m;}set(g());var b=document.getElementById('theme-toggle');if(b)b.onclick=function(){var n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';set(n);};})();</script>
 </body>
 </html>

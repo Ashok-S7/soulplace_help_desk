@@ -1,0 +1,47 @@
+Soulplace Help Desk – Deployment checks
+
+Run these steps before or after each deploy (local + Vercel).
+
+1) Code + config
+   - Python compiles:  python -m py_compile app.py
+   - config.json is valid JSON:  python -m json.tool config.json
+   - .env (local) / Vercel env:
+       - SOULPLACE_PUBLIC_URL
+       - SOULPLACE_URL_PREFIX   (/soulplace)
+       - VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY (for push)
+
+2) Local smoke test
+   - Start server:  python app.py
+   - Open login:  http://127.0.0.1:5000/soulplace/login
+   - Login as admin (ashok) and staff (e.g. rajesh).
+   - From table page, send a request:
+       - Reason = Order
+       - Pick a food item from “What you need”.
+   - Dashboard:
+       - Enable notification sound.
+       - New request appears, table grid updates, sound plays.
+
+3) Live (Vercel) smoke test
+   - Open:  https://soulplace-help-desk-kappa.vercel.app/soulplace/login
+   - Login as admin + staff.
+   - From live table link, send test request:
+       - Check it appears on live dashboard.
+       - Check notification + sound on at least one PC and one phone.
+
+4) Push notifications (screen off)
+   - On phone dashboard:
+       - Click “Enable notifications”, allow in browser popup.
+   - Lock screen.
+   - From another device, send a new request:
+       - Phone shows lock-screen notification.
+
+5) QR + links
+   - From dashboard: open “Your links”.
+   - Check:
+       - Staff login link goes to live login.
+       - Table QR codes open the live table page.
+
+6) Error logs
+   - Local: watch PowerShell for stack traces when testing.
+   - Vercel: check logs after deploy for 5xx errors.
+

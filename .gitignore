@@ -6,3 +6,5 @@ __pycache__/
 venv/
 .env
 notifications.json
+private_key.pem
+public_key.pem

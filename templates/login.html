@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
-    <meta name="app-version" content="login-v4-no-import-noti">
+    <meta name="app-version" content="login-v5-notify-on-login">
     <title>Soul Login – Soulplace Boardgames</title>
     <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}" type="image/png">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/logo.png') }}">
@@ -73,6 +73,14 @@
                 <span aria-hidden="true"> &nbsp;·&nbsp; </span>
                 <a href="{{ base_url }}{{ url_for('main.links_page') }}" class="staff-link">Your login link (long-distance)</a>
             </p>
+            <p class="demo-hint" style="margin-top:0.5rem;display:flex;flex-wrap:wrap;align-items:baseline;gap:0.35rem 0.75rem;">
+                <button type="button" id="login-enable-notifications" class="link-btn" style="background:transparent;border:none;cursor:pointer;font-size:inherit;color:var(--primary);text-decoration:underline;padding:0;">Enable website notifications</button>
+                <span id="login-noti-status" style="font-size:0.85rem;color:var(--text-muted);"></span>
+            </p>
+            <p class="demo-hint" style="margin-top:0.5rem;">
+                <button type="button" id="login-test-sound" class="link-btn" style="background:transparent;border:none;cursor:pointer;font-size:inherit;color:var(--primary);text-decoration:underline;padding:0;">Test notification sound</button>
+                <span style="font-size:0.85rem;color:var(--text-muted);"> – After login, use the dashboard for sound + lock-screen push when new requests arrive.</span>
+            </p>
             <p class="demo-hint" style="margin-top:0.5rem;font-size:0.85rem;">
                 Scan to open request-help: <img src="{{ base_url }}{{ url_for('main.qr_image_general') }}" alt="QR for request help" style="width:64px;height:64px;vertical-align:middle;">
             </p>
@@ -93,6 +101,98 @@
                 }
             }
         } catch (e) {}
+    })();
+    </script>
+    <script>
+    (function() {
+        var btn = document.getElementById('login-enable-notifications');
+        var status = document.getElementById('login-noti-status');
+        if (!btn) return;
+        function updateLoginNotiLabel() {
+            if (!('Notification' in window)) {
+                btn.style.display = 'none';
+                if (status) status.textContent = 'This browser does not support notifications.';
+                return;
+            }
+            if (Notification.permission === 'granted') {
+                btn.textContent = 'Website notifications: On';
+                if (status) status.textContent = 'Browser already allows this site. To turn off: lock icon → Site settings → Notifications.';
+            } else if (Notification.permission === 'denied') {
+                btn.textContent = 'Notifications blocked — how to allow';
+                if (status) status.textContent = 'Click the button for steps (browser settings).';
+            } else {
+                btn.textContent = 'Enable website notifications';
+                if (status) status.textContent = 'Click and choose Allow when the browser asks.';
+            }
+        }
+        updateLoginNotiLabel();
+        btn.addEventListener('click', function() {
+            if (!('Notification' in window)) return;
+            if (Notification.permission === 'granted') {
+                if (status) {
+                    var prev = status.textContent;
+                    status.textContent = 'Already allowed. Sign in and open the dashboard for alerts and sound.';
+                    setTimeout(function() { status.textContent = prev; updateLoginNotiLabel(); }, 5000);
+                }
+                return;
+            }
+            if (Notification.permission === 'denied') {
+                alert('To allow notifications: click the lock icon in the address bar → Site settings → Notifications → Allow, then refresh this page.');
+                return;
+            }
+            btn.disabled = true;
+            btn.textContent = 'Asking…';
+            Notification.requestPermission().then(function(p) {
+                btn.disabled = false;
+                updateLoginNotiLabel();
+                if (p === 'granted') {
+                    alert('Notifications allowed for Soulplace. Sign in and open the dashboard once so lock-screen alerts can finish setting up.');
+                }
+            }).catch(function() {
+                btn.disabled = false;
+                updateLoginNotiLabel();
+            });
+        });
+    })();
+    </script>
+    <script>
+    (function() {
+        var btn = document.getElementById('login-test-sound');
+        if (!btn) return;
+        function playBeep() {
+            try {
+                var Ctx = window.AudioContext || window.webkitAudioContext;
+                if (!Ctx) return;
+                var ctx = new Ctx();
+                if (ctx.state === 'suspended') ctx.resume();
+                var t = ctx.currentTime;
+                var osc1 = ctx.createOscillator();
+                var g1 = ctx.createGain();
+                osc1.connect(g1);
+                g1.connect(ctx.destination);
+                osc1.frequency.value = 880;
+                osc1.type = 'sine';
+                g1.gain.setValueAtTime(0.7, t);
+                g1.gain.exponentialRampToValueAtTime(0.01, t + 0.25);
+                osc1.start(t);
+                osc1.stop(t + 0.25);
+                var osc2 = ctx.createOscillator();
+                var g2 = ctx.createGain();
+                osc2.connect(g2);
+                g2.connect(ctx.destination);
+                osc2.frequency.value = 1100;
+                osc2.type = 'sine';
+                g2.gain.setValueAtTime(0.65, t + 0.3);
+                g2.gain.exponentialRampToValueAtTime(0.01, t + 0.55);
+                osc2.start(t + 0.3);
+                osc2.stop(t + 0.55);
+            } catch (e) {}
+        }
+        btn.addEventListener('click', function() {
+            playBeep();
+            btn.textContent = 'Sound played – tap again to repeat';
+            setTimeout(function() { btn.textContent = 'Test notification sound'; }, 2000);
+        });
     })();
     </script>
     <script>

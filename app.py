@@ -4,6 +4,7 @@ Flask backend: login (admins + staff), dashboard, help requests, QR codes, API t
 """
 import io
 import json
+import logging
 import os
 
 # Load .env so Gmail, Telegram, SMS, WhatsApp vars work when running locally
@@ -23,6 +24,10 @@ from flask import Flask, Blueprint, Response, render_template, request, redirect
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SOULPLACE_SECRET_KEY", "soulplace-help-desk-secret-key-change-in-production")
+
+# Log errors to console (PowerShell/terminal) when running locally
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s", datefmt="%H:%M:%S")
+app.logger.setLevel(logging.INFO)
 # Session cookie: work on Vercel so /soulplace/dashboard stays logged in
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 app.config["SESSION_COOKIE_HTTPONLY"] = True
@@ -74,6 +79,7 @@ api_token = None
 request_history = []  # For analytics: never cleared by "clear all"
 requests_paused = False  # Quiet hours: when True, new requests are rejected
 password_overrides = {}  # Runtime password overrides (username -> new password), saved in data.json
+push_subscriptions = []  # Web Push subscriptions (for notifications when screen is off); saved in data.json
 
 
 def load_config():
@@ -122,11 +128,11 @@ def load_config():
             key = str(u["name"]).strip().lower()
             if key not in USER_DB:
                 pwd = str(u["password"]).strip()
-    USER_DB[key] = {
-                "password": pwd,
-                "display_name": str(u["name"]).strip(),
-                "role": "staff",
-            }
+                USER_DB[key] = {
+                    "password": pwd,
+                    "display_name": str(u["name"]).strip(),
+                    "role": "staff",
+                }
     # If no users loaded (e.g. broken config), ensure admins + staff from defaults
     if not USER_DB:
         for u in DEFAULT_CONFIG.get("admins") or []:
@@ -151,8 +157,8 @@ def load_config():
 
 
 def load_data():
-    """Load help_requests, accepted_requests, api_token, request_history, requests_paused, password_overrides from data.json."""
-    global help_requests, accepted_requests, api_token, request_history, requests_paused, password_overrides
+    """Load help_requests, accepted_requests, api_token, request_history, requests_paused, password_overrides, push_subscriptions from data.json."""
+    global help_requests, accepted_requests, api_token, request_history, requests_paused, password_overrides, push_subscriptions
     if DATA_FILE.exists():
         try:
             with open(DATA_FILE, "r", encoding="utf-8") as f:
@@ -164,6 +170,7 @@ def load_data():
                 requests_paused = bool(data.get("requests_paused", False))
                 password_overrides.clear()
                 password_overrides.update(data.get("password_overrides") or {})
+                push_subscriptions[:] = data.get("push_subscriptions", [])
         except (json.JSONDecodeError, IOError):
             pass
     if api_token is None:
@@ -188,6 +195,7 @@ def save_data():
             "request_history": request_history,
             "requests_paused": requests_paused,
             "password_overrides": password_overrides,
+            "push_subscriptions": push_subscriptions,
         }
         if api_token is not None and not os.environ.get("SOULPLACE_API_TOKEN"):
             payload["api_token"] = api_token
@@ -784,6 +792,124 @@ def qr_image(table_num):
     return Response(buf.read(), mimetype="image/png")
 
 
+def _send_web_push_to_all(table, request_id, note=None, urgent=False):
+    """Send a Web Push to all subscribed devices (lock screen & background – with Maroon sound)."""
+    if not push_subscriptions:
+        return
+    vapid_private = os.environ.get("VAPID_PRIVATE_KEY", "").strip()
+    if not vapid_private:
+        return
+    try:
+        import pywebpush
+        title = "Soulplace – New help request"
+        body = "Table " + str(table) + " needs a Soul."
+        if note:
+            body += " – " + (note[:80] + "…" if len(note) > 80 else note)
+        if urgent:
+            title = "Soulplace – Urgent: Table " + str(table)
+        base = get_public_base_url().rstrip("/")
+        sound_url = base + "/static/sounds/maroon_5_animals.mp3"
+        payload = json.dumps({"title": title, "body": body, "sound": sound_url})
+        vapid_claims = {"sub": os.environ.get("VAPID_SUB", "mailto:soulplace@localhost")}
+        for sub in list(push_subscriptions):
+            try:
+                if isinstance(sub, dict) and sub.get("endpoint"):
+                    pywebpush.webpush(
+                        subscription_info=sub,
+                        data=payload,
+                        vapid_private_key=vapid_private,
+                        vapid_claims=vapid_claims,
+                    )
+            except Exception:
+                pass
+    except Exception:
+        pass
+
+
+@bp.route("/sw.js")
+def service_worker():
+    """Serve service worker so it can be registered with scope /soulplace/ (for push when screen off)."""
+    sw_path = Path(__file__).parent / "static" / "sw.js"
+    if not sw_path.is_file():
+        return "// no sw", 404, {"Content-Type": "application/javascript; charset=utf-8"}
+    with open(sw_path, "r", encoding="utf-8") as f:
+        body = f.read()
+    resp = make_response(body)
+    resp.headers["Content-Type"] = "application/javascript; charset=utf-8"
+    resp.headers["Service-Worker-Allowed"] = "/"
+    return resp
+
+
+@bp.route("/api/push-vapid-public", methods=["GET"])
+@login_required
+def push_vapid_public():
+    """Return the VAPID public key for the frontend to subscribe to push."""
+    key = os.environ.get("VAPID_PUBLIC_KEY", "").strip()
+    if not key:
+        return jsonify({"publicKey": None, "message": "VAPID_PUBLIC_KEY not set"})
+    return jsonify({"publicKey": key})
+
+
+@bp.route("/api/push-subscribe", methods=["POST"])
+@login_required
+def push_subscribe():
+    """Store a Web Push subscription so we can send notifications when screen is off."""
+    global push_subscriptions
+    data = request.get_json() or {}
+    endpoint = data.get("endpoint")
+    keys = data.get("keys")
+    if not endpoint or not isinstance(keys, dict) or not keys.get("p256dh") or not keys.get("auth"):
+        return jsonify({"ok": False, "error": "Invalid subscription"}), 400
+    sub = {"endpoint": endpoint, "keys": {"p256dh": keys["p256dh"], "auth": keys["auth"]}}
+    # Replace existing subscription with same endpoint
+    push_subscriptions[:] = [s for s in push_subscriptions if isinstance(s, dict) and s.get("endpoint") != endpoint]
+    push_subscriptions.append(sub)
+    save_data()
+    return jsonify({"ok": True, "message": "Subscribed. You'll get notifications even when screen is off."})
+
+
+@bp.route("/api/push-status", methods=["GET"])
+@login_required
+def push_status():
+    """Return Web Push debug info (count + whether VAPID keys are present)."""
+    try:
+        vapid_private_set = bool(os.environ.get("VAPID_PRIVATE_KEY", "").strip())
+        vapid_public_set = bool(os.environ.get("VAPID_PUBLIC_KEY", "").strip())
+        # Avoid returning huge payloads; endpoints are not secrets but can be long.
+        subs = []
+        for s in push_subscriptions[:5]:
+            if isinstance(s, dict) and s.get("endpoint"):
+                subs.append({"endpoint": s.get("endpoint")})
+        return jsonify(
+            {
+                "ok": True,
+                "push_subscriptions_count": len(push_subscriptions),
+                "vapid_private_key_set": vapid_private_set,
+                "vapid_public_key_set": vapid_public_set,
+                "saved_endpoints_sample": subs,
+            }
+        )
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
+@bp.route("/api/push-test", methods=["POST"])
+@login_required
+def push_test():
+    """Send a test Web Push to all saved subscriptions (admin only)."""
+    try:
+        if session.get("role") != "admin":
+            return jsonify({"ok": False, "error": "admin only"}), 403
+        count = len(push_subscriptions)
+        if count == 0:
+            return jsonify({"ok": False, "error": "No subscriptions saved yet. Enable notifications on devices first."}), 400
+        # Uses the same push pipeline as real requests.
+        _send_web_push_to_all("Test", "test-" + str(int(datetime.now(timezone.utc).timestamp())), note="Test push", urgent=False)
+        return jsonify({"ok": True, "message": "Test push sent.", "subscriptions_count": count})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
 @bp.route("/api/request/create", methods=["POST"])
 def create_request():
     """Create a new help request (e.g. from a table terminal or QR scan). No API token required – form always works."""
@@ -815,6 +941,7 @@ def create_request():
     help_requests.append(req)
     request_history.append({"id": new_id, "table": table, "raised_at": raised_at, "note": note, "category": category, "urgent": urgent})
     save_data()
+    _send_web_push_to_all(table, new_id, note, urgent)
     return jsonify({"ok": True, "id": new_id, "raised_at": raised_at})
 
 
