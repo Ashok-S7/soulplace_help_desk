@@ -772,7 +772,13 @@ def inject_base_url():
     except Exception:
         base = DEFAULT_PUBLIC_URL
     base = (base or DEFAULT_PUBLIC_URL).rstrip("/")
-    return {"base_url": base, "url_prefix": URL_PREFIX.rstrip("/") or "/soulplace", "app_config": APP_CONFIG or {}}
+    up = URL_PREFIX.rstrip("/") or "/soulplace"
+    return {
+        "base_url": base,
+        "url_prefix": up,
+        "default_public_origin": DEFAULT_PUBLIC_URL.rstrip("/"),
+        "app_config": APP_CONFIG or {},
+    }
 
 
 def _redirect_to_login():

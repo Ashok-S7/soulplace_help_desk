@@ -21,6 +21,9 @@
   • Request help – Table N (replace N with 1–10):
     https://soulplace-help-desk-kappa.vercel.app/soulplace/table?table=N
 
+  • Payments & billing (rates, UPI, cash, card):
+    https://soulplace-help-desk-kappa.vercel.app/soulplace/payments
+
   • All table QR codes (scan to open request-help for that table):
     https://soulplace-help-desk-kappa.vercel.app/soulplace/tables
 
@@ -46,6 +49,7 @@
 
   Login:     https://soulplace-help-desk-kappa.vercel.app/soulplace/login
   Dashboard: https://soulplace-help-desk-kappa.vercel.app/soulplace/dashboard
+  Payments:  https://soulplace-help-desk-kappa.vercel.app/soulplace/payments
   Tables:    https://soulplace-help-desk-kappa.vercel.app/soulplace/tables
   Links:     https://soulplace-help-desk-kappa.vercel.app/soulplace/links
   Request:   https://soulplace-help-desk-kappa.vercel.app/soulplace/table
@@ -54,10 +58,16 @@
   IF YOU SEE 404 DEPLOYMENT_NOT_FOUND
 --------------------------------------------------------------------------------
 
-  • soulplace-help-desk.vercel.app = no deployment there (deleted or never set).
-  • Use the kappa link above. Or: Vercel → New Project → Import same repo →
-    set Root Directory to soulplace_help_desk → Deploy. Then use that new URL
-    and set DEFAULT_PUBLIC_URL in app.py to match.
+  • soulplace-help-desk.vercel.app often returns 404 for the whole site: that
+    Vercel *project* is not deploying this app (wrong repo, wrong Root Directory,
+    or no production deployment). The app code is fine on kappa.
+  • Fix in Vercel (pick one):
+    (A) Use the kappa URL above everywhere; or
+    (B) Open project "soulplace-help-desk" → Settings → Git → confirm repo;
+        Root Directory = soulplace_help_desk; Redeploy Production; or
+    (C) Project kappa → Settings → Domains → add soulplace-help-desk.vercel.app
+        and remove it from the broken project so traffic hits the live deployment.
+  • Optional env on the working project: SOULPLACE_PUBLIC_URL = your chosen https URL
 
 --------------------------------------------------------------------------------
   NOTES

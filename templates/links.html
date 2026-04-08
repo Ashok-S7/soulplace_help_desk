@@ -49,19 +49,19 @@
         <p class="login-subtitle">Use these links when you are far away. After you deploy to Vercel, open this page from your Vercel URL and copy the login link.</p>
 
         <p class="link-label">1. Staff / Admin login link</p>
-        <div class="link-box" id="login-link">{{ login_link or 'https://soulplace-help-desk.vercel.app/soulplace/login' }}</div>
+        <div class="link-box" id="login-link">{{ login_link or (default_public_origin ~ url_prefix ~ '/login') }}</div>
         <button type="button" class="copy-btn" onclick="copy('login-link')">Copy login link</button>
 
         <p class="link-label" style="margin-top: 1.25rem;">2. Dashboard (after login – help requests, accepted, clear pending)</p>
-        <div class="link-box" id="dashboard-link">{{ dashboard_link or 'https://soulplace-help-desk.vercel.app/soulplace/dashboard' }}</div>
+        <div class="link-box" id="dashboard-link">{{ dashboard_link or (default_public_origin ~ url_prefix ~ '/dashboard') }}</div>
         <button type="button" class="copy-btn" onclick="copy('dashboard-link')">Copy dashboard link</button>
 
         <p class="link-label" style="margin-top: 1.25rem;">3. Payments &amp; billing (rates, UPI, cash, card)</p>
-        <div class="link-box" id="payments-link">{{ payments_link or 'https://soulplace-help-desk.vercel.app/soulplace/payments' }}</div>
+        <div class="link-box" id="payments-link">{{ payments_link or (default_public_origin ~ url_prefix ~ '/payments') }}</div>
         <button type="button" class="copy-btn" onclick="copy('payments-link')">Copy link</button>
 
         <p class="link-label" style="margin-top: 1.25rem;">4. Table QR codes page</p>
-        <div class="link-box" id="tables-link">{{ tables_link or 'https://soulplace-help-desk.vercel.app/soulplace/tables' }}</div>
+        <div class="link-box" id="tables-link">{{ tables_link or (default_public_origin ~ url_prefix ~ '/tables') }}</div>
         <button type="button" class="copy-btn" onclick="copy('tables-link')">Copy</button>
 
         <p class="link-label" style="margin-top: 1.25rem;">Direct request-help links (Table 1–10)</p>
