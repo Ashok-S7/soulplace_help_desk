@@ -7,7 +7,7 @@
     <title>Your links – Soulplace Boardgames</title>
     <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}" type="image/png">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/logo.png') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=11">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=21">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
@@ -56,7 +56,11 @@
         <div class="link-box" id="dashboard-link">{{ dashboard_link or 'https://soulplace-help-desk.vercel.app/soulplace/dashboard' }}</div>
         <button type="button" class="copy-btn" onclick="copy('dashboard-link')">Copy dashboard link</button>
 
-        <p class="link-label" style="margin-top: 1.25rem;">3. Table QR codes page</p>
+        <p class="link-label" style="margin-top: 1.25rem;">3. Payments &amp; billing (rates, UPI, cash, card)</p>
+        <div class="link-box" id="payments-link">{{ payments_link or 'https://soulplace-help-desk.vercel.app/soulplace/payments' }}</div>
+        <button type="button" class="copy-btn" onclick="copy('payments-link')">Copy link</button>
+
+        <p class="link-label" style="margin-top: 1.25rem;">4. Table QR codes page</p>
         <div class="link-box" id="tables-link">{{ tables_link or 'https://soulplace-help-desk.vercel.app/soulplace/tables' }}</div>
         <button type="button" class="copy-btn" onclick="copy('tables-link')">Copy</button>
 

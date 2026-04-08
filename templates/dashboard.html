@@ -8,7 +8,7 @@
     <title>Soul – Soulplace Boardgames</title>
     <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}" type="image/png">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/logo.png') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=11">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=21">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -31,78 +31,206 @@
             </div>
             <span class="logo-main" style="display:block;font-size:1.2rem;font-weight:700;color:#0f172a;">SOULPLACE</span>
         </div>
-        <h1 class="welcome-title">Soul – Welcome, {{ username }}</h1>
-        <a href="{{ base_url }}{{ url_for('main.links_page') }}" class="link-btn" style="margin-right:0.5rem;">Your links</a>
-        <a href="{{ base_url }}{{ url_for('main.logout') }}" class="logout-link">Log out</a>
+        <h1 class="welcome-title" id="dash-welcome-title">Soul – Welcome, {{ username }}</h1>
+        <div class="lang-select-wrap" style="margin-right:0.5rem;max-width:170px;width:170px;">
+        <select id="dash-lang-select" class="lang-select" title="Language" aria-label="Choose language" style="min-height:36px;">
+            <option value="en">English</option>
+            <option value="ta">தமிழ்</option>
+            <option value="te">తెలుగు</option>
+            <option value="kn">ಕನ್ನಡ</option>
+            <option value="ml">മലയാളം</option>
+            <option value="hi">हिन्दी</option>
+            <option value="ur">اردو</option>
+            <option value="bn">বাংলা</option>
+            <option value="gu">ગુજરાતી</option>
+            <option value="mr">मराठी</option>
+            <option value="pa">ਪੰਜਾਬੀ</option>
+        </select>
+        </div>
+        <a href="{{ base_url }}{{ url_for('main.links_page') }}" class="link-btn" id="dash-your-links" style="margin-right:0.5rem;">Your links</a>
+        <a href="{{ base_url }}{{ url_for('main.payments_page') }}" class="link-btn" id="dash-payments" style="margin-right:0.5rem;">Payments</a>
+        <a href="{{ base_url }}{{ url_for('main.logout') }}" class="logout-link" id="dash-logout">Log out</a>
     </header>
 
     <main class="dashboard-main" style="position:relative;z-index:1;">
         <div id="enable-sound-banner" style="display:none;position:relative;z-index:10;margin-bottom:1rem;padding:0.75rem 1rem;background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.2);text-align:center;border:2px solid #f59e0b;">
-            <p style="margin:0 0 0.25rem 0;font-size:1rem;">🔔 <strong>You won’t hear sound until you click below once.</strong></p>
-            <p style="margin:0 0 0.5rem 0;font-size:0.9rem;opacity:0.95;">Tap or click <strong>«Allow notification sound»</strong> now. You’ll hear a beep + Maroon. After that, every new table request will play sound.</p>
+            <p id="enable-sound-line1" style="margin:0 0 0.25rem 0;font-size:1rem;">🔔 You won’t hear sound until you click below once.</p>
+            <p id="enable-sound-line2" style="margin:0 0 0.5rem 0;font-size:0.9rem;opacity:0.95;">Tap or click «Allow notification sound» now. You’ll hear a beep + Maroon. After that, every new table request will play sound.</p>
             <button type="button" id="enable-sound-btn" class="btn btn-primary" style="padding:0.6rem 1.5rem;font-size:1rem;min-height:44px;font-weight:600;" aria-label="Allow notification sound access">Allow notification sound</button>
         </div>
+        <div id="shift-handoff-banner" class="card card-elevated" style="display:none;margin-bottom:1rem;padding:0.75rem 1rem;border-left:4px solid var(--primary);" role="region" aria-label="Shift handoff note">
+            <p id="shift-handoff-prev-label" style="margin:0;font-size:0.9rem;font-weight:700;color:var(--text-muted);">Note from previous shift</p>
+            <p id="shift-handoff-text" style="margin:0.35rem 0 0 0;font-size:1rem;"></p>
+        </div>
+        <section class="card card-elevated" style="margin-bottom:1rem;">
+            <h2 id="dash-handoff-edit-title" style="margin-top:0;">Shift handoff note</h2>
+            <p id="dash-handoff-edit-sub" class="card-subtitle">One line for the next shift (e.g. “Table 7 — follow up on rules”).</p>
+            <label for="shift-handoff-input" class="sr-only">Handoff note</label>
+            <textarea id="shift-handoff-input" rows="2" style="width:100%;max-width:100%;box-sizing:border-box;padding:0.5rem;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);" maxlength="4000" placeholder="Optional note for next shift…"></textarea>
+            <p style="margin-top:0.5rem;"><button type="button" class="btn btn-primary btn-sm" id="shift-handoff-save-btn">Save handoff note</button> <span id="shift-handoff-save-status" style="font-size:0.85rem;color:var(--text-muted);"></span></p>
+            <p class="card-subtitle" style="margin-top:0.5rem;font-size:0.78rem;" id="dash-shortcuts-hint">Shortcuts: Ctrl+Shift+S = test sound; Ctrl+Shift+A = auto-assign next (when focused on dashboard).</p>
+            {% if is_admin %}
+            <p style="margin-top:0.5rem;"><a href="{{ base_url }}{{ url_for('main.admin_system_page') }}" class="link-btn" id="dash-system-link">System &amp; config</a></p>
+            {% endif %}
+        </section>
         <section class="card table-grid-card card-elevated">
-            <h2>Tables (1–<span id="num-tables">{{ num_tables or 10 }}</span>)</h2>
-            <p class="card-subtitle">Green = no request, Orange = pending, Blue = being attended.</p>
+            <h2 id="dash-tables-title">Tables (1–<span id="num-tables">{{ num_tables or 10 }}</span>)</h2>
+            <p class="card-subtitle" id="dash-tables-sub">Green = no request, Orange = pending, Blue = being attended.</p>
             <div id="table-grid" class="table-grid" aria-label="Table status grid" data-num-tables="{{ num_tables or 10 }}"></div>
         </section>
         <section class="card help-requests-card card-elevated">
             <div class="card-header">
-                <h2>Help requests</h2>
+                <h2 id="dash-help-title">Help requests</h2>
                 <button type="button" class="link-btn" id="enable-notifications" aria-label="Allow website notifications and sound" title="Allow browser notifications for this site (in-app + lock screen)">Enable website notifications</button>
                 <button type="button" class="link-btn" id="test-sound-btn" aria-label="Test notification sound">Test sound</button>
             </div>
-            <p class="card-subtitle" style="margin-top:0.25rem;font-size:0.8rem;">Shows <strong>all</strong> tables that have requested help. <span id="sound-unlock-tip" style="display:inline;">Tap or click once (or «Test sound») for <strong>sound</strong>. Click <strong>«Enable website notifications»</strong> when the browser asks so you also get alerts (Maroon sound on <strong>lock screen</strong> where supported).</span></p>
-            <p class="card-subtitle" style="margin-top:0.25rem;font-size:0.75rem;color:var(--text-muted);">Only requests from the last 2 hours are shown (so refresh doesn’t show old ones). To reset the list, use «Clear all pending» below.</p>
+            <p id="dash-help-desc-line" class="card-subtitle" style="margin-top:0.25rem;font-size:0.8rem;">Shows all tables that have requested help.</p>
+            <p class="card-subtitle" style="margin-top:0.2rem;font-size:0.78rem;"><span id="sound-unlock-tip" style="display:inline;">Tap or click once (or «Test sound») for <strong>sound</strong>. Click <strong>«Enable website notifications»</strong> when the browser asks so you also get alerts (Maroon sound on <strong>lock screen</strong> where supported).</span></p>
+            <p id="dash-help-recent-line" class="card-subtitle" style="margin-top:0.25rem;font-size:0.75rem;color:var(--text-muted);">Only requests from the last 2 hours are shown (so refresh doesn’t show old ones). To reset the list, use «Clear all pending» below.</p>
             <div id="requests-list" class="requests-list">
                 <p class="empty-state">Loading…</p>
             </div>
-            <p style="margin-top:0.75rem;">
+            <p id="bulk-pending-toolbar" style="margin-top:0.5rem;display:none;flex-wrap:wrap;gap:0.5rem;align-items:center;" class="card-subtitle">
+                <label style="display:inline-flex;align-items:center;gap:0.35rem;font-size:0.85rem;cursor:pointer;">
+                    <input type="checkbox" id="bulk-select-all" title="Select all pending">
+                    <span id="bulk-select-all-lbl">Select all</span>
+                </label>
+                <button type="button" class="btn btn-primary btn-sm" id="bulk-accept-btn" disabled>Accept selected</button>
+            </p>
+            <p style="margin-top:0.75rem;display:flex;flex-wrap:wrap;gap:0.5rem;align-items:center;">
                 <button type="button" class="btn btn-outline btn-sm" id="clear-all-pending-btn" aria-label="Clear all pending requests">Clear all pending</button>
+                <button type="button" class="btn btn-outline btn-sm" id="snooze-alerts-btn" title="No sound or desktop notifications for 15 minutes">Mute alerts 15 min</button>
+                <span id="snooze-status" style="font-size:0.8rem;color:var(--text-muted);"></span>
             </p>
         </section>
+        <section class="card card-elevated">
+            <h2 id="dash-shift-title">Shift & Smart Assist</h2>
+            <p id="dash-shift-sub" class="card-subtitle">Set your mode and see the best next table to attend.</p>
+            <div style="display:flex;flex-wrap:wrap;gap:0.5rem;align-items:center;">
+                <button type="button" class="btn btn-outline btn-sm" id="presence-online-btn">Online</button>
+                <button type="button" class="btn btn-outline btn-sm" id="presence-break-btn">Break</button>
+                <button type="button" class="btn btn-outline btn-sm" id="presence-offline-btn">Offline</button>
+                <button type="button" class="btn btn-primary btn-sm" id="auto-assign-next-btn">Auto-assign next to me</button>
+                <span id="presence-status" style="font-size:0.85rem;color:var(--text-muted);"></span>
+            </div>
+            <p id="next-suggestion" class="card-subtitle" style="margin-top:0.6rem;font-size:0.9rem;">Loading suggestion…</p>
+        </section>
 
+        <section class="card card-elevated">
+            <h2 id="dash-per-table-title">Per-table history</h2>
+            <p id="dash-per-table-sub" class="card-subtitle">Recent requests for one table (from analytics history).</p>
+            <div style="display:flex;flex-wrap:wrap;gap:0.5rem;align-items:center;margin-bottom:0.5rem;">
+                <label for="history-table-num" class="sr-only" id="dash-history-table-lbl">Table</label>
+                <input type="number" id="history-table-num" min="1" max="{{ num_tables or 10 }}" value="1" style="width:5rem;padding:0.35rem;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);">
+                <button type="button" class="btn btn-outline btn-sm" id="load-table-history-btn">Load history</button>
+            </div>
+            <div id="table-history-content" class="card-subtitle" style="font-size:0.85rem;white-space:pre-wrap;">Enter a table number and load.</div>
+        </section>
+
+        {% if is_admin or is_manager %}
+        <section class="card card-elevated" id="ops-incidents-section">
+            <h2 id="dash-ops-title">Ops &amp; incident log</h2>
+            <p id="dash-ops-sub" class="card-subtitle">Short notes visible to admins and shift leads (saved on server).</p>
+            <div style="display:flex;flex-wrap:wrap;gap:0.5rem;align-items:flex-start;margin-bottom:0.5rem;">
+                <textarea id="incident-message-input" rows="2" placeholder="e.g. AC down in zone A — ETA 30m" style="flex:1;min-width:200px;max-width:100%;padding:0.5rem;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);" maxlength="2000"></textarea>
+                <select id="incident-severity" aria-label="Severity" style="padding:0.45rem;border-radius:8px;border:1px solid var(--border);">
+                    <option value="info">Info</option>
+                    <option value="warn">Warning</option>
+                    <option value="critical">Critical</option>
+                </select>
+                <button type="button" class="btn btn-primary btn-sm" id="incident-add-btn">Add entry</button>
+            </div>
+            <div id="incident-log-list" style="font-size:0.85rem;max-height:200px;overflow:auto;border:1px solid var(--border);border-radius:8px;padding:0.5rem;background:var(--bg-warm);">Loading…</div>
+        </section>
+        <section class="card card-elevated">
+            <h2 id="dash-admin-presence-title">Staff presence board</h2>
+            <p id="dash-admin-presence-sub" class="card-subtitle">Live status of staff availability.</p>
+            <div id="presence-board-content" style="font-size:0.85rem;max-height:220px;overflow:auto;">Loading…</div>
+        </section>
+        <section class="card card-elevated">
+            <h2 id="dash-admin-reassign-title">Manual reassign panel</h2>
+            <p id="dash-admin-reassign-sub" class="card-subtitle">Admin override: assign a pending request to selected staff.</p>
+            <div style="display:flex;flex-wrap:wrap;gap:0.5rem;align-items:center;">
+                <select id="admin-reassign-request" style="min-width:220px;padding:0.35rem;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);"></select>
+                <select id="admin-reassign-staff" style="min-width:220px;padding:0.35rem;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);"></select>
+                <button type="button" class="btn btn-primary btn-sm" id="admin-reassign-btn">Assign now</button>
+            </div>
+            <p id="admin-reassign-feedback" class="card-subtitle" style="margin-top:0.4rem;font-size:0.85rem;"></p>
+        </section>
+        <section class="card card-elevated">
+            <h2 id="dash-dnd-title">Drag & drop assign board</h2>
+            <p id="dash-dnd-sub" class="card-subtitle">Drag a pending request card and drop it onto a staff lane to assign.</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+                <div id="dnd-pending-list" style="border:1px solid var(--border);border-radius:10px;padding:0.6rem;min-height:140px;"></div>
+                <div id="dnd-staff-lanes" style="display:grid;gap:0.5rem;"></div>
+            </div>
+            <p id="dash-dnd-mobile-hint" class="card-subtitle" style="margin-top:0.55rem;">Mobile quick assign: choose request and tap a staff chip.</p>
+            <div id="mobile-assign-request-list" style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:0.35rem;"></div>
+            <div id="mobile-assign-staff-chips" style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:0.35rem;"></div>
+            <p id="dnd-assign-feedback" class="card-subtitle" style="margin-top:0.4rem;font-size:0.85rem;"></p>
+        </section>
+        <section class="card card-elevated">
+            <h2 id="dash-audit-title">Staff activity (audit)</h2>
+            <p id="dash-audit-sub" class="card-subtitle">Accepts and status updates (latest first).</p>
+            <div id="activity-log-content" style="font-size:0.85rem;max-height:220px;overflow:auto;">Loading…</div>
+            <p style="margin-top:0.5rem;"><button type="button" class="btn btn-outline btn-sm" id="reload-activity-btn">Refresh</button></p>
+        </section>
+        <section class="card card-elevated">
+            <h2 id="dash-export-title">Export request log (CSV)</h2>
+            <p id="dash-export-sub" class="card-subtitle">Admin: download detailed rows from <code>request_history</code> by date (UTC).</p>
+            <div style="display:flex;flex-wrap:wrap;gap:0.5rem;align-items:center;">
+                <label><span id="dash-export-from-lbl">From</span> <input type="date" id="export-from" style="padding:0.35rem;border-radius:8px;border:1px solid var(--border);"></label>
+                <label><span id="dash-export-to-lbl">To</span> <input type="date" id="export-to" style="padding:0.35rem;border-radius:8px;border:1px solid var(--border);"></label>
+                <a href="#" class="btn btn-outline btn-sm" id="export-requests-link">Download CSV</a>
+            </div>
+        </section>
+        {% endif %}
         {% if is_admin %}
         <section class="card card-elevated">
-            <h2>Quiet hours</h2>
-            <p class="card-subtitle">When paused, customers cannot submit new help requests.</p>
+            <h2 id="dash-cafe-title">Edit café menu</h2>
+            <p id="dash-cafe-sub" class="card-subtitle">Change the dropdown items on the customer request page.</p>
+            <p><a id="dash-cafe-link" href="{{ base_url }}{{ url_for('main.admin_menu_page') }}" class="btn btn-primary btn-sm">Open menu editor</a></p>
+        </section>
+        <section class="card card-elevated">
+            <h2 id="dash-quiet-title">Quiet hours</h2>
+            <p id="dash-quiet-sub" class="card-subtitle">When paused, customers cannot submit new help requests.</p>
             <button type="button" class="btn btn-outline" id="pause-requests-btn">Loading…</button>
         </section>
         <section class="card card-elevated">
-            <h2>Push (lock-screen) debug</h2>
-            <p class="card-subtitle">Subscriptions saved: <strong id="push-count">Loading…</strong></p>
+            <h2 id="dash-push-title">Push (lock-screen) debug</h2>
+            <p class="card-subtitle"><span id="dash-push-saved-lbl">Subscriptions saved:</span> <strong id="push-count">Loading…</strong></p>
             <p class="card-subtitle" style="margin-top:0.25rem;">
-                VAPID keys: <span id="vapid-keys">Loading…</span>
+                <span id="dash-vapid-lbl">VAPID keys:</span> <span id="vapid-keys">Loading…</span>
             </p>
             <p style="margin-top:0.75rem;">
+                <button type="button" class="btn btn-outline btn-sm" id="local-noti-test-btn">Show local test notification</button>
                 <button type="button" class="btn btn-outline btn-sm" id="push-test-btn">Send test push</button>
             </p>
             <p class="card-subtitle" id="push-debug-result" style="margin-top:0.25rem;font-size:0.85rem;"></p>
         </section>
         <section class="card api-token-card card-elevated">
-            <h2>API Token (for Vercel / external API)</h2>
-            <p class="card-subtitle">Use header <code>X-API-Token</code> or <code>Authorization: Bearer &lt;token&gt;</code> when calling <code>POST /api/request/create</code>.</p>
+            <h2 id="dash-api-token-title">API Token (for Vercel / external API)</h2>
+            <p id="dash-api-token-sub" class="card-subtitle">Use header <code>X-API-Token</code> or <code>Authorization: Bearer &lt;token&gt;</code> when calling <code>POST /api/request/create</code>.</p>
             <div class="token-row">
                 <input type="password" id="api-token-input" class="token-input" readonly value="" placeholder="Click to load">
                 <button type="button" class="btn btn-primary btn-sm" id="show-token-btn">Show token</button>
                 <button type="button" class="btn btn-outline btn-sm" id="copy-token-btn" style="display:none;">Copy</button>
             </div>
-            <p class="token-hint">Set <code>SOULPLACE_API_TOKEN</code> in Vercel environment variables to use your own token.</p>
+            <p id="dash-token-hint" class="token-hint">Set <code>SOULPLACE_API_TOKEN</code> in Vercel environment variables to use your own token.</p>
         </section>
         {% endif %}
 
         <section class="card accepted-card card-elevated">
-            <h2>Your accepted requests</h2>
-            <p class="card-subtitle">Update status: On the way → At table → Done.</p>
+            <h2 id="dash-accepted-title">Your accepted requests</h2>
+            <p id="dash-accepted-sub" class="card-subtitle">Update status: On the way → At table → Done.</p>
             <div class="table-wrapper">
                 <table class="accepted-table">
                     <thead>
                         <tr>
-                            <th>Table #</th>
-                            <th>Note / Category</th>
-                            <th>Raised at</th>
-                            <th>Status</th>
+                            <th id="dash-th-table">Table #</th>
+                            <th id="dash-th-note">Note / Category</th>
+                            <th id="dash-th-raised">Raised at</th>
+                            <th id="dash-th-status">Status</th>
                         </tr>
                     </thead>
                     <tbody id="accepted-tbody">
@@ -112,25 +240,25 @@
             </div>
         </section>
         <section class="card card-elevated">
-            <h2>Request history (analytics)</h2>
-            <p class="card-subtitle">Last 30 days: requests per day and per table.</p>
+            <h2 id="dash-analytics-title">Request history (analytics)</h2>
+            <p id="dash-analytics-sub" class="card-subtitle">Last 30 days: requests per day and per table.</p>
             <div id="analytics-content">Loading…</div>
             <p style="margin-top:0.5rem;"><a href="#" id="analytics-csv-link" class="link-btn">Download CSV</a></p>
         </section>
         <section class="card card-elevated">
-            <h2>Change my password</h2>
+            <h2 id="dash-password-title">Change my password</h2>
             <form id="change-password-form" class="login-form" style="max-width:320px;">
-                <label for="current-password">Current password</label>
+                <label for="current-password" id="dash-current-pass-label">Current password</label>
                 <input type="password" id="current-password" name="current" required autocomplete="current-password">
-                <label for="new-password">New password</label>
+                <label for="new-password" id="dash-new-pass-label">New password</label>
                 <input type="password" id="new-password" name="new" required autocomplete="new-password">
-                <button type="submit" class="btn btn-primary btn-sm">Update password</button>
+                <button type="submit" class="btn btn-primary btn-sm" id="dash-update-pass-btn">Update password</button>
             </form>
             <p id="change-password-feedback" class="request-feedback" style="display:none;margin-top:0.5rem;"></p>
         </section>
         <section class="card card-elevated">
-            <h2>Quick open (scan to request help)</h2>
-            <p class="card-subtitle">Scan this QR to open the request-help page on your phone.</p>
+            <h2 id="dash-quick-title">Quick open (scan to request help)</h2>
+            <p class="card-subtitle" id="dash-quick-sub">Scan this QR to open the request-help page on your phone.</p>
             <img id="dashboard-qr" src="{{ base_url }}{{ url_for('main.qr_image_general') }}" alt="QR code for request help page" style="max-width:160px;height:auto;display:block;">
         </section>
     </main>
@@ -140,7 +268,255 @@
         window.SOULPLACE_BASE = "{{ url_for('main.index') }}".replace(/\/$/, '');
         window.SOULPLACE_NOTIFICATION_SOUND = "{{ base_url }}{{ url_for('static', filename='sounds/maroon_5_animals.mp3') }}";
     </script>
-    <script src="{{ base_url }}{{ url_for('static', filename='js/app.js') }}?v=34"></script>
+    <script>
+    (function () {
+        var VALID = ['en', 'ta', 'te', 'kn', 'ml', 'hi', 'ur', 'bn', 'gu', 'mr', 'pa'];
+        function normLang(raw) {
+            if (raw == null || String(raw).trim() === '') return 'en';
+            var base = String(raw).trim().toLowerCase().split(/[-_]/)[0];
+            return VALID.indexOf(base) !== -1 ? base : 'en';
+        }
+        var D = {
+            en: {
+                welcome: 'Soul – Welcome, {u}', links: 'Your links', logout: 'Log out', tables: 'Tables (1–{n})', tsub: 'Green = no request, Orange = pending, Blue = being attended.', help: 'Help requests', noti: 'Enable website notifications', sound: 'Test sound', clear: 'Clear all pending', mute: 'Mute alerts 15 min', accepted: 'Your accepted requests', analytics: 'Request history (analytics)', pass: 'Change my password', cur: 'Current password', nw: 'New password', upd: 'Update password', quick: 'Quick open (scan to request help)', quickSub: 'Scan this QR to open the request-help page on your phone.', shift: 'Shift & Smart Assist', shiftSub: 'Set your mode and see the best next table to attend.', online: 'Online', brk: 'Break', offline: 'Offline', autoAssign: 'Auto-assign next to me', nextLoading: 'Loading suggestion…', adminPresenceTitle: 'Staff presence board', adminPresenceSub: 'Live status of staff availability.', adminReassignTitle: 'Manual reassign panel', adminReassignSub: 'Admin override: assign a pending request to selected staff.', assignNow: 'Assign now', dndTitle: 'Drag & drop assign board', dndSub: 'Drag a pending request card and drop it onto a staff lane to assign.', dndMobileHint: 'Mobile quick assign: choose request and tap a staff chip.', auditTitle: 'Staff activity (audit)', auditSub: 'Accepts and status updates (latest first).', refreshBtn: 'Refresh', exportTitle: 'Export request log (CSV)', exportSub: 'Admin: download detailed rows from request_history by date (UTC).', exportFrom: 'From', exportTo: 'To', downloadCsv: 'Download CSV', cafeTitle: 'Edit café menu', cafeSub: 'Change the dropdown items on the customer request page.', openMenuEditor: 'Open menu editor', quietTitle: 'Quiet hours', quietSub: 'When paused, customers cannot submit new help requests.', pushTitle: 'Push (lock-screen) debug', pushSavedLbl: 'Subscriptions saved:', vapidLbl: 'VAPID keys:', localNotiBtn: 'Show local test notification', sendPushBtn: 'Send test push', apiTokenTitle: 'API Token (for Vercel / external API)', apiTokenSub: 'Use header X-API-Token or Authorization: Bearer <token> when calling POST /api/request/create.', tokenPlaceholder: 'Click to load', showToken: 'Show token', copyToken: 'Copy', tokenHint: 'Set SOULPLACE_API_TOKEN in Vercel environment variables to use your own token.', perTableTitle: 'Per-table history', perTableSub: 'Recent requests for one table (from analytics history).', historyTableLbl: 'Table', loadHistory: 'Load history', tableHistoryIdle: 'Enter a table number and load.', acceptedSub: 'Update status: On the way → At table → Done.', thTable: 'Table #', thNote: 'Note / Category', thRaised: 'Raised at', thStatus: 'Status', analyticsSub: 'Last 30 days: requests per day and per table.', loading: 'Loading…', helpDesc: 'Shows all tables that have requested help.', helpRecent: 'Only requests from the last 2 hours are shown (so refresh does not show old ones). To reset the list, use «Clear all pending» below.', handoffTitle: 'Shift handoff note', handoffSub: 'One line for the next shift (e.g. “Table 7 — follow up on rules”).', handoffPlaceholder: 'Optional note for next shift…', handoffSave: 'Save handoff note', handoffPrevNote: 'Note from previous shift', shortcutsHint: 'Shortcuts: Ctrl+Shift+S = test sound; Ctrl+Shift+A = auto-assign next (when focused on dashboard).', systemConfig: 'System & config', soundBanner1: 'You won’t hear sound until you click below once.', soundBanner2: 'Tap or click «Allow notification sound» now. You’ll hear a beep + Maroon. After that, every new table request will play sound.', allowSoundBtn: 'Allow notification sound', soundUnlockTip: 'Tap or click once (or «Test sound») for sound. Click «Enable website notifications» when the browser asks so you also get alerts (Maroon sound on lock screen where supported).', bulkSelectAll: 'Select all', bulkAccept: 'Accept selected', opsTitle: 'Ops & incident log', opsSub: 'Short notes visible to admins and shift leads (saved on server).',
+                recForYou: 'Recommended for you', suggestedStaffPrefix: 'Suggested staff:', tableWord: 'Table', vipUrgent: 'VIP / Urgent', imAttending: "I'm attending", btnAccepted: 'Accepted', noPendingReq: 'No pending help requests.', reqLoadFail: 'Failed to load requests.', noAcceptedYet: 'No accepted requests yet.', loadFailShort: 'Failed to load.', atTable: 'At table', doneStatus: 'Done', presencePrefix: 'Current mode: ', presenceNoData: 'No staff presence data yet.', nextNone: 'No pending requests right now.', nextErr: 'Could not load suggestion.', nextSuggestedFmt: 'Suggested next: Table {table} (score {score})', urgentTag: 'URGENT', assigning: 'Assigning...', autoAssignErr: 'No request to assign', assignFail: 'Assign failed', assignedTo: 'Assigned request to {name}.', dndNoPending: 'No pending requests', dndNoStaff: 'No staff lanes', mobileNoReq: 'No requests', mobileNoStaff: 'No staff', pauseResume: 'Resume requests', pauseNew: 'Pause new requests', pauseShort: 'Pause', notifOn: 'Website notifications: On', notifEnable: 'Enable website notifications',                 notifTitleOn: 'Browser already allows notifications for this site. Click to test sound. To turn off: lock icon → Site settings → Notifications → Block.', notifTitleEnable: 'Allow browser notifications for this site (in-app + lock screen when signed in).', hideToken: 'Hide', copiedToken: 'Copied!'
+            },
+            ta: {
+                welcome: 'Soul – வரவேற்பு, {u}', links: 'உங்கள் இணைப்புகள்', logout: 'வெளியேறு', tables: 'மேசைகள் (1–{n})', tsub: 'பச்சை = கோரிக்கை இல்லை, ஆரஞ்சு = நிலுவை, நீலம் = கவனிக்கப்படுகிறது.', help: 'உதவி கோரிக்கைகள்', noti: 'அறிவிப்புகளை இயக்கு', sound: 'ஒலி சோதனை', clear: 'நிலுவை அனைத்தையும் அழி', mute: 'அறிவிப்பை ம்யூட் 15 நிமி', accepted: 'நீங்கள் ஏற்ற கோரிக்கைகள்', analytics: 'கோரிக்கை வரலாறு (ஆய்வு)', pass: 'என் கடவுச்சொல்லை மாற்று', cur: 'தற்போதைய கடவுச்சொல்', nw: 'புதிய கடவுச்சொல்', upd: 'கடவுச்சொல் புதுப்பிக்க', quick: 'விரைவு திறப்பு (QR ஸ்கேன் செய்து உதவி கேள்)', quickSub: 'இந்த QR-ஐ ஸ்கேன் செய்து உங்கள் போனில் உதவி பக்கத்தை திறக்கவும்.', shift: 'ஷிப்ட் & ஸ்மார்ட் உதவி', shiftSub: 'உங்கள் பயன்முறையை அமைத்து அடுத்து எந்த மேசைக்குச் செல்ல வேண்டும் என்பதைப் பாருங்கள்.', online: 'ஆன்லைன்', brk: 'இடைவேளை', offline: 'ஆஃப்லைன்', autoAssign: 'அடுத்ததை எனக்கு தானா ஒதுக்கு', nextLoading: 'பரிந்துரை ஏற்றுகிறது…', adminPresenceTitle: 'ஊழியர் இருப்பு பலகை', adminPresenceSub: 'ஊழியர் கிடைப்பின் நேரடி நிலை.', adminReassignTitle: 'கைமுறை மீண்டும் ஒதுக்கீடு', adminReassignSub: 'நிர்வாகி: நிலுவை கோரிக்கையைத் தேர்ந்தெடுத்த ஊழியருக்கு ஒதுக்கு.', assignNow: 'இப்போது ஒதுக்கு', dndTitle: 'இழுத்து விடு ஒதுக்கீடு பலகை', dndSub: 'நிலுவை கோரிக்கை அட்டையை இழுத்து ஊழியர் வரிசையில் விடவும்.', dndMobileHint: 'மொபைல் விரைவு: கோரிக்கையைத் தேர்ந்து ஊழியர் சிப்பைத் தட்டவும்.', auditTitle: 'ஊழியர் செயல்பாடு (தணிக்கை)', auditSub: 'ஏற்றுகள் மற்றும் நிலை புதுப்பிப்புகள் (புதியது முதல்).', refreshBtn: 'புதுப்பி', exportTitle: 'கோரிக்கை பதிவு ஏற்றுமதி (CSV)', exportSub: 'நிர்வாகி: தேதி வாரியாக request_history விவரங்களைப் பதிவிறக்கு.', exportFrom: 'இருந்து', exportTo: 'வரை', downloadCsv: 'CSV பதிவிறக்கு', cafeTitle: 'கஃபே மெனு திருத்து', cafeSub: 'வாடிக்கையாளர் கோரிக்கை பக்கத்தின் பட்டியல் உருப்படிகளை மாற்று.', openMenuEditor: 'மெனு திருத்தியைத் திற', quietTitle: 'அமைதி நேரம்', quietSub: 'இடைநிறுத்தத்தின் போது புதிய உதவி கோரிக்கைகளை வாடிக்கையாளர்கள் அனுப்ப முடியாது.', pushTitle: 'புஷ் (பூட்டுத் திரை) பிழைத்திருத்தம்', pushSavedLbl: 'சேமிக்கப்பட்ட சந்தாக்கள்:', vapidLbl: 'VAPID விசைகள்:', localNotiBtn: 'உள்ளூர் சோதனை அறிவிப்பு', sendPushBtn: 'புஷ் சோதனை அனுப்பு', apiTokenTitle: 'API டோக்கன் (Vercel / வெளி API)', apiTokenSub: 'POST /api/request/create அழைக்கும்போது X-API-Token அல்லது Authorization: Bearer <token> பயன்படுத்தவும்.', tokenPlaceholder: 'ஏற்ற கிளிக் செய்', showToken: 'டோக்கன் காட்டு', copyToken: 'நகலெடு', tokenHint: 'உங்கள் டோக்கனுக்கு Vercel சூழல் மாறிலியில் SOULPLACE_API_TOKEN அமைக்கவும்.', perTableTitle: 'மேசை வாரியான வரலாறு', perTableSub: 'ஒரு மேசைக்கான சமீபத்திய கோரிக்கைகள் (பகுப்பாய்வு வரலாற்றிலிருந்து).', historyTableLbl: 'மேசை', loadHistory: 'வரலாற்றை ஏற்று', tableHistoryIdle: 'மேசை எண்ணை உள்ளிட்டு ஏற்றவும்.', acceptedSub: 'நிலை புதுப்பி: வழியில் → மேசையில் → முடிந்தது.', thTable: 'மேசை #', thNote: 'குறிப்பு / வகை', thRaised: 'எழுப்பப்பட்ட நேரம்', thStatus: 'நிலை', analyticsSub: 'கடந்த 30 நாட்கள்: நாள் மற்றும் மேசை வாரியான கோரிக்கைகள்.', loading: 'ஏற்றுகிறது…', helpDesc: 'உதவி கேட்ட அனைத்து மேசைகளும் காட்டப்படும்.', helpRecent: 'கடைசி 2 மணி நேர கோரிக்கைகள் மட்டும் காட்டப்படும் (refresh செய்தாலும் பழையவை வராது). மீட்டமைக்க கீழே «Clear all pending» பயன்படுத்தவும்.', handoffTitle: 'ஷிப்ட் ஒப்படைப்புக் குறிப்பு', handoffSub: 'அடுத்த ஷிப்டுக்கு ஒரு வரி (எ.கா. “மேசை 7 — விதிகள் தொடர்பாக”).', handoffPlaceholder: 'அடுத்த ஷிப்டுக்கு விருப்பக் குறிப்பு…', handoffSave: 'குறிப்பைச் சேமி', handoffPrevNote: 'முந்தைய ஷிப்டிலிருந்து குறிப்பு', shortcutsHint: 'குறுக்குவழிகள்: Ctrl+Shift+S = ஒலி சோதனை; Ctrl+Shift+A = அடுத்ததை தானா ஒதுக்கு (டாஷ்போர்டில் கவனம் இருக்கும்போது).', systemConfig: 'அமைப்பு & கட்டமைப்பு', soundBanner1: 'கீழே ஒருமுறை கிளிக் செய்யும் வரை ஒலி கேட்காது.', soundBanner2: 'இப்போது «அறிவிப்பு ஒலியை அனுமதி» என்பதைத் தட்டவும். பீப் + Maroon கேட்கும். பிறகு ஒவ்வொரு புதிய மேசை கோரிக்கைக்கும் ஒலி வரும்.', allowSoundBtn: 'அறிவிப்பு ஒலியை அனுமதி', soundUnlockTip: 'ஒலிக்கு ஒருமுறை தட்டவும் (அல்லது «ஒலி சோதனை»). உலாவி கேட்டால் «வலைத்தள அறிவிப்புகளை இயக்கு» என்பதைத் தட்டவும்.', bulkSelectAll: 'அனைத்தையும் தேர்ந்தெடு', bulkAccept: 'தேர்ந்தெடுத்தவற்றை ஏற்க', opsTitle: 'செயல்பாடு & சம்பவப் பதிவு', opsSub: 'நிர்வாகிகள் மற்றும் ஷிப்ட் முன்னணிக்கு குறுகிய குறிப்புகள் (சேவரில் சேமிக்கப்படும்).',
+                recForYou: 'உங்களுக்குப் பரிந்துரை', suggestedStaffPrefix: 'பரிந்துரை ஊழியர்:', tableWord: 'மேசை', vipUrgent: 'VIP / அவசரம்', imAttending: 'நான் வருகிறேன்', btnAccepted: 'ஏற்றுக்கொள்ளப்பட்டது', noPendingReq: 'நிலுவை உதவி கோரிக்கைகள் இல்லை.', reqLoadFail: 'கோரிக்கைகளை ஏற்ற முடியவில்லை.', noAcceptedYet: 'இன்னும் ஏற்றுக்கொள்ளப்பட்ட கோரிக்கைகள் இல்லை.', loadFailShort: 'ஏற்ற முடியவில்லை.', atTable: 'மேசையில்', doneStatus: 'முடிந்தது', presencePrefix: 'தற்போதைய பயன்முறை: ', presenceNoData: 'இன்னும் ஊழியர் இருப்பு தரவு இல்லை.', nextNone: 'இப்போது நிலுவை கோரிக்கைகள் இல்லை.', nextErr: 'பரிந்துரையை ஏற்ற முடியவில்லை.', nextSuggestedFmt: 'அடுத்த பரிந்துரை: மேசை {table} (மதிப்பெண் {score})', urgentTag: 'அவசரம்', assigning: 'ஒதுக்குகிறது…', autoAssignErr: 'ஒதுக்க கோரிக்கை இல்லை', assignFail: 'ஒதுக்கீடு தோல்வி', assignedTo: 'கோரிக்கை {name}க்கு ஒதுக்கப்பட்டது.', dndNoPending: 'நிலுவை கோரிக்கைகள் இல்லை', dndNoStaff: 'ஊழியர் வரிசைகள் இல்லை', mobileNoReq: 'கோரிக்கைகள் இல்லை', mobileNoStaff: 'ஊழியர் இல்லை', pauseResume: 'கோரிக்கைகளை மீண்டும் தொடங்கு', pauseNew: 'புதிய கோரிக்கைகளை இடைநிறுத்து', pauseShort: 'இடைநிறுத்து', notifOn: 'வலைத்தள அறிவிப்புகள்: இயக்கம்', notifEnable: 'வலைத்தள அறிவிப்புகளை இயக்கு',                 notifTitleOn: 'உலாவி ஏற்கனவே இந்த தளத்திற்கு அறிவிப்புகளை அனுமதிக்கிறது. ஒலி சோதிக்க கிளிக் செய்யவும்.', notifTitleEnable: 'இந்த தளத்திற்கு உலாவி அறிவிப்புகளை அனுமதிக்கவும்.', hideToken: 'மறை', copiedToken: 'நகலெடுக்கப்பட்டது!'
+            }
+        };
+        function cloneStr(o) {
+            var n = {};
+            for (var k in o) {
+                if (Object.prototype.hasOwnProperty.call(o, k)) n[k] = o[k];
+            }
+            return n;
+        }
+        D.ml = cloneStr(D.en);
+        Object.assign(D.ml, {
+            welcome: 'സോൾ – സ്വാഗതം, {u}', links: 'നിങ്ങളുടെ ലിങ്കുകൾ', logout: 'ലോഗ് ഔട്ട്', tables: 'ടേബിളുകൾ (1–{n})', tsub: 'പച്ച = അഭ്യർത്ഥനയില്ല, ഓറഞ്ച് = താൽക്കാലിക, നീല = ശ്രദ്ധയിൽ.', help: 'സഹായ അഭ്യർത്ഥനകൾ', noti: 'വെബ് അറിയിപ്പുകൾ പ്രവർത്തനക്ഷമമാക്കുക', sound: 'ശബ്ദം പരീക്ഷിക്കുക', clear: 'താൽക്കാലിക എല്ലാം മായ്ക്കുക', mute: 'അറിയിപ്പുകൾ 15 മിനിറ്റ് നിശബ്ദമാക്കുക', accepted: 'നിങ്ങൾ സ്വീകരിച്ച അഭ്യർത്ഥനകൾ', analytics: 'അഭ്യർത്ഥന ചരിത്രം (വിശകലനം)', pass: 'എന്റെ പാസ്‌വേഡ് മാറ്റുക', cur: 'നിലവിലെ പാസ്‌വേഡ്', nw: 'പുതിയ പാസ്‌വേഡ്', upd: 'പാസ്‌വേഡ് അപ്ഡേറ്റ് ചെയ്യുക', quick: 'വേഗത്തിൽ തുറക്കുക (QR സ്കാൻ ചെയ്ത് സഹായം ചോദിക്കുക)', quickSub: 'ഈ QR സ്കാൻ ചെയ്ത് ഫോണിൽ സഹായ പേജ് തുറക്കുക.', shift: 'ഷിഫ്റ്റ് & സ്മാർട്ട് സഹായം', shiftSub: 'നിങ്ങളുടെ മോഡ് സജ്ജമാക്കി അടുത്ത ടേബിൾ ഏതെന്ന് കാണുക.', online: 'ഓൺലൈൻ', brk: 'ബ്രേക്ക്', offline: 'ഓഫ്‌ലൈൻ', autoAssign: 'അടുത്തത് എനിക്ക് സ്വയം നിയോഗിക്കുക', nextLoading: 'നിർദ്ദേശം ലോഡ് ചെയ്യുന്നു…', adminPresenceTitle: 'സ്റ്റാഫ് സാന്നിധ്യ ബോർഡ്', adminPresenceSub: 'സ്റ്റാഫ് ലഭ്യതയുടെ തത്സമയ നില.', adminReassignTitle: 'മാനുവൽ വീണ്ടും നിയോഗം', adminReassignSub: 'അഡ്മിൻ: താൽക്കാലിക അഭ്യർത്ഥന തിരഞ്ഞെടുത്ത സ്റ്റാഫിന് നിയോഗിക്കുക.', assignNow: 'ഇപ്പോൾ നിയോഗിക്കുക', dndTitle: 'ഡ്രാഗ് & ഡ്രോപ്പ് നിയോഗ ബോർഡ്', dndSub: 'താൽക്കാലിക കാർഡ് വലിച്ച് സ്റ്റാഫ് ലേനിലേക്ക് ഇടുക.', dndMobileHint: 'മൊബൈൽ: അഭ്യർത്ഥന തിരഞ്ഞെടുത്ത് സ്റ്റാഫ് ചിപ്പ് തട്ടുക.', auditTitle: 'സ്റ്റാഫ് പ്രവർത്തനം (ഓഡിറ്റ്)', auditSub: 'സ്വീകരണങ്ങളും നില അപ്ഡേറ്റുകളും (പുതിയത് ആദ്യം).', refreshBtn: 'പുതുക്കുക', exportTitle: 'അഭ്യർത്ഥന ലോഗ് എക്സ്പോർട്ട് (CSV)', exportSub: 'അഡ്മിൻ: തീയതി പ്രകാരം request_history വിവരങ്ങൾ ഡൗൺലോഡ് ചെയ്യുക.', exportFrom: 'മുതൽ', exportTo: 'വരെ', downloadCsv: 'CSV ഡൗൺലോഡ്', cafeTitle: 'കഫേ മെനു എഡിറ്റ് ചെയ്യുക', cafeSub: 'ഉപഭോക്തൃ അഭ്യർത്ഥന പേജിലെ ഡ്രോപ്പ്ഡൗൺ ഇനങ്ങൾ മാറ്റുക.', openMenuEditor: 'മെനു എഡിറ്റർ തുറക്കുക', quietTitle: 'നിശബ്ദ സമയം', quietSub: 'താൽക്കാലികമായി നിർത്തുമ്പോൾ പുതിയ സഹായ അഭ്യർത്ഥനകൾ സമർപ്പിക്കാൻ കഴിയില്ല.', pushTitle: 'പുഷ് (ലോക്ക് സ്ക്രീൻ) ഡീബഗ്', pushSavedLbl: 'സബ്‌സ്‌ക്രിപ്ഷനുകൾ സേവ് ചെയ്തു:', vapidLbl: 'VAPID കീകൾ:', localNotiBtn: 'പ്രാദേശിക ടെസ്റ്റ് അറിയിപ്പ് കാണിക്കുക', sendPushBtn: 'ടെസ്റ്റ് പുഷ് അയയ്ക്കുക', apiTokenTitle: 'API ടോക്കൺ (Vercel / ബാഹ്യ API)', apiTokenSub: 'POST /api/request/create വിളിക്കുമ്പോൾ X-API-Token അല്ലെങ്കിൽ Authorization: Bearer <token> ഉപയോഗിക്കുക.', tokenPlaceholder: 'ലോഡ് ചെയ്യാൻ ക്ലിക്ക് ചെയ്യുക', showToken: 'ടോക്കൺ കാണിക്കുക', copyToken: 'പകർത്തുക', tokenHint: 'നിങ്ങളുടെ ടോക്കിനായി Vercel പരിസരത്തിൽ SOULPLACE_API_TOKEN സജ്ജമാക്കുക.', perTableTitle: 'ടേബിൾ പ്രകാരമുള്ള ചരിത്രം', perTableSub: 'ഒരു ടേബിളിനുള്ള സമീപകാല അഭ്യർത്ഥനകൾ (വിശകലന ചരിത്രത്തിൽ നിന്ന്).', historyTableLbl: 'ടേബിൾ', loadHistory: 'ചരിത്രം ലോഡ് ചെയ്യുക', tableHistoryIdle: 'ടേബിൽ നമ്പർ നൽകി ലോഡ് ചെയ്യുക.', acceptedSub: 'നില അപ്ഡേറ്റ്: വഴിയിൽ → ടേബിളിൽ → പൂർത്തിയായി.', thTable: 'ടേബിൾ #', thNote: 'കുറിപ്പ് / വിഭാഗം', thRaised: 'ഉയർത്തിയ സമയം', thStatus: 'നില', analyticsSub: 'കഴിഞ്ഞ 30 ദിവസം: ദിവസവും ടേബിളും പ്രകാരം അഭ്യർത്ഥനകൾ.', loading: 'ലോഡ് ചെയ്യുന്നു…', helpDesc: 'സഹായം ചോദിച്ച എല്ലാ ടേബിളുകളും കാണിക്കും.', helpRecent: 'കഴിഞ്ഞ 2 മണിക്കൂറിലെ അഭ്യർത്ഥനകൾ മാത്രം (പുതുക്കിയാലും പഴയവ വരില്ല). പട്ടിക പുനഃസജ്ജമാക്കാൻ താഴെ «Clear all pending» ഉപയോഗിക്കുക.', handoffTitle: 'ഷിഫ്റ്റ് കൈമാറ്റ കുറിപ്പ്', handoffSub: 'അടുത്ത ഷിഫ്റ്റിന് ഒരു വരി (ഉദാ. “ടേബിൾ 7 — നിയമങ്ങൾ പിന്തുടരുക”).', handoffPlaceholder: 'അടുത്ത ഷിഫ്റ്റിന് ഓപ്ഷണൽ കുറിപ്പ്…', handoffSave: 'കുറിപ്പ് സേവ് ചെയ്യുക', handoffPrevNote: 'മുമ്പത്തെ ഷിഫ്റ്റിൽ നിന്നുള്ള കുറിപ്പ്', shortcutsHint: 'കുറുക്കുവഴികൾ: Ctrl+Shift+S = ശബ്ദം പരീക്ഷിക്കുക; Ctrl+Shift+A = അടുത്തത് സ്വയം നിയോഗിക്കുക (ഡാഷ്ബോർഡിൽ ഫോക്കസ് ഉള്ളപ്പോൾ).', systemConfig: 'സിസ്റ്റം & കോൺഫിഗ്', soundBanner1: 'താഴെ ഒരിക്കൽ ക്ലിക്ക് ചെയ്യുന്നതുവരെ ശബ്ദം കേൾക്കില്ല.', soundBanner2: 'ഇപ്പോൾ «അറിയിപ്പ് ശബ്ദം അനുവദിക്കുക» തട്ടുക. ബീപ്പും Maroon-um കേൾക്കും. പിന്നീട് ഓരോ പുതിയ ടേബിൽ അഭ്യർത്ഥനയ്ക്കും ശബ്ദം.', allowSoundBtn: 'അറിയിപ്പ് ശബ്ദം അനുവദിക്കുക', soundUnlockTip: 'ശബ്ദത്തിന് ഒരിക്കൽ തട്ടുക («ശബ്ദം പരീക്ഷിക്കുക» ഉം). ബ്രൗസർ ചോദിക്കുമ്പോൾ «വെബ് അറിയിപ്പുകൾ» അനുവദിക്കുക.', bulkSelectAll: 'എല്ലാം തിരഞ്ഞെടുക്കുക', bulkAccept: 'തിരഞ്ഞെടുത്തവ സ്വീകരിക്കുക', opsTitle: 'ഓപ്സ് & സംഭവ രേഖ', opsSub: 'അഡ്മിനുകൾക്കും ഷിഫ്റ്റ് ലീഡുകൾക്കും കുറച്ച് കുറിപ്പുകൾ (സെർവറിൽ സേവ്).',
+            recForYou: 'നിങ്ങൾക്ക് ശുപാർശ ചെയ്തത്', suggestedStaffPrefix: 'ശുപാർശ സ്റ്റാഫ്:', tableWord: 'ടേബിൾ', vipUrgent: 'VIP / അത്യാവശ്യം', imAttending: 'ഞാൻ ശ്രദ്ധിക്കുന്നു', btnAccepted: 'സ്വീകരിച്ചു', noPendingReq: 'താൽക്കാലിക സഹായ അഭ്യർത്ഥനകളില്ല.', reqLoadFail: 'അഭ്യർത്ഥനകൾ ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല.', noAcceptedYet: 'ഇതുവരെ സ്വീകരിച്ച അഭ്യർത്ഥനകളില്ല.', loadFailShort: 'ലോഡ് പരാജയം.', atTable: 'ടേബിളിൽ', doneStatus: 'പൂർത്തിയായി', presencePrefix: 'നിലവിലെ മോഡ്: ', presenceNoData: 'ഇതുവരെ സ്റ്റാഫ് സാന്നിധ്യ ഡാറ്റയില്ല.', nextNone: 'ഇപ്പോൾ താൽക്കാലിക അഭ്യർത്ഥനകളില്ല.', nextErr: 'നിർദ്ദേശം ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല.', nextSuggestedFmt: 'അടുത്ത ശുപാർശ: ടേബിൾ {table} (സ്കോർ {score})', urgentTag: 'അത്യാവശ്യം', assigning: 'നിയോഗിക്കുന്നു…', autoAssignErr: 'നിയോഗിക്കാൻ അഭ്യർത്ഥനയില്ല', assignFail: 'നിയോഗം പരാജയം', assignedTo: 'അഭ്യർത്ഥന {name} ന് നിയോഗിച്ചു.', dndNoPending: 'താൽക്കാലിക അഭ്യർത്ഥനകളില്ല', dndNoStaff: 'സ്റ്റാഫ് ലേനുകളില്ല', mobileNoReq: 'അഭ്യർത്ഥനകളില്ല', mobileNoStaff: 'സ്റ്റാഫ് ഇല്ല', pauseResume: 'അഭ്യർത്ഥനകൾ പുനരാരംഭിക്കുക', pauseNew: 'പുതിയ അഭ്യർത്ഥനകൾ താൽക്കാലികമായി നിർത്തുക', pauseShort: 'താൽക്കാലിക നിർത്തുക', notifOn: 'വെബ് അറിയിപ്പുകൾ: ഓൺ', notifEnable: 'വെബ് അറിയിപ്പുകൾ പ്രവർത്തനക്ഷമമാക്കുക', notifTitleOn: 'ബ്രൗസർ ഇതിനകം ഈ സൈറ്റിന് അറിയിപ്പുകൾ അനുവദിക്കുന്നു. ശബ്ദം പരീക്ഷിക്കാൻ ക്ലിക്ക് ചെയ്യുക.', notifTitleEnable: 'ഈ സൈറ്റിന് ബ്രൗസർ അറിയിപ്പുകൾ അനുവദിക്കുക.',             hideToken: 'മറയ്ക്കുക', copiedToken: 'പകർത്തി!'
+        });
+        D.hi = cloneStr(D.en);
+        Object.assign(D.hi, {
+            welcome: 'सोल – स्वागत है, {u}', links: 'आपके लिंक', logout: 'लॉग आउट', tables: 'टेबल (1–{n})', tsub: 'हरा = कोई अनुरोध नहीं, नारंगी = लंबित, नीला = सेवा में।', help: 'सहायता अनुरोध', noti: 'वेब सूचनाएँ चालू करें', sound: 'ध्वनि जाँचें', clear: 'सभी लंबित साफ़ करें', mute: '15 मिनट सूचनाएँ बंद', accepted: 'आपके स्वीकृत अनुरोध', analytics: 'अनुरोध इतिहास (विश्लेषण)', pass: 'मेरा पासवर्ड बदलें', cur: 'वर्तमान पासवर्ड', nw: 'नया पासवर्ड', upd: 'पासवर्ड अपडेट करें', quick: 'त्वरित खोलें (QR स्कैन कर सहायता माँगें)', quickSub: 'यह QR स्कैन कर फोन पर सहायता पृष्ठ खोलें।', shift: 'शिफ्ट और स्मार्ट सहायता', shiftSub: 'अपना मोड सेट करें और अगला कौन सा टेबल देखें।', online: 'ऑनलाइन', brk: 'ब्रेक', offline: 'ऑफ़लाइन', autoAssign: 'अगला मुझे स्वतः असाइन करें', nextLoading: 'सुझाव लोड हो रहा है…', adminPresenceTitle: 'स्टाफ उपस्थिति बोर्ड', adminPresenceSub: 'स्टाफ उपलब्धता की लाइव स्थिति।', adminReassignTitle: 'मैन्युअल पुनः असाइनमेंट', adminReassignSub: 'एडमिन: लंबित अनुरोध चयनित स्टाफ को दें।', assignNow: 'अभी असाइन करें', dndTitle: 'ड्रैग और ड्रॉप असाइन बोर्ड', dndSub: 'लंबित कार्ड खींचकर स्टाफ लेन पर छोड़ें।', dndMobileHint: 'मोबाइल: अनुरोध चुनें और स्टाफ चिप पर टैप करें।', auditTitle: 'स्टाफ गतिविधि (ऑडिट)', auditSub: 'स्वीकृतियाँ और स्थिति अपडेट (नया पहले)।', refreshBtn: 'रीफ़्रेश', exportTitle: 'अनुरोध लॉग निर्यात (CSV)', exportSub: 'एडमिन: तारीख के अनुसार request_history विवरण डाउनलोड करें।', exportFrom: 'से', exportTo: 'तक', downloadCsv: 'CSV डाउनलोड', cafeTitle: 'कैफ़े मेनू संपादित करें', cafeSub: 'ग्राहक अनुरोध पृष्ठ की ड्रॉपडाउन वस्तुएँ बदलें।', openMenuEditor: 'मेनू संपादक खोलें', quietTitle: 'शांत घंटे', quietSub: 'रोक पर नए सहायता अनुरोध नहीं भेजे जा सकते।', pushTitle: 'पुश (लॉक स्क्रीन) डीबग', pushSavedLbl: 'सदस्यताएँ सहेजी गईं:', vapidLbl: 'VAPID कुंजी:', localNotiBtn: 'स्थानीय टेस्ट सूचना दिखाएँ', sendPushBtn: 'टेस्ट पुश भेजें', apiTokenTitle: 'API टोकन (Vercel / बाहरी API)', apiTokenSub: 'POST /api/request/create पर X-API-Token या Authorization: Bearer <token> उपयोग करें।', tokenPlaceholder: 'लोड करने के लिए क्लिक करें', showToken: 'टोकन दिखाएँ', copyToken: 'कॉपी करें', tokenHint: 'अपने टोकन के लिए Vercel में SOULPLACE_API_TOKEN सेट करें।', perTableTitle: 'टेबल अनुसार इतिहास', perTableSub: 'एक टेबल के हाल के अनुरोध (विश्लेषण इतिहास से)।', historyTableLbl: 'टेबल', loadHistory: 'इतिहास लोड करें', tableHistoryIdle: 'टेबल नंबर दर्ज कर लोड करें।', acceptedSub: 'स्थिति अपडेट: रास्ते में → टेबल पर → पूर्ण।', thTable: 'टेबल #', thNote: 'नोट / श्रेणी', thRaised: 'उठाया गया समय', thStatus: 'स्थिति', analyticsSub: 'पिछले 30 दिन: प्रति दिन और प्रति टेबल अनुरोध।', loading: 'लोड हो रहा है…', helpDesc: 'सहायता माँगने वाले सभी टेबल दिखाए जाते हैं।', helpRecent: 'केवल पिछले 2 घंटे के अनुरोध (रीफ़्रेश पर पुराने नहीं)। सूची रीसेट करने के लिए नीचे «Clear all pending» उपयोग करें।', handoffTitle: 'शिफ्ट हैंडऑफ़ नोट', handoffSub: 'अगली शिफ्ट के लिए एक पंक्ति (जैसे «टेबल 7 — नियमों पर फॉलो अप»)।', handoffPlaceholder: 'अगली शिफ्ट के लिए वैकल्पिक नोट…', handoffSave: 'हैंडऑफ़ नोट सहेजें', handoffPrevNote: 'पिछली शिफ्ट से नोट', shortcutsHint: 'शॉर्टकट: Ctrl+Shift+S = ध्वनि परीक्षण; Ctrl+Shift+A = अगला स्वतः असाइन (डैशबोर्ड पर फोकस होने पर)।', systemConfig: 'सिस्टम और कॉन्फ़िग', soundBanner1: 'नीचे एक बार क्लिक करने तक ध्वनि नहीं चलेगी।', soundBanner2: 'अभी «अधिसूचना ध्वनि अनुमति» पर टैप करें। बीप और Maroon सुनें। फिर हर नए टेबल अनुरोध पर ध्वनि।', allowSoundBtn: 'अधिसूचना ध्वनि अनुमति', soundUnlockTip: 'ध्वनि के लिए एक बार टैप करें («ध्वनि जाँचें»)। ब्राउज़र पूछे तो «वेब सूचनाएँ» अनुमति दें।', bulkSelectAll: 'सभी चुनें', bulkAccept: 'चयनित स्वीकारें', opsTitle: 'ऑप्स और घटना लॉग', opsSub: 'एडमिन और शिफ्ट लीड के लिए संक्षिप्त नोट (सर्वर पर सहेजे)।',
+            recForYou: 'आपके लिए सुझाव', suggestedStaffPrefix: 'सुझाया गया स्टाफ:', tableWord: 'टेबल', vipUrgent: 'VIP / तत्काल', imAttending: 'मैं देख रहा हूँ', btnAccepted: 'स्वीकृत', noPendingReq: 'कोई लंबित सहायता अनुरोध नहीं।', reqLoadFail: 'अनुरोध लोड नहीं हो सके।', noAcceptedYet: 'अभी तक कोई स्वीकृत अनुरोध नहीं।', loadFailShort: 'लोड विफल।', atTable: 'टेबल पर', doneStatus: 'पूर्ण', presencePrefix: 'वर्तमान मोड: ', presenceNoData: 'अभी तक स्टाफ उपस्थिति डेटा नहीं।', nextNone: 'अभी कोई लंबित अनुरोध नहीं।', nextErr: 'सुझाव लोड नहीं हो सका।', nextSuggestedFmt: 'अगला सुझाव: टेबल {table} (स्कोर {score})', urgentTag: 'तत्काल', assigning: 'असाइन हो रहा है…', autoAssignErr: 'असाइन करने के लिए अनुरोध नहीं', assignFail: 'असाइन विफल', assignedTo: 'अनुरोध {name} को असाइन किया।', dndNoPending: 'कोई लंबित अनुरोध नहीं', dndNoStaff: 'कोई स्टाफ लेन नहीं', mobileNoReq: 'कोई अनुरोध नहीं', mobileNoStaff: 'कोई स्टाफ नहीं', pauseResume: 'अनुरोध फिर शुरू करें', pauseNew: 'नए अनुरोध रोकें', pauseShort: 'रोकें', notifOn: 'वेब सूचनाएँ: चालू', notifEnable: 'वेब सूचनाएँ चालू करें',             notifTitleOn: 'ब्राउज़र पहले से इस साइट की सूचनाएँ अनुमत हैं। ध्वनि जाँच के लिए क्लिक करें।', notifTitleEnable: 'इस साइट के लिए ब्राउज़र सूचनाएँ अनुमति दें।', hideToken: 'छिपाएँ', copiedToken: 'कॉपी हो गया!'
+        });
+        D.te = cloneStr(D.en);
+        Object.assign(D.te, {
+            welcome: 'సోల్ – స్వాగతం, {u}', links: 'మీ లింకులు', logout: 'లాగ్ అవుట్', tables: 'టేబుల్‌లు (1–{n})', tsub: 'ఆకుపచ్చ = అభ్యర్థన లేదు, నారింజ = పెండింగ్, నీలం = సేవలో.', help: 'సహాయ అభ్యర్థనలు', noti: 'వెబ్ నోటిఫికేషన్‌లను ఆన్ చేయండి', sound: 'ధ్వని పరీక్ష', clear: 'పెండింగ్ అన్నీ తొలగించు', mute: '15 నిమి నోటిఫికేషన్ మ్యూట్', accepted: 'మీరు అంగీకరించిన అభ్యర్థనలు', analytics: 'అభ్యర్థన చరిత్ర (విశ్లేషణ)', pass: 'నా పాస్‌వర్డ్ మార్చండి', cur: 'ప్రస్తుత పాస్‌వర్డ్', nw: 'కొత్త పాస్‌వర్డ్', upd: 'పాస్‌వర్డ్ నవీకరించు', quick: 'త్వరిత తెరవండి (QR స్కాన్ చేసి సహాయం అడగండి)', quickSub: 'ఈ QR స్కాన్ చేసి ఫోన్‌లో సహాయ పేజీ తెరవండి.', shift: 'షిఫ్ట్ & స్మార్ట్ సహాయం', shiftSub: 'మీ మోడ్ సెట్ చేసి తదుపరి ఏ టేబుల్ చూడండి.', online: 'ఆన్‌లైన్', brk: 'బ్రేక్', offline: 'ఆఫ్‌లైన్', autoAssign: 'తదుపరిది నాకు ఆటో అసైన్', nextLoading: 'సూచన లోడ్ అవుతోంది…', adminPresenceTitle: 'స్టాఫ్ హాజరు బోర్డు', adminPresenceSub: 'స్టాఫ్ అందుబాటు ప్రత్యక్ష స్థితి.', adminReassignTitle: 'మాన్యువల్ రీఅసైన్', adminReassignSub: 'అడ్మిన్: పెండింగ్ అభ్యర్థన ఎంచుకున్న స్టాఫ్‌కు ఇవ్వండి.', assignNow: 'ఇప్పుడే అసైన్', dndTitle: 'డ్రాగ్ & డ్రాప్ అసైన్ బోర్డు', dndSub: 'పెండింగ్ కార్డ్ లాగి స్టాఫ్ లేన్‌లో వదలండి.', dndMobileHint: 'మొబైల్: అభ్యర్థన ఎంచుకొని స్టాఫ్ చిప్‌పై టాప్.', auditTitle: 'స్టాఫ్ కార్యకలాపం (ఆడిట్)', auditSub: 'అంగీకారాలు & స్థితి నవీకరణలు (కొత్తది ముందు).', refreshBtn: 'రిఫ్రెష్', exportTitle: 'అభ్యర్థన లాగ్ ఎక్స్‌పోర్ట్ (CSV)', exportSub: 'అడ్మిన్: తేదీ ప్రకారం request_history వివరాలు డౌన్‌లోడ్.', exportFrom: 'నుండి', exportTo: 'వరకు', downloadCsv: 'CSV డౌన్‌లోడ్', cafeTitle: 'కాఫే మెనూ సవరించు', cafeSub: 'కస్టమర్ అభ్యర్థన పేజీ డ్రాప్‌డౌన్ అంశాలు మార్చండి.', openMenuEditor: 'మెనూ ఎడిటర్ తెరవండి', quietTitle: 'నిశ్శబ్ద గంటలు', quietSub: 'ఆపివేసినప్పుడు కొత్త సహాయ అభ్యర్థనలు పంపలేరు.', pushTitle: 'పుష్ (లాక్ స్క్రీన్) డీబగ్', pushSavedLbl: 'సభ్యత్వాలు సేవ్:', vapidLbl: 'VAPID కీలు:', localNotiBtn: 'స్థానిక టెస్ట్ నోటిఫికేషన్ చూపు', sendPushBtn: 'టెస్ట్ పుష్ పంపు', apiTokenTitle: 'API టోకెన్ (Vercel / బాహ్య API)', apiTokenSub: 'POST /api/request/create కు X-API-Token లేదా Authorization: Bearer <token> వాడండి.', tokenPlaceholder: 'లోడ్ చేయడానికి క్లిక్', showToken: 'టోకెన్ చూపు', copyToken: 'కాపీ', tokenHint: 'మీ టోకెన్ కోసం Vercelలో SOULPLACE_API_TOKEN సెట్ చేయండి.', perTableTitle: 'టేబుల్ ప్రకార చరిత్ర', perTableSub: 'ఒక టేబుల్‌కు ఇటీవలి అభ్యర్థనలు (విశ్లేషణ చరిత్ర నుండి).', historyTableLbl: 'టేబుల్', loadHistory: 'చరిత్ర లోడ్', tableHistoryIdle: 'టేబుల్ నంబర్ ఇచ్చి లోడ్ చేయండి.', acceptedSub: 'స్థితి నవీకరణ: మార్గంలో → టేబుల్ వద్ద → పూర్తి.', thTable: 'టేబుల్ #', thNote: 'గమనిక / వర్గం', thRaised: 'ఎత్తిన సమయం', thStatus: 'స్థితి', analyticsSub: 'గత 30 రోజులు: రోజు మరియు టేబుల్ ప్రకార అభ్యర్థనలు.', loading: 'లోడ్ అవుతోంది…', helpDesc: 'సహాయం అడిగిన అన్ని టేబుల్‌లు చూపబడతాయి.', helpRecent: 'గత 2 గంటల అభ్యర్థనలు మాత్రమే (రిఫ్రెష్‌తో పాతవి రావు). జాబితా రీసెట్ కోసం క్రింద «Clear all pending» వాడండి.', handoffTitle: 'షిఫ్ట్ హ్యాండ్‌ఆఫ్ నోట్', handoffSub: 'తదుపరి షిఫ్ట్‌కు ఒక పంక్తి (ఉదా. «టేబుల్ 7 — నియమాల ఫాలో అప్»).', handoffPlaceholder: 'తదుపరి షిఫ్ట్‌కు ఐచ్ఛిక నోట్…', handoffSave: 'హ్యాండ్‌ఆఫ్ నోట్ సేవ్', handoffPrevNote: 'మునుపటి షిఫ్ట్ నుండి నోట్', shortcutsHint: 'షార్ట్‌కట్‌లు: Ctrl+Shift+S = ధ్వని పరీక్ష; Ctrl+Shift+A = తదుపరి ఆటో అసైన్ (డాష్‌బోర్డ్‌పై ఫోకస్ ఉన్నప్పుడు).', systemConfig: 'సిస్టమ్ & కాన్ఫిగ్', soundBanner1: 'క్రింద ఒకసారి క్లిక్ చేసే వరకు ధ్వని వినబడదు.', soundBanner2: 'ఇప్పుడు «నోటిఫికేషన్ ధ్వని అనుమతి» నొక్కండి. బీప్ మరియు Maroon వినండి. తర్వాత ప్రతి కొత్త టేబుల్ అభ్యర్థనకు ధ్వని.', allowSoundBtn: 'నోటిఫికేషన్ ధ్వని అనుమతి', soundUnlockTip: 'ధ్వని కోసం ఒకసారి టాప్ («ధ్వని పరీక్ష»). బ్రౌజర్ అడిగితే «వెబ్ నోటిఫికేషన్‌లు» అనుమతించండి.', bulkSelectAll: 'అన్నీ ఎంచుకోండి', bulkAccept: 'ఎంచుకున్నవి అంగీకరించు', opsTitle: 'ఆప్స్ & సంఘటన లాగ్', opsSub: 'అడ్మిన్ & షిఫ్ట్ లీడ్‌లకు చిన్న నోట్‌లు (సర్వర్‌లో సేవ్).',
+            recForYou: 'మీకు సిఫార్సు', suggestedStaffPrefix: 'సిఫార్సు స్టాఫ్:', tableWord: 'టేబుల్', vipUrgent: 'VIP / అత్యవసరం', imAttending: 'నేను చూస్తున్నాను', btnAccepted: 'అంగీకరించబడింది', noPendingReq: 'పెండింగ్ సహాయ అభ్యర్థనలు లేవు.', reqLoadFail: 'అభ్యర్థనలు లోడ్ కాలేదు.', noAcceptedYet: 'ఇంకా అంగీకరించిన అభ్యర్థనలు లేవు.', loadFailShort: 'లోడ్ విఫలం.', atTable: 'టేబుల్ వద్ద', doneStatus: 'పూర్తి', presencePrefix: 'ప్రస్తుత మోడ్: ', presenceNoData: 'ఇంకా స్టాఫ్ హాజరు డేటా లేదు.', nextNone: 'ఇప్పుడు పెండింగ్ అభ్యర్థనలు లేవు.', nextErr: 'సూచన లోడ్ కాలేదు.', nextSuggestedFmt: 'తదుపరి సూచన: టేబుల్ {table} (స్కోర్ {score})', urgentTag: 'అత్యవసరం', assigning: 'అసైన్ అవుతోంది…', autoAssignErr: 'అసైన్ చేయ అభ్యర్థన లేదు', assignFail: 'అసైన్ విఫలం', assignedTo: 'అభ్యర్థన {name} కు అసైన్.', dndNoPending: 'పెండింగ్ అభ్యర్థనలు లేవు', dndNoStaff: 'స్టాఫ్ లేన్‌లు లేవు', mobileNoReq: 'అభ్యర్థనలు లేవు', mobileNoStaff: 'స్టాఫ్ లేరు', pauseResume: 'అభ్యర్థనలు పునఃప్రారంభించు', pauseNew: 'కొత్త అభ్యర్థనలు ఆపు', pauseShort: 'ఆపు', notifOn: 'వెబ్ నోటిఫికేషన్‌లు: ఆన్', notifEnable: 'వెబ్ నోటిఫికేషన్‌లు ఆన్ చేయి', notifTitleOn: 'బ్రౌజర్ ఇప్పటికే ఈ సైట్‌కు నోటిఫికేషన్‌లు అనుమతించింది. ధ్వని పరీక్షకు క్లిక్.', notifTitleEnable: 'ఈ సైట్‌కు బ్రౌజర్ నోటిఫికేషన్‌లు అనుమతించు.', hideToken: 'దాచు', copiedToken: 'కాపీ అయింది!'
+        });
+        D.kn = cloneStr(D.en);
+        Object.assign(D.kn, {
+            welcome: 'ಸೋಲ್ – ಸ್ವಾಗತ, {u}', links: 'ನಿಮ್ಮ ಲಿಂಕ್‌ಗಳು', logout: 'ಲಾಗ್ ಔಟ್', tables: 'ಟೇಬಲ್‌ಗಳು (1–{n})', tsub: 'ಹಸಿರು = ವಿನಂತಿ ಇಲ್ಲ, ಕಿತ್ತಳೆ = ಬಾಕಿ, ನೀಲಿ = ಸೇವೆಯಲ್ಲಿ.', help: 'ಸಹಾಯ ವಿನಂತಿಗಳು', noti: 'ವೆಬ್ ಅಧಿಸೂಚನೆಗಳನ್ನು ಆನ್ ಮಾಡಿ', sound: 'ಧ್ವನಿ ಪರೀಕ್ಷೆ', clear: 'ಬಾಕಿ ಎಲ್ಲಾ ತೆರವು', mute: '15 ನಿಮಿ ಅಧಿಸೂಚನೆ ಮ್ಯೂಟ್', accepted: 'ನೀವು ಸ್ವೀಕರಿಸಿದ ವಿನಂತಿಗಳು', analytics: 'ವಿನಂತಿ ಇತಿಹಾಸ (ವಿಶ್ಲೇಷಣೆ)', pass: 'ನನ್ನ ಪಾಸ್‌ವರ್ಡ್ ಬದಲಾಯಿಸಿ', cur: 'ಪ್ರಸ್ತುತ ಪಾಸ್‌ವರ್ಡ್', nw: 'ಹೊಸ ಪಾಸ್‌ವರ್ಡ್', upd: 'ಪಾಸ್‌ವರ್ಡ್ ನವೀಕರಿಸಿ', quick: 'ತ್ವರಿತ ತೆರೆಯಿರಿ (QR ಸ್ಕ್ಯಾನ್ ಮಾಡಿ ಸಹಾಯ ಕೇಳಿ)', quickSub: 'ಈ QR ಸ್ಕ್ಯಾನ್ ಮಾಡಿ ಫೋನ್‌ನಲ್ಲಿ ಸಹಾಯ ಪುಟ ತೆರೆಯಿರಿ.', shift: 'ಶಿಫ್ಟ್ ಮತ್ತು ಸ್ಮಾರ್ಟ್ ಸಹಾಯ', shiftSub: 'ನಿಮ್ಮ ಮೋಡ್ ಹೊಂದಿಸಿ ಮುಂದಿನ ಯಾವ ಟೇಬಲ್ ಎಂದು ನೋಡಿ.', online: 'ಆನ್‌ಲೈನ್', brk: 'ಬ್ರೇಕ್', offline: 'ಆಫ್‌ಲೈನ್', autoAssign: 'ಮುಂದಿನದನ್ನು ನನಗೆ ಸ್ವಯಂ ನಿಯೋಜಿಸಿ', nextLoading: 'ಸಲಹೆ ಲೋಡ್ ಆಗುತ್ತಿದೆ…', adminPresenceTitle: 'ಸ್ಟಾಫ್ ಹಾಜರಿ ಫಲಕ', adminPresenceSub: 'ಸ್ಟಾಫ್ ಲಭ್ಯತೆಯ ಪ್ರತ್ಯಕ್ಷ ಸ್ಥಿತಿ.', adminReassignTitle: 'ಮ್ಯಾನ್ಯುಯಲ್ ಮರುನಿಯೋಜನೆ', adminReassignSub: 'ನಿರ್ವಾಹಕ: ಬಾಕಿ ವಿನಂತಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿದ ಸ್ಟಾಫ್‌ಗೆ ನೀಡಿ.', assignNow: 'ಈಗ ನಿಯೋಜಿಸಿ', dndTitle: 'ಡ್ರ್ಯಾಗ್ ಮತ್ತು ಡ್ರಾಪ್ ನಿಯೋಜನೆ ಫಲಕ', dndSub: 'ಬಾಕಿ ಕಾರ್ಡ್ ಎಳೆದು ಸ್ಟಾಫ್ ಮಾರ್ಗದಲ್ಲಿ ಬಿಡಿ.', dndMobileHint: 'ಮೊಬೈಲ್: ವಿನಂತಿ ಆಯ್ಕೆಮಾಡಿ ಸ್ಟಾಫ್ ಚಿಪ್ ಮೇಲೆ ಟ್ಯಾಪ್.', auditTitle: 'ಸ್ಟಾಫ್ ಚಟುವಟಿಕೆ (ಆಡಿಟ್)', auditSub: 'ಸ್ವೀಕಾರಗಳು ಮತ್ತು ಸ್ಥಿತಿ ನವೀಕರಣಗಳು (ಹೊಸದು ಮೊದಲು).', refreshBtn: 'ರಿಫ್ರೆಶ್', exportTitle: 'ವಿನಂತಿ ಲಾಗ್ ರಫ್ತು (CSV)', exportSub: 'ನಿರ್ವಾಹಕ: ದಿನಾಂಕದ ಪ್ರಕಾರ request_history ವಿವರಗಳನ್ನು ಡೌನ್‌ಲೋಡ್.', exportFrom: 'ಇಂದ', exportTo: 'ವರೆಗೆ', downloadCsv: 'CSV ಡೌನ್‌ಲೋಡ್', cafeTitle: 'ಕೆಫೆ ಮೆನು ಸಂಪಾದಿಸಿ', cafeSub: 'ಗ್ರಾಹಕ ವಿನಂತಿ ಪುಟದ ಡ್ರಾಪ್‌ಡೌನ್ ಅಂಶಗಳನ್ನು ಬದಲಾಯಿಸಿ.', openMenuEditor: 'ಮೆನು ಸಂಪಾದಕ ತೆರೆಯಿರಿ', quietTitle: 'ನಿಶ್ಶಬ್ದ ಗಂಟೆಗಳು', quietSub: 'ನಿಲ್ಲಿಸಿದಾಗ ಹೊಸ ಸಹಾಯ ವಿನಂತಿಗಳನ್ನು ಕಳುಹಿಸಲಾಗುವುದಿಲ್ಲ.', pushTitle: 'ಪುಶ್ (ಲಾಕ್ ಸ್ಕ್ರೀನ್) ಡೀಬಗ್', pushSavedLbl: 'ಚಂದಾದಾರಿಕೆಗಳು ಉಳಿಸಲಾಗಿದೆ:', vapidLbl: 'VAPID ಕೀಲಿಗಳು:', localNotiBtn: 'ಸ್ಥಳೀಯ ಪರೀಕ್ಷಾ ಅಧಿಸೂಚನೆ ತೋರಿಸಿ', sendPushBtn: 'ಪರೀಕ್ಷಾ ಪುಶ್ ಕಳುಹಿಸಿ', apiTokenTitle: 'API ಟೋಕನ್ (Vercel / ಬಾಹ್ಯ API)', apiTokenSub: 'POST /api/request/create ಗೆ X-API-Token ಅಥವಾ Authorization: Bearer <token> ಬಳಸಿ.', tokenPlaceholder: 'ಲೋಡ್ ಮಾಡಲು ಕ್ಲಿಕ್', showToken: 'ಟೋಕನ್ ತೋರಿಸಿ', copyToken: 'ನಕಲು', tokenHint: 'ನಿಮ್ಮ ಟೋಕನ್‌ಗಾಗಿ Vercelನಲ್ಲಿ SOULPLACE_API_TOKEN ಹೊಂದಿಸಿ.', perTableTitle: 'ಟೇಬಲ್ ಪ್ರಕಾರ ಇತಿಹಾಸ', perTableSub: 'ಒಂದು ಟೇಬಲ್‌ಗೆ ಇತ್ತೀಚಿನ ವಿನಂತಿಗಳು (ವಿಶ್ಲೇಷಣೆ ಇತಿಹಾಸದಿಂದ).', historyTableLbl: 'ಟೇಬಲ್', loadHistory: 'ಇತಿಹಾಸ ಲೋಡ್', tableHistoryIdle: 'ಟೇಬಲ್ ಸಂಖ್ಯೆ ನಮೂದಿಸಿ ಲೋಡ್ ಮಾಡಿ.', acceptedSub: 'ಸ್ಥಿತಿ ನವೀಕರಣ: ಮಾರ್ಗದಲ್ಲಿ → ಟೇಬಲ್‌ನಲ್ಲಿ → ಪೂರ್ಣ.', thTable: 'ಟೇಬಲ್ #', thNote: 'ಟಿಪ್ಪಣಿ / ವರ್ಗ', thRaised: 'ಎತ್ತಿದ ಸಮಯ', thStatus: 'ಸ್ಥಿತಿ', analyticsSub: 'ಕಳೆದ 30 ದಿನ: ಪ್ರತಿ ದಿನ ಮತ್ತು ಟೇಬಲ್ ಪ್ರಕಾರ ವಿನಂತಿಗಳು.', loading: 'ಲೋಡ್ ಆಗುತ್ತಿದೆ…', helpDesc: 'ಸಹಾಯ ಕೇಳಿದ ಎಲ್ಲಾ ಟೇಬಲ್‌ಗಳನ್ನು ತೋರಿಸಲಾಗುತ್ತದೆ.', helpRecent: 'ಕೇವಲ ಕೊನೆಯ 2 ಗಂಟೆಗಳ ವಿನಂತಿಗಳು (ರಿಫ್ರೆಶ್‌ನಲ್ಲಿ ಹಳೆಯವು ಬರುವುದಿಲ್ಲ). ಪಟ್ಟಿ ಮರುಹೊಂದಿಸಲು ಕೆಳಗೆ «Clear all pending» ಬಳಸಿ.', handoffTitle: 'ಶಿಫ್ಟ್ ಹ್ಯಾಂಡ್‌ಆಫ್ ಟಿಪ್ಪಣಿ', handoffSub: 'ಮುಂದಿನ ಶಿಫ್ಟ್‌ಗೆ ಒಂದು ಸಾಲು (ಉದಾ. «ಟೇಬಲ್ 7 — ನಿಯಮಗಳ ಫಾಲೋ ಅಪ್»).', handoffPlaceholder: 'ಮುಂದಿನ ಶಿಫ್ಟ್‌ಗೆ ಐಚ್ಛಿಕ ಟಿಪ್ಪಣಿ…', handoffSave: 'ಹ್ಯಾಂಡ್‌ಆಫ್ ಟಿಪ್ಪಣಿ ಉಳಿಸಿ', handoffPrevNote: 'ಹಿಂದಿನ ಶಿಫ್ಟ್‌ನಿಂದ ಟಿಪ್ಪಣಿ', shortcutsHint: 'ಶಾರ್ಟ್‌ಕಟ್‌ಗಳು: Ctrl+Shift+S = ಧ್ವನಿ ಪರೀಕ್ಷೆ; Ctrl+Shift+A = ಮುಂದಿನ ಸ್ವಯಂ ನಿಯೋಜನೆ (ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ನಲ್ಲಿ ಫೋಕಸ್ ಇದ್ದಾಗ).', systemConfig: 'ಸಿಸ್ಟಮ್ ಮತ್ತು ಕಾನ್ಫಿಗ್', soundBanner1: 'ಕೆಳಗೆ ಒಮ್ಮೆ ಕ್ಲಿಕ್ ಮಾಡುವವರೆಗೆ ಧ್ವನಿ ಕೇಳಿಸುವುದಿಲ್ಲ.', soundBanner2: 'ಈಗ «ಅಧಿಸೂಚನೆ ಧ್ವನಿ ಅನುಮತಿ» ಒತ್ತಿ. ಬೀಪ್ ಮತ್ತು Maroon ಕೇಳಿ. ನಂತರ ಪ್ರತಿ ಹೊಸ ಟೇಬಲ್ ವಿನಂತಿಗೆ ಧ್ವನಿ.', allowSoundBtn: 'ಅಧಿಸೂಚನೆ ಧ್ವನಿ ಅನುಮತಿ', soundUnlockTip: 'ಧ್ವನಿಗೆ ಒಮ್ಮೆ ಟ್ಯಾಪ್ («ಧ್ವನಿ ಪರೀಕ್ಷೆ»). ಬ್ರೌಸರ್ ಕೇಳಿದರೆ «ವೆಬ್ ಅಧಿಸೂಚನೆಗಳು» ಅನುಮತಿಸಿ.', bulkSelectAll: 'ಎಲ್ಲಾ ಆಯ್ಕೆ', bulkAccept: 'ಆಯ್ಕೆಮಾಡಿದವನ್ನು ಸ್ವೀಕರಿಸಿ', opsTitle: 'ಆಪ್ಸ್ ಮತ್ತು ಘಟನೆ ಲಾಗ್', opsSub: 'ನಿರ್ವಾಹಕರು ಮತ್ತು ಶಿಫ್ಟ್ ಲೀಡ್‌ಗಳಿಗೆ ಚಿಕ್ಕ ಟಿಪ್ಪಣಿಗಳು (ಸರ್ವರ್‌ನಲ್ಲಿ ಉಳಿಸಲಾಗಿದೆ).',
+            recForYou: 'ನಿಮಗೆ ಶಿಫಾರಸು', suggestedStaffPrefix: 'ಶಿಫಾರಸು ಮಾಡಿದ ಸ್ಟಾಫ್:', tableWord: 'ಟೇಬಲ್', vipUrgent: 'VIP / ತುರ್ತು', imAttending: 'ನಾನು ನೋಡುತ್ತಿದ್ದೇನೆ', btnAccepted: 'ಸ್ವೀಕರಿಸಲಾಗಿದೆ', noPendingReq: 'ಬಾಕಿ ಸಹಾಯ ವಿನಂತಿಗಳಿಲ್ಲ.', reqLoadFail: 'ವಿನಂತಿಗಳನ್ನು ಲೋಡ್ ಮಾಡಲಾಗಲಿಲ್ಲ.', noAcceptedYet: 'ಇನ್ನೂ ಸ್ವೀಕರಿಸಿದ ವಿನಂತಿಗಳಿಲ್ಲ.', loadFailShort: 'ಲೋಡ್ ವಿಫಲ.', atTable: 'ಟೇಬಲ್‌ನಲ್ಲಿ', doneStatus: 'ಪೂರ್ಣ', presencePrefix: 'ಪ್ರಸ್ತುತ ಮೋಡ್: ', presenceNoData: 'ಇನ್ನೂ ಸ್ಟಾಫ್ ಹಾಜರಿ ಡೇಟಾ ಇಲ್ಲ.', nextNone: 'ಈಗ ಬಾಕಿ ವಿನಂತಿಗಳಿಲ್ಲ.', nextErr: 'ಸಲಹೆ ಲೋಡ್ ಆಗಲಿಲ್ಲ.', nextSuggestedFmt: 'ಮುಂದಿನ ಸಲಹೆ: ಟೇಬಲ್ {table} (ಸ್ಕೋರ್ {score})', urgentTag: 'ತುರ್ತು', assigning: 'ನಿಯೋಜಿಸಲಾಗುತ್ತಿದೆ…', autoAssignErr: 'ನಿಯೋಜಿಸಲು ವಿನಂತಿ ಇಲ್ಲ', assignFail: 'ನಿಯೋಜನೆ ವಿಫಲ', assignedTo: 'ವಿನಂತಿಯನ್ನು {name} ಗೆ ನಿಯೋಜಿಸಲಾಗಿದೆ.', dndNoPending: 'ಬಾಕಿ ವಿನಂತಿಗಳಿಲ್ಲ', dndNoStaff: 'ಸ್ಟಾಫ್ ಮಾರ್ಗಗಳಿಲ್ಲ', mobileNoReq: 'ವಿನಂತಿಗಳಿಲ್ಲ', mobileNoStaff: 'ಸ್ಟಾಫ್ ಇಲ್ಲ', pauseResume: 'ವಿನಂತಿಗಳನ್ನು ಪುನರಾರಂಭಿಸಿ', pauseNew: 'ಹೊಸ ವಿನಂತಿಗಳನ್ನು ನಿಲ್ಲಿಸಿ', pauseShort: 'ನಿಲ್ಲಿಸಿ', notifOn: 'ವೆಬ್ ಅಧಿಸೂಚನೆಗಳು: ಆನ್', notifEnable: 'ವೆಬ್ ಅಧಿಸೂಚನೆಗಳನ್ನು ಆನ್ ಮಾಡಿ', notifTitleOn: 'ಬ್ರೌಸರ್ ಈಗಾಗಲೇ ಈ ಸೈಟ್‌ಗೆ ಅಧಿಸೂಚನೆಗಳನ್ನು ಅನುಮತಿಸಿದೆ. ಧ್ವನಿ ಪರೀಕ್ಷೆಗೆ ಕ್ಲಿಕ್.', notifTitleEnable: 'ಈ ಸೈಟ್‌ಗೆ ಬ್ರೌಸರ್ ಅಧಿಸೂಚನೆಗಳನ್ನು ಅನುಮತಿಸಿ.',             hideToken: 'ಮರೆಮಾಡಿ', copiedToken: 'ನಕಲಿಸಲಾಗಿದೆ!'
+        });
+        D.ur = cloneStr(D.en);
+        Object.assign(D.ur, {
+            welcome: 'سول – خوش آمدید، {u}', links: 'آپ کے لنکس', logout: 'لاگ آؤٹ', tables: 'میزیں (1–{n})', tsub: 'سبز = کوئی مدد کی درخواست نہیں، نارنجی = زیر التواء، نیلا = دیکھ بھال جاری۔', help: 'مدد کی درخواستیں', noti: 'ویب اطلاعات چالو کریں', sound: 'آواز چیک کریں', clear: 'تمام زیر التواء صاف کریں', mute: '۱۵ منٹ اطلاع خاموش', accepted: 'آپ کی منظور شدہ درخواستیں', analytics: 'درخواست کا ریکارڈ (تجزیہ)', pass: 'میرا پاس ورڈ تبدیل کریں', cur: 'موجودہ پاس ورڈ', nw: 'نیا پاس ورڈ', upd: 'پاس ورڈ اپ ڈیٹ کریں', quick: 'جلدی کھولیں (QR سکین کر کے مدد مانگیں)', quickSub: 'یہ QR سکین کریں اور فون پر مدد کا صفحہ کھولیں۔', shift: 'شفٹ اور اسمارٹ اسسٹ', shiftSub: 'اپنا موڈ سیٹ کریں اور اگلا کون سا ٹیبل دیکھیں۔', online: 'آن لائن', brk: 'وقفہ', offline: 'آف لائن', autoAssign: 'اگلا مجھے خود تفویض کریں', nextLoading: 'تجویز لوڈ ہو رہی ہے…', adminPresenceTitle: 'اسٹاف حاضری بورڈ', adminPresenceSub: 'اسٹاف دستیابی کی موجودہ حالت۔', adminReassignTitle: 'دستی طور پر دوبارہ تفویض', adminReassignSub: 'ایڈمن: زیر التواء درخواست منتخب اسٹاف کو دیں۔', assignNow: 'ابھی تفویض کریں', dndTitle: 'کھینچ کر چھوڑیں تفویض بورڈ', dndSub: 'زیر التواء کارڈ کھینچ کر اسٹاف لائن پر چھوڑیں۔', dndMobileHint: 'موبائل: درخواست منتخب کریں اور اسٹاف چپ پر ٹیپ کریں۔', auditTitle: 'اسٹاف سرگرمی (آڈٹ)', auditSub: 'قبولیاں اور حالت کی تازہ کاریاں (نئے پہلے)۔', refreshBtn: 'تازہ کریں', exportTitle: 'درخواست لاگ برآمد (CSV)', exportSub: 'ایڈمن: تاریخ کے مطابق request_history کی تفصیلات ڈاؤن لوڈ کریں۔', exportFrom: 'سے', exportTo: 'تک', downloadCsv: 'CSV ڈاؤن لوڈ', cafeTitle: 'کیفے مینو میں ترمیم', cafeSub: 'کسٹمر درخواست کے صفحے کی فہرست کی اشیاء بدلیں۔', openMenuEditor: 'مینو ایڈیٹر کھولیں', quietTitle: 'خاموش اوقات', quietSub: 'روکے جانے پر نئی مدد کی درخواستیں نہیں بھیج سکتے۔', pushTitle: 'پش (لاک اسکرین) ڈیبگ', pushSavedLbl: 'سبسکرپشنز محفوظ:', vapidLbl: 'VAPID کلیدیں:', localNotiBtn: 'مقامی ٹیسٹ اطلاع دکھائیں', sendPushBtn: 'ٹیسٹ پش بھیجیں', apiTokenTitle: 'API ٹوکن (Vercel / بیرونی API)', apiTokenSub: 'POST /api/request/create پر X-API-Token یا Authorization: Bearer <token> استعمال کریں۔', tokenPlaceholder: 'لوڈ کرنے کے لیے کلک کریں', showToken: 'ٹوکن دکھائیں', copyToken: 'کاپی', tokenHint: 'اپنے ٹوکن کے لیے Vercel میں SOULPLACE_API_TOKEN سیٹ کریں۔', perTableTitle: 'ٹیبل وار تاریخ', perTableSub: 'ایک ٹیبل کے حالیہ درخواستیں (تجزیاتی ریکارڈ سے)۔', historyTableLbl: 'ٹیبل', loadHistory: 'تاریخ لوڈ کریں', tableHistoryIdle: 'ٹیبل نمبر درج کر کے لوڈ کریں۔', acceptedSub: 'حالت اپ ڈیٹ: راستے میں → ٹیبل پر → مکمل۔', thTable: 'ٹیبل #', thNote: 'نوٹ / زمرہ', thRaised: 'وقت اٹھایا گیا', thStatus: 'حالت', analyticsSub: 'گزشتہ ۳۰ دن: فی دن اور فی ٹیبل درخواستیں۔', loading: 'لوڈ ہو رہا ہے…', helpDesc: 'مدد مانگنے والی تمام میزیں دکھائی جاتی ہیں۔', helpRecent: 'صرف گزشتہ ۲ گھنٹے کی درخواستیں (تازہ کرنے پر پرانے نہیں)۔ فہرست ری سیٹ کے لیے نیچے «تمام زیر التواء صاف کریں» استعمال کریں۔', handoffTitle: 'شفٹ ہینڈ آف نوٹ', handoffSub: 'اگلی شفٹ کے لیے ایک سطر (مثلاً «میز ۷ — قوانین پر فالو اپ»)۔', handoffPlaceholder: 'اگلی شفٹ کے لیے اختیاری نوٹ…', handoffSave: 'ہینڈ آف نوٹ محفوظ کریں', handoffPrevNote: 'پچھلی شفٹ سے نوٹ', shortcutsHint: 'شارٹ کٹ: Ctrl+Shift+S = آواز چیک؛ Ctrl+Shift+A = اگلا خود تفویض (ڈیش بورڈ پر فوکس ہو تو)۔', systemConfig: 'سسٹم اور ترتیب', soundBanner1: 'ذیل میں ایک بار کلک کرنے تک آواز نہیں چلے گی۔', soundBanner2: 'اب «اطلاع کی آواز کی اجازت» پر ٹیپ کریں۔ بیپ اور Maroon سنیں۔ پھر ہر نئی میز درخواست پر آواز۔', allowSoundBtn: 'اطلاع کی آواز کی اجازت', soundUnlockTip: 'آواز کے لیے ایک بار ٹیپ کریں («آواز چیک»)۔ براؤزر پوچھے تو «ویب اطلاعات» کی اجازت دیں۔', bulkSelectAll: 'سب منتخب کریں', bulkAccept: 'منتخب شدہ قبول کریں', opsTitle: 'آپریشنز اور واقعات کا لاگ', opsSub: 'ایڈمنز اور شفٹ لیڈز کے لیے مختصر نوٹز (سرور پر محفوظ)۔',
+            recForYou: 'آپ کے لیے تجویز', suggestedStaffPrefix: 'تجویز شدہ اسٹاف:', tableWord: 'میز', vipUrgent: 'VIP / فوری', imAttending: 'میں دیکھ رہا ہوں', btnAccepted: 'منظور شدہ', noPendingReq: 'کوئی زیر التواء مدد کی درخواست نہیں۔', reqLoadFail: 'درخواستیں لوڈ نہ ہو سکیں۔', noAcceptedYet: 'ابھی کوئی منظور شدہ درخواست نہیں۔', loadFailShort: 'لوڈ ناکام۔', atTable: 'میز پر', doneStatus: 'مکمل', presencePrefix: 'موجودہ موڈ: ', presenceNoData: 'ابھی اسٹاف حاضری کا ڈیٹا نہیں۔', nextNone: 'ابھی کوئی زیر التواء درخواست نہیں۔', nextErr: 'تجویز لوڈ نہ ہو سکی۔', nextSuggestedFmt: 'اگلی تجویز: میز {table} (اسکور {score})', urgentTag: 'فوری', assigning: 'تفویض ہو رہی ہے…', autoAssignErr: 'تفویض کے لیے کوئی درخواست نہیں', assignFail: 'تفویض ناکام', assignedTo: 'درخواست {name} کو تفویض کی گئی۔', dndNoPending: 'کوئی زیر التواء درخواست نہیں', dndNoStaff: 'کوئی اسٹاف لائن نہیں', mobileNoReq: 'کوئی درخواست نہیں', mobileNoStaff: 'کوئی اسٹاف نہیں', pauseResume: 'درخواستیں دوبارہ شروع', pauseNew: 'نئی درخواستیں روکیں', pauseShort: 'روکیں', notifOn: 'ویب اطلاعات: چالو', notifEnable: 'ویب اطلاعات چالو کریں', notifTitleOn: 'براؤسر پہلے ہی اس سائٹ کے لیے اطلاعات کی اجازت دیتا ہے۔ آواز چیک کے لیے کلک کریں۔', notifTitleEnable: 'اس سائٹ کے لیے براؤسر اطلاعات کی اجازت دیں۔', hideToken: 'چھپائیں', copiedToken: 'کاپی ہو گیا!'
+        });
+        D.bn = cloneStr(D.en);
+        Object.assign(D.bn, {
+            welcome: 'সোল – স্বাগতম, {u}', links: 'আপনার লিঙ্ক', logout: 'লগ আউট', tables: 'টেবিল (1–{n})', tsub: 'সবুজ = কোনো অনুরোধ নেই, কমলা = মুলতুবি, নীল = সেবা চলছে।', help: 'সাহায্যের অনুরোধ', noti: 'ওয়েব বিজ্ঞপ্তি চালু করুন', sound: 'শব্দ পরীক্ষা', clear: 'সব মুলতুবি মুছুন', mute: '১৫ মিনিট বিজ্ঞপ্তি বন্ধ', accepted: 'আপনার গ্রহণ করা অনুরোধ', analytics: 'অনুরোধের ইতিহাস (বিশ্লেষণ)', pass: 'আমার পাসওয়ার্ড বদলান', cur: 'বর্তমান পাসওয়ার্ড', nw: 'নতুন পাসওয়ার্ড', upd: 'পাসওয়ার্ড আপডেট', quick: 'দ্রুত খুলুন (QR স্ক্যান করে সাহায্য চান)', quickSub: 'এই QR স্ক্যান করে ফোনে সাহায্য পৃষ্ঠা খুলুন।', shift: 'শিফ্ট ও স্মার্ট সহায়তা', shiftSub: 'মোড সেট করুন এবং পরের টেবিল দেখুন।', online: 'অনলাইন', brk: 'বিরতি', offline: 'অফলাইন', autoAssign: 'পরেরটি আমাকে স্বয়ংক্রিয়ভাবে বরাদ্দ করুন', nextLoading: 'পরামর্শ লোড হচ্ছে…', adminPresenceTitle: 'স্টাফ উপস্থিতি বোর্ড', adminPresenceSub: 'স্টাফ উপলব্ধতার লাইভ অবস্থা।', adminReassignTitle: 'ম্যানুয়াল পুনঃবরাদ্দ', adminReassignSub: 'অ্যাডমিন: মুলতুবি অনুরোধ নির্বাচিত স্টাফকে দিন।', assignNow: 'এখনই বরাদ্দ', dndTitle: 'ড্র্যাগ ও ড্রপ বরাদ্দ বোর্ড', dndSub: 'মুলতুবি কার্ড টেনে স্টাফ লেনে রাখুন।', dndMobileHint: 'মোবাইল: অনুরোধ বেছে নিন ও স্টাফ চিপে ট্যাপ করুন।', auditTitle: 'স্টাফ কার্যকলাপ (অডিট)', auditSub: 'গ্রহণ ও স্ট্যাটাস আপডেট (নতুন প্রথমে)।', refreshBtn: 'রিফ্রেশ', exportTitle: 'অনুরোখ লগ এক্সপোর্ট (CSV)', exportSub: 'অ্যাডমিন: তারিখ অনুযায়ী request_history ডাউনলোড।', exportFrom: 'থেকে', exportTo: 'পর্যন্ত', downloadCsv: 'CSV ডাউনলোড', cafeTitle: 'ক্যাফে মেনু সম্পাদনা', cafeSub: 'গ্রাহক অনুরোধ পৃষ্ঠার ড্রপডাউন আইটেম বদলান।', openMenuEditor: 'মেনু এডিটর খুলুন', quietTitle: 'নীরব সময়', quietSub: 'বিরত থাকলে নতুন সাহায্য অনুরোধ পাঠানো যাবে না।', pushTitle: 'পুশ (লক স্ক্রিন) ডিবাগ', pushSavedLbl: 'সাবস্ক্রিপশন সংরক্ষিত:', vapidLbl: 'VAPID কী:', localNotiBtn: 'স্থানীয় টেস্ট বিজ্ঞপ্তি দেখান', sendPushBtn: 'টেস্ট পুশ পাঠান', apiTokenTitle: 'API টোকেন (Vercel / বাহ্যিক API)', apiTokenSub: 'POST /api/request/create এ X-API-Token বা Authorization: Bearer <token> ব্যবহার করুন।', tokenPlaceholder: 'লোড করতে ক্লিক করুন', showToken: 'টোকেন দেখান', copyToken: 'কপি', tokenHint: 'নিজের টোকেনের জন্য Vercel এ SOULPLACE_API_TOKEN সেট করুন।', perTableTitle: 'টেবিল অনুযায়ী ইতিহাস', perTableSub: 'একটি টেবিলের সাম্প্রতিক অনুরোধ (বিশ্লেষণ ইতিহাস থেকে)।', historyTableLbl: 'টেবিল', loadHistory: 'ইতিহাস লোড', tableHistoryIdle: 'টেবিল নম্বর দিয়ে লোড করুন।', acceptedSub: 'স্ট্যাটাস আপডেট: পথে → টেবিলে → সম্পন্ন।', thTable: 'টেবিল #', thNote: 'নোট / বিভাগ', thRaised: 'উত্থাপিত সময়', thStatus: 'স্ট্যাটাস', analyticsSub: 'গত ৩০ দিন: প্রতিদিন ও প্রতি টেবিল অনুরোধ।', loading: 'লোড হচ্ছে…', helpDesc: 'সাহায্য চাওয়া সব টেবিল দেখায়।', helpRecent: 'শুধু গত ২ ঘণ্টার অনুরোধ। তালিকা রিসেটে নিচে «Clear all pending» ব্যবহার করুন।', handoffTitle: 'শিফ্ট হ্যান্ডঅফ নোট', handoffSub: 'পরের শিফ্টের জন্য এক লাইন (যেমন «টেবিল ৭ — নিয়ম ফলো আপ»)।', handoffPlaceholder: 'পরের শিফ্টের জন্য ঐচ্ছিক নোট…', handoffSave: 'হ্যান্ডঅফ নোট সংরক্ষণ', handoffPrevNote: 'আগের শিফ্ট থেকে নোট', shortcutsHint: 'শর্টকাট: Ctrl+Shift+S = শব্দ পরীক্ষা; Ctrl+Shift+A = স্বয়ংক্রিয় বরাদ্দ (ড্যাশবোর্ড ফোকাসে)।', systemConfig: 'সিস্টেম ও কনফিগ', soundBanner1: 'নিচে একবার ক্লিক না করলে শব্দ বাজবে না।', soundBanner2: 'এখন «বিজ্ঞপ্তি শব্দ অনুমতি» ট্যাপ করুন। বিপ ও Maroon শুনুন।', allowSoundBtn: 'বিজ্ঞপ্তি শব্দের অনুমতি', soundUnlockTip: 'শব্দের জন্য একবার ট্যাপ («শব্দ পরীক্ষা»)। ব্রাউজার জিজ্ঞাসা করলে «ওয়েব বিজ্ঞপ্তি» অনুমতি দিন।', bulkSelectAll: 'সব নির্বাচন', bulkAccept: 'নির্বাচিত গ্রহণ', opsTitle: 'অপস ও ঘটনা লগ', opsSub: 'অ্যাডমিন ও শিফ্ট লিডের জন্য সংক্ষিপ্ত নোট (সার্ভারে সংরক্ষিত)।',
+            recForYou: 'আপনার জন্য পরামর্শ', suggestedStaffPrefix: 'পরামর্শিত স্টাফ:', tableWord: 'টেবিল', vipUrgent: 'VIP / জরুরি', imAttending: 'আমি দেখছি', btnAccepted: 'গৃহীত', noPendingReq: 'কোনো মুলতুবি সাহায্য অনুরোধ নেই।', reqLoadFail: 'অনুরোধ লোড ব্যর্থ।', noAcceptedYet: 'এখনও কোনো গৃহীত অনুরোধ নেই।', loadFailShort: 'লোড ব্যর্থ।', atTable: 'টেবিলে', doneStatus: 'সম্পন্ন', presencePrefix: 'বর্তমান মোড: ', presenceNoData: 'এখনও স্টাফ উপস্থিতি ডেটা নেই।', nextNone: 'এখন কোনো মুলতুবি অনুরোধ নেই।', nextErr: 'পরামর্শ লোড ব্যর্থ।', nextSuggestedFmt: 'পরের পরামর্শ: টেবিল {table} (স্কোর {score})', urgentTag: 'জরুরি', assigning: 'বরাদ্দ হচ্ছে…', autoAssignErr: 'বরাদ্দের জন্য অনুরোধ নেই', assignFail: 'বরাদ্দ ব্যর্থ', assignedTo: 'অনুরোধ {name} কে বরাদ্দ।', dndNoPending: 'কোনো মুলতুবি অনুরোধ নেই', dndNoStaff: 'কোনো স্টাফ লেন নেই', mobileNoReq: 'কোনো অনুরোধ নেই', mobileNoStaff: 'কোনো স্টাফ নেই', pauseResume: 'অনুরোধ পুনরায় চালু', pauseNew: 'নতুন অনুরোধ বিরত', pauseShort: 'বিরত', notifOn: 'ওয়েব বিজ্ঞপ্তি: চালু', notifEnable: 'ওয়েব বিজ্ঞপ্তি চালু করুন', notifTitleOn: 'ব্রাউজার ইতিমধ্যে এই সাইটের বিজ্ঞপ্তি অনুমোদিত। শব্দ পরীক্ষায় ক্লিক।', notifTitleEnable: 'এই সাইটের জন্য ব্রাউজার বিজ্ঞপ্তি অনুমতি দিন।', hideToken: 'লুকান', copiedToken: 'কপি হয়েছে!'
+        });
+        D.gu = cloneStr(D.en);
+        Object.assign(D.gu, {
+            welcome: 'સોલ – સ્વાગત છે, {u}', links: 'તમારી લિંક્સ', logout: 'લૉગ આઉટ', tables: 'ટેબલ (1–{n})', tsub: 'લીલું = કોઈ વિનંતી નહીં, નારંગી = બાકી, નીલું = સેવામાં।', help: 'મદદ વિનંતીઓ', noti: 'વેબ સૂચનાઓ ચાલુ કરો', sound: 'ધ્વનિ ચકાસો', clear: 'બધી બાકી સાફ કરો', mute: '૧૫ મિનિટ સૂચના બંધ', accepted: 'તમે સ્વીકારેલી વિનંતીઓ', analytics: 'વિનંતી ઇતિહાસ (વિશ્લેષણ)', pass: 'મારો પાસવર્ડ બદલો', cur: 'વર્તમાન પાસવર્ડ', nw: 'નવો પાસવર્ડ', upd: 'પાસવર્ડ અપડેટ', quick: 'ઝડપથી ખોલો (QR સ્કેન કરી મદદ માંગો)', quickSub: 'આ QR સ્કેન કરી ફોન પર મદદ પૃષ્ઠ ખોલો।', shift: 'શિફ્ટ અને સ્માર્ટ સહાય', shiftSub: 'મોડ સેટ કરો અને આગળ કયું ટેબલ જુઓ।', online: 'ઓનલાઇન', brk: 'બ્રેક', offline: 'ઑફલાઇન', autoAssign: 'આગળનું મને આપમેળે સોંપો', nextLoading: 'સૂચન લોડ થઈ રહ્યું છે…', adminPresenceTitle: 'સ્ટાફ હાજરી બોર્ડ', adminPresenceSub: 'સ્ટાફ ઉપલબ્ધતાની લાઇવ સ્થિતિ।', adminReassignTitle: 'મેન્યુઅલ ફરીથી સોંપણી', adminReassignSub: 'એડમિન: બાકી વિનંતી પસંદ કરેલ સ્ટાફને આપો।', assignNow: 'હમણાં સોંપો', dndTitle: 'ડ્રેગ અને ડ્રોપ સોંપણી બોર્ડ', dndSub: 'બાકી કાર્ડ ખેંચી સ્ટાફ લેન પર મૂકો।', dndMobileHint: 'મોબાઇલ: વિનંતી પસંદ કરો અને સ્ટાફ ચિપ પર ટૅપ કરો।', auditTitle: 'સ્ટાફ પ્રવૃત્તિ (ઓડિટ)', auditSub: 'સ્વીકૃતિઓ અને સ્થિતિ અપડેટ (નવું પહેલા)।', refreshBtn: 'રિફ્રેશ', exportTitle: 'વિનંતી લૉગ નિકાસ (CSV)', exportSub: 'એડમિન: તારીખ પ્રમાણે request_history ડાઉનલોડ।', exportFrom: 'થી', exportTo: 'સુધી', downloadCsv: 'CSV ડાઉનલોડ', cafeTitle: 'કૅફે મેનૂ સંપાદિત કરો', cafeSub: 'ગ્રાહક વિનંતી પૃષ્ઠની ડ્રૉપડાઉન વસ્તુઓ બદલો।', openMenuEditor: 'મેનૂ એડિટર ખોલો', quietTitle: 'શાંત સમય', quietSub: 'રોક દરમ્યાન નવી મદદ વિનંતીઓ મોકલી શકાતી નથી।', pushTitle: 'પુશ (લૉક સ્ક્રીન) ડિબગ', pushSavedLbl: 'સબ્સ્ક્રિપ્શન સાચવ્યા:', vapidLbl: 'VAPID કી:', localNotiBtn: 'સ્થાનિક ટેસ્ટ સૂચના બતાવો', sendPushBtn: 'ટેસ્ટ પુશ મોકલો', apiTokenTitle: 'API ટોકન (Vercel / બાહ્ય API)', apiTokenSub: 'POST /api/request/create પર X-API-Token અથવા Authorization: Bearer <token> વાપરો।', tokenPlaceholder: 'લોડ કરવા ક્લિક કરો', showToken: 'ટોકન બતાવો', copyToken: 'કૉપિ', tokenHint: 'તમારા ટોકન માટે Vercel માં SOULPLACE_API_TOKEN સેટ કરો।', perTableTitle: 'ટેબલ પ્રમાણે ઇતિહાસ', perTableSub: 'એક ટેબલની તાજેતરની વિનંતીઓ (વિશ્લેષણ ઇતિહાસથી)।', historyTableLbl: 'ટેબલ', loadHistory: 'ઇતિહાસ લોડ', tableHistoryIdle: 'ટેબલ નંબર દાખલ કરી લોડ કરો।', acceptedSub: 'સ્થિતિ અપડેટ: રસ્તામાં → ટેબલ પર → પૂર્ણ।', thTable: 'ટેબલ #', thNote: 'નોંધ / શ્રેણી', thRaised: 'ઉઠાવ્યાનો સમય', thStatus: 'સ્થિતિ', analyticsSub: 'છેલ્લા ૩૦ દિવસ: દરરોજ અને દર ટેબલ વિનંતીઓ।', loading: 'લોડ થઈ રહ્યું છે…', helpDesc: 'મદદ માંગતા બધા ટેબલ બતાવે છે।', helpRecent: 'ફક્ત છેલ્લા ૨ કલાકની વિનંતીઓ। યાદી રીસેટ માટે નીચે «Clear all pending» વાપરો।', handoffTitle: 'શિફ્ટ હેન્ડઑફ નોંધ', handoffSub: 'આગળની શિફ્ટ માટે એક લીટી (જેમ કે «ટેબલ ૭ — નિયમો ફોલો અપ»)।', handoffPlaceholder: 'આગળની શિફ્ટ માટે વૈકલ્પિક નોંધ…', handoffSave: 'હેન્ડઑફ નોંધ સાચવો', handoffPrevNote: 'પાછલી શિફ્ટથી નોંધ', shortcutsHint: 'શૉર્ટકટ: Ctrl+Shift+S = ધ્વનિ; Ctrl+Shift+A = આપમેળે સોંપણી (ડૅશબોર્ડ ફોકસ)।', systemConfig: 'સિસ્ટમ અને કોન્ફિગ', soundBanner1: 'નીચે એક વાર ક્લિક કર્યા સુધી ધ્વનિ નહીં।', soundBanner2: 'હમણાં «સૂચના ધ્વનિ પરવાનગી» ટૅપ કરો। બીપ અને Maroon સાંભળો।', allowSoundBtn: 'સૂચના ધ્વનિ પરવાનગી', soundUnlockTip: 'ધ્વનિ માટે એક વાર ટૅપ («ધ્વનિ ચકાસો»)। બ્રાઉઝર પૂછે તો «વેબ સૂચનાઓ» મંજૂર કરો।', bulkSelectAll: 'બધું પસંદ કરો', bulkAccept: 'પસંદ સ્વીકારો', opsTitle: 'ઓપ્સ અને ઘટના લૉગ', opsSub: 'એડમિન અને શિફ્ટ લીડ માટે ટૂંકી નોંધો (સર્વર પર)।',
+            recForYou: 'તમારા માટે સૂચન', suggestedStaffPrefix: 'સૂચવેલ સ્ટાફ:', tableWord: 'ટેબલ', vipUrgent: 'VIP / તાત્કાલિક', imAttending: 'હું જોઈ રહ્યો છું', btnAccepted: 'સ્વીકૃત', noPendingReq: 'કોઈ બાકી મદદ વિનંતી નથી।', reqLoadFail: 'વિનંતીઓ લોડ ન થઈ શકી।', noAcceptedYet: 'હજુ કોઈ સ્વીકૃત વિનંતી નથી।', loadFailShort: 'લોડ નિષ્ફળ।', atTable: 'ટેબલ પર', doneStatus: 'પૂર્ણ', presencePrefix: 'વર્તમાન મોડ: ', presenceNoData: 'હજુ સ્ટાફ હાજરી ડેટા નથી।', nextNone: 'હમણાં કોઈ બાકી વિનંતી નથી।', nextErr: 'સૂચન લોડ ન થયું।', nextSuggestedFmt: 'આગળનું સૂચન: ટેબલ {table} (સ્કોર {score})', urgentTag: 'તાત્કાલિક', assigning: 'સોંપાઈ રહ્યું છે…', autoAssignErr: 'સોંપણી માટે વિનંતી નથી', assignFail: 'સોંપણી નિષ્ફળ', assignedTo: 'વિનંતી {name} ને સોંપી।', dndNoPending: 'કોઈ બાકી વિનંતી નથી', dndNoStaff: 'કોઈ સ્ટાફ લેન નથી', mobileNoReq: 'કોઈ વિનંતી નથી', mobileNoStaff: 'કોઈ સ્ટાફ નથી', pauseResume: 'વિનંતીઓ ફરી શરૂ', pauseNew: 'નવી વિનંતીઓ રોકો', pauseShort: 'રોકો', notifOn: 'વેબ સૂચનાઓ: ચાલુ', notifEnable: 'વેબ સૂચનાઓ ચાલુ કરો', notifTitleOn: 'બ્રાઉઝર પહેલેથી આ સાઇટ માટે સૂચનાઓ મંજૂર। ધ્વનિ ચકાસણી ક્લિક।', notifTitleEnable: 'આ સાઇટ માટે બ્રાઉઝર સૂચનાઓ મંજૂર કરો।', hideToken: 'છુપાવો', copiedToken: 'કૉપિ થયું!'
+        });
+        D.mr = cloneStr(D.en);
+        Object.assign(D.mr, {
+            welcome: 'सोल – स्वागत, {u}', links: 'तुमचे लिंक', logout: 'लॉग आउट', tables: 'टेबल (1–{n})', tsub: 'हिरवा = विनंती नाही, नारिंगी = प्रलंबित, निळा = सेवेत.', help: 'मदत विनंती', noti: 'वेब सूचना चालू करा', sound: 'आवाज तपासा', clear: 'सर्व प्रलंबित साफ करा', mute: '१५ मिनिटे सूचना बंद', accepted: 'तुमच्या स्वीकृत विनंती', analytics: 'विनंती इतिहास (विश्लेषण)', pass: 'माझा पासवर्ड बदला', cur: 'सध्याचा पासवर्ड', nw: 'नवा पासवर्ड', upd: 'पासवर्ड अपडेट', quick: 'पटकन उघडा (QR स्कॅन करून मदत मागा)', quickSub: 'हा QR स्कॅन करा आणि फोनवर मदत पृष्ठ उघडा।', shift: 'शिफ्ट आणि स्मार्ट सहाय्य', shiftSub: 'मोड सेट करा आणि पुढचा कोणता टेबल पहा।', online: 'ऑनलाइन', brk: 'ब्रेक', offline: 'ऑफलाइन', autoAssign: 'पुढचे मला आपोआप नियुक्त करा', nextLoading: 'सूचना लोड होत आहे…', adminPresenceTitle: 'स्टाफ उपस्थिती फलक', adminPresenceSub: 'स्टाफ उपलब्धतेची थेट स्थिती।', adminReassignTitle: 'मॅन्युअल पुन्हा नियुक्ती', adminReassignSub: 'अॅडमिन: प्रलंबित विनंती निवडलेल्या स्टाफला द्या।', assignNow: 'आत्ता नियुक्त करा', dndTitle: 'ड्रॅग आणि ड्रॉप नियुक्ती फलक', dndSub: 'प्रलंबित कार्ड ओढून स्टाफ लेनवर ठेवा।', dndMobileHint: 'मोबाइल: विनंती निवडा आणि स्टाफ चिपवर टॅप करा।', auditTitle: 'स्टाफ क्रियाकलाप (ऑडिट)', auditSub: 'स्वीकृती आणि स्थिती अपडेट (नवीन प्रथम)।', refreshBtn: 'रीफ्रेश', exportTitle: 'विनंती लॉग निर्यात (CSV)', exportSub: 'अॅडमिन: तारखेनुसार request_history तपशील डाउनलोड।', exportFrom: 'पासून', exportTo: 'पर्यंत', downloadCsv: 'CSV डाउनलोड', cafeTitle: 'कॅफे मेनू संपादित करा', cafeSub: 'ग्राहक विनंती पृष्ठातील ड्रॉपडाउन बदला।', openMenuEditor: 'मेनू संपादक उघडा', quietTitle: 'शांत वेळ', quietSub: 'थांबले असताना नवीन मदत विनंती पाठवू शकत नाही।', pushTitle: 'पुश (लॉक स्क्रीन) डीबग', pushSavedLbl: 'सदस्यता जतन:', vapidLbl: 'VAPID की:', localNotiBtn: 'स्थानिक चाचणी सूचना दाखवा', sendPushBtn: 'चाचणी पुश पाठवा', apiTokenTitle: 'API टोकन (Vercel / बाह्य API)', apiTokenSub: 'POST /api/request/create वर X-API-Token किंवा Authorization: Bearer <token> वापरा।', tokenPlaceholder: 'लोड करण्यासाठी क्लिक', showToken: 'टोकन दाखवा', copyToken: 'कॉपी', tokenHint: 'तुमच्या टोकनसाठी Vercel मध्ये SOULPLACE_API_TOKEN सेट करा।', perTableTitle: 'टेबलनुसार इतिहास', perTableSub: 'एका टेबलच्या अलीकडच्या विनंती (विश्लेषण इतिहासातून)।', historyTableLbl: 'टेबल', loadHistory: 'इतिहास लोड', tableHistoryIdle: 'टेबल क्रमांक टाकून लोड करा।', acceptedSub: 'स्थिती अपडेट: मार्गात → टेबलावर → पूर्ण।', thTable: 'टेबल #', thNote: 'नोट / श्रेणी', thRaised: 'विनंतीची वेळ', thStatus: 'स्थिती', analyticsSub: 'मागील ३० दिवस: दररोज आणि प्रति टेबल विनंती।', loading: 'लोड होत आहे…', helpDesc: 'मदत मागणारे सर्व टेबल दाखवते।', helpRecent: 'फक्त मागील २ तासांच्या विनंती। यादी रीसेटसाठी खाली «Clear all pending» वापरा।', handoffTitle: 'शिफ्ट हँडऑफ नोट', handoffSub: 'पुढच्या शिफ्टसाठी एक ओळ (उदा. «टेबल ७ — नियम फॉलो अप»)।', handoffPlaceholder: 'पुढच्या शिफ्टसाठी ऐच्छिक नोट…', handoffSave: 'हँडऑफ नोट जतन करा', handoffPrevNote: 'मागील शिफ्टची नोट', shortcutsHint: 'शॉर्टकट: Ctrl+Shift+S = आवाज; Ctrl+Shift+A = आपोआप नियुक्ती (डॅशबोर्ड फोकस)।', systemConfig: 'सिस्टम आणि कॉन्फिग', soundBanner1: 'खाली एकदा क्लिक न केल्यास आवाज नाही।', soundBanner2: 'आता «सूचना आवाज परवानगी» टॅप करा। बीप आणि Maroon ऐका।', allowSoundBtn: 'सूचना आवाज परवानगी', soundUnlockTip: 'आवाजासाठी एकदा टॅप («आवाज तपासा»)। ब्राउझर विचारल्यास «वेब सूचना» परवानगी द्या।', bulkSelectAll: 'सर्व निवडा', bulkAccept: 'निवडले स्वीकारा', opsTitle: 'ऑप्स आणि घटना लॉग', opsSub: 'अॅडमिन आणि शिफ्ट लीडसाठी लहान नोट (सर्व्हरवर)।',
+            recForYou: 'तुमच्यासाठी सूचना', suggestedStaffPrefix: 'सुचवलेला स्टाफ:', tableWord: 'टेबल', vipUrgent: 'VIP / तातडीचे', imAttending: 'मी पाहत आहे', btnAccepted: 'स्वीकृत', noPendingReq: 'कोणतीही प्रलंबित मदत विनंती नाही।', reqLoadFail: 'विनंती लोड अयशस्वी।', noAcceptedYet: 'अद्याप स्वीकृत विनंती नाही।', loadFailShort: 'लोड अयशस्वी।', atTable: 'टेबलावर', doneStatus: 'पूर्ण', presencePrefix: 'सध्याचा मोड: ', presenceNoData: 'अद्याप स्टाफ उपस्थिती डेटा नाही।', nextNone: 'आत्ता प्रलंबित विनंती नाहीत।', nextErr: 'सूचना लोड अयशस्वी।', nextSuggestedFmt: 'पुढची सूचना: टेबल {table} (स्कोर {score})', urgentTag: 'तातडीचे', assigning: 'नियुक्त होत आहे…', autoAssignErr: 'नियुक्तीसाठी विनंती नाही', assignFail: 'नियुक्ती अयशस्वी', assignedTo: 'विनंती {name} ला नियुक्त।', dndNoPending: 'प्रलंबित विनंती नाहीत', dndNoStaff: 'स्टाफ लेन नाही', mobileNoReq: 'विनंती नाहीत', mobileNoStaff: 'स्टाफ नाही', pauseResume: 'विनंती पुन्हा सुरू', pauseNew: 'नव्या विनंती थांबवा', pauseShort: 'थांबवा', notifOn: 'वेब सूचना: चालू', notifEnable: 'वेब सूचना चालू करा', notifTitleOn: 'ब्राउझर आधीच या साइटसाठी सूचना परवानगी। आवाज तपासणी क्लिक।', notifTitleEnable: 'या साइटसाठी ब्राउझर सूचना परवानगी द्या।', hideToken: 'लपवा', copiedToken: 'कॉपी झाले!'
+        });
+        D.pa = cloneStr(D.en);
+        Object.assign(D.pa, {
+            welcome: 'ਸੋਲ – ਸਵਾਗਤ ਹੈ, {u}', links: 'ਤੁਹਾਡੇ ਲਿੰਕ', logout: 'ਲਾਗ ਆਉਟ', tables: 'ਟੇਬਲ (1–{n})', tsub: 'ਹਰਾ = ਕੋਈ ਬੇਨਤੀ ਨਹੀਂ, ਨਾਰੰਗੀ = ਲੰਬਿਤ, ਨੀਲਾ = ਸੇਵਾ ਵਿੱਚ।', help: 'ਮਦਦ ਬੇਨਤੀਆਂ', noti: 'ਵੈਬ ਸੂਚਨਾਵਾਂ ਚਾਲੂ ਕਰੋ', sound: 'ਆਵਾਜ਼ ਚੈਕ', clear: 'ਸਾਰੀਆਂ ਲੰਬਿਤ ਸਾਫ਼ ਕਰੋ', mute: '੧੫ ਮਿੰਟ ਸੂਚਨਾ ਬੰਦ', accepted: 'ਤੁਹਾਡੀਆਂ ਮਨਜ਼ੂਰ ਬੇਨਤੀਆਂ', analytics: 'ਬੇਨਤੀ ਇਤਿਹਾਸ (ਵਿਸ਼ਲੇਸ਼ਣ)', pass: 'ਮੇਰਾ ਪਾਸਵਰਡ ਬਦਲੋ', cur: 'ਮੌਜੂਦਾ ਪਾਸਵਰਡ', nw: 'ਨਵਾਂ ਪਾਸਵਰਡ', upd: 'ਪਾਸਵਰਡ ਅਪਡੇਟ', quick: 'ਝਟਪਟ ਖੋਲ੍ਹੋ (QR ਸਕੈਨ ਕਰਕੇ ਮਦਦ ਮੰਗੋ)', quickSub: 'ਇਹ QR ਸਕੈਨ ਕਰੋ ਅਤੇ ਫੋਨ ਤੇ ਮਦਦ ਪੰਨਾ ਖੋਲ੍ਹੋ।', shift: 'ਸ਼ਿਫਟ ਅਤੇ ਸਮਾਰਟ ਸਹਾਇਤਾ', shiftSub: 'ਮੋਡ ਸੈੱਟ ਕਰੋ ਅਤੇ ਅਗਲਾ ਕਿਹੜਾ ਟੇਬਲ ਦੇਖੋ।', online: 'ਆਨਲਾਈਨ', brk: 'ਬ੍ਰੇਕ', offline: 'ਆਫਲਾਈਨ', autoAssign: 'ਅਗਲਾ ਮੈਨੂੰ ਆਪੇ ਅਸਾਈਨ ਕਰੋ', nextLoading: 'ਸੁਝਾਅ ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ…', adminPresenceTitle: 'ਸਟਾਫ ਹਾਜ਼ਰੀ ਬੋਰਡ', adminPresenceSub: 'ਸਟਾਫ ਉਪਲਬਧਤਾ ਦੀ ਲਾਈਵ ਸਥਿਤੀ।', adminReassignTitle: 'ਮੈਨੂਅਲ ਮੁੜ ਅਸਾਈਨ', adminReassignSub: 'ਐਡਮਿਨ: ਲੰਬਿਤ ਬੇਨਤੀ ਚੁਣੇ ਸਟਾਫ ਨੂੰ ਦਿਓ।', assignNow: 'ਹੁਣੇ ਅਸਾਈਨ', dndTitle: 'ਡ੍ਰੈਗ ਅਤੇ ਡ੍ਰੌਪ ਅਸਾਈਨ ਬੋਰਡ', dndSub: 'ਲੰਬਿਤ ਕਾਰਡ ਖਿੱਚ ਕੇ ਸਟਾਫ ਲੇਨ ਤੇ ਰੱਖੋ।', dndMobileHint: 'ਮੋਬਾਇਲ: ਬੇਨਤੀ ਚੁਣੋ ਅਤੇ ਸਟਾਫ ਚਿਪ ਤੇ ਟੈਪ ਕਰੋ।', auditTitle: 'ਸਟਾਫ ਗਤੀਵਿਧੀ (ਆਡਿਟ)', auditSub: 'ਸਵੀਕ੍ਰਤੀਆਂ ਅਤੇ ਸਥਿਤੀ ਅਪਡੇਟ (ਨਵਾਂ ਪਹਿਲਾਂ)।', refreshBtn: 'ਰਿਫ੍ਰੈਸ਼', exportTitle: 'ਬੇਨਤੀ ਲੌਗ ਐਕਸਪੋਰਟ (CSV)', exportSub: 'ਐਡਮਿਨ: ਤਾਰੀਖ ਅਨੁਸਾਰ request_history ਡਾਊਨਲੋਡ।', exportFrom: 'ਤੋਂ', exportTo: 'ਤੱਕ', downloadCsv: 'CSV ਡਾਊਨਲੋਡ', cafeTitle: 'ਕੈਫੇ ਮੀਨੂ ਸੰਪਾਦਿਤ ਕਰੋ', cafeSub: 'ਗ੍ਰਾਹਕ ਬੇਨਤੀ ਪੰਨੇ ਦੀਆਂ ਡ੍ਰੌਪਡਾਊਨ ਆਈਟਮਾਂ ਬਦਲੋ।', openMenuEditor: 'ਮੀਨੂ ਐਡੀਟਰ ਖੋਲ੍ਹੋ', quietTitle: 'ਚੁੱਪ ਸਮਾਂ', quietSub: 'ਰੋਕ ਦੌਰਾਨ ਨਵੀਆਂ ਮਦਦ ਬੇਨਤੀਆਂ ਨਹੀਂ ਭੇਜ ਸਕਦੇ।', pushTitle: 'ਪੁਸ਼ (ਲੌਕ ਸਕ੍ਰੀਨ) ਡੀਬੱਗ', pushSavedLbl: 'ਸਬਸਕ੍ਰਿਪਸ਼ਨ ਸੁਰੱਖਿਅਤ:', vapidLbl: 'VAPID ਕੁੰਜੀਆਂ:', localNotiBtn: 'ਸਥਾਨਕ ਟੈਸਟ ਸੂਚਨਾ ਦਿਖਾਓ', sendPushBtn: 'ਟੈਸਟ ਪੁਸ਼ ਭੇਜੋ', apiTokenTitle: 'API ਟੋਕਨ (Vercel / ਬਾਹਰੀ API)', apiTokenSub: 'POST /api/request/create ਤੇ X-API-Token ਜਾਂ Authorization: Bearer <token> ਵਰਤੋ।', tokenPlaceholder: 'ਲੋਡ ਕਰਨ ਲਈ ਕਲਿਕ', showToken: 'ਟੋਕਨ ਦਿਖਾਓ', copyToken: 'ਕਾਪੀ', tokenHint: 'ਆਪਣੇ ਟੋਕਨ ਲਈ Vercel ਵਿੱਚ SOULPLACE_API_TOKEN ਸੈੱਟ ਕਰੋ।', perTableTitle: 'ਟੇਬਲ ਅਨੁਸਾਰ ਇਤਿਹਾਸ', perTableSub: 'ਇੱਕ ਟੇਬਲ ਦੀਆਂ ਹਾਲੀਆ ਬੇਨਤੀਆਂ (ਵਿਸ਼ਲੇਸ਼ਣ ਇਤਿਹਾਸ ਤੋਂ)।', historyTableLbl: 'ਟੇਬਲ', loadHistory: 'ਇਤਿਹਾਸ ਲੋਡ', tableHistoryIdle: 'ਟੇਬਲ ਨੰਬਰ ਦਾਖਲ ਕਰਕੇ ਲੋਡ ਕਰੋ।', acceptedSub: 'ਸਥਿਤੀ ਅਪਡੇਟ: ਰਸਤੇ ਵਿੱਚ → ਟੇਬਲ ਤੇ → ਪੂਰਾ।', thTable: 'ਟੇਬਲ #', thNote: 'ਨੋਟ / ਸ਼੍ਰੇਣੀ', thRaised: 'ਚੁੱਕਣ ਦਾ ਸਮਾਂ', thStatus: 'ਸਥਿਤੀ', analyticsSub: 'ਪਿਛਲੇ ੩੦ ਦਿਨ: ਪ੍ਰਤੀ ਦਿਨ ਅਤੇ ਪ੍ਰਤੀ ਟੇਬਲ ਬੇਨਤੀਆਂ।', loading: 'ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ…', helpDesc: 'ਮਦਦ ਮੰਗਣ ਵਾਲੇ ਸਾਰੇ ਟੇਬਲ ਦਿਖਾਉਂਦਾ ਹੈ।', helpRecent: 'ਸਿਰਫ਼ ਪਿਛਲੇ ੨ ਘੰਟਿਆਂ ਦੀਆਂ ਬੇਨਤੀਆਂ। ਸੂਚੀ ਰੀਸੈੱਟ ਲਈ ਹੇਠਾਂ «Clear all pending» ਵਰਤੋ।', handoffTitle: 'ਸ਼ਿਫਟ ਹੈਂਡਆਫ ਨੋਟ', handoffSub: 'ਅਗਲੀ ਸ਼ਿਫਟ ਲਈ ਇੱਕ ਲਾਈਨ (ਜਿਵੇਂ «ਟੇਬਲ ੭ — ਨਿਯਮ ਫਾਲੋ ਅਪ»)।', handoffPlaceholder: 'ਅਗਲੀ ਸ਼ਿਫਟ ਲਈ ਵਿਕਲਪਿਕ ਨੋਟ…', handoffSave: 'ਹੈਂਡਆਫ ਨੋਟ ਸੁਰੱਖਿਅਤ', handoffPrevNote: 'ਪਿਛਲੀ ਸ਼ਿਫਟ ਤੋਂ ਨੋਟ', shortcutsHint: 'ਸ਼ਾਰਟਕੱਟ: Ctrl+Shift+S = ਆਵਾਜ਼; Ctrl+Shift+A = ਆਪੇ ਅਸਾਈਨ (ਡੈਸ਼ਬੋਰਡ ਫੋਕਸ)।', systemConfig: 'ਸਿਸਟਮ ਅਤੇ ਕੌਨਫਿਗ', soundBanner1: 'ਹੇਠਾਂ ਇੱਕ ਵਾਰ ਕਲਿਕ ਨ ਕਰਨ ਤੱਕ ਆਵਾਜ਼ ਨਹੀਂ।', soundBanner2: 'ਹੁਣ «ਸੂਚਨਾ ਆਵਾਜ਼ ਇਜਾਜ਼ਤ» ਟੈਪ ਕਰੋ। ਬੀਪ ਅਤੇ Maroon ਸੁਣੋ।', allowSoundBtn: 'ਸੂਚਨਾ ਆਵਾਜ਼ ਇਜਾਜ਼ਤ', soundUnlockTip: 'ਆਵਾਜ਼ ਲਈ ਇੱਕ ਵਾਰ ਟੈਪ («ਆਵਾਜ਼ ਚੈਕ»)। ਬ੍ਰਾਊਜ਼ਰ ਪੁੱਛੇ ਤਾਂ «ਵੈਬ ਸੂਚਨਾਵਾਂ» ਮਨਜ਼ੂਰ ਕਰੋ।', bulkSelectAll: 'ਸਭ ਚੁਣੋ', bulkAccept: 'ਚੁਣੇ ਸਵੀਕਾਰੋ', opsTitle: 'ਆਪਸ ਅਤੇ ਘਟਨਾ ਲੌਗ', opsSub: 'ਐਡਮਿਨ ਅਤੇ ਸ਼ਿਫਟ ਲੀਡ ਲਈ ਛੋਟੇ ਨੋਟ (ਸਰਵਰ ਤੇ)।',
+            recForYou: 'ਤੁਹਾਡੇ ਲਈ ਸੁਝਾਅ', suggestedStaffPrefix: 'ਸੁਝਾਇਆ ਸਟਾਫ:', tableWord: 'ਟੇਬਲ', vipUrgent: 'VIP / ਤੁਰੰਤ', imAttending: 'ਮੈਂ ਦੇਖ ਰਿਹਾ ਹਾਂ', btnAccepted: 'ਸਵੀਕ੍ਰਿਤ', noPendingReq: 'ਕੋਈ ਲੰਬਿਤ ਮਦਦ ਬੇਨਤੀ ਨਹੀਂ।', reqLoadFail: 'ਬੇਨਤੀਆਂ ਲੋਡ ਨਹੀਂ ਹੋਈਆਂ।', noAcceptedYet: 'ਹਾਲੇ ਕੋਈ ਸਵੀਕ੍ਰਿਤ ਬੇਨਤੀ ਨਹੀਂ।', loadFailShort: 'ਲੋਡ ਅਸਫਲ।', atTable: 'ਟੇਬਲ ਤੇ', doneStatus: 'ਪੂਰਾ', presencePrefix: 'ਮੌਜੂਦਾ ਮੋਡ: ', presenceNoData: 'ਹਾਲੇ ਸਟਾਫ ਹਾਜ਼ਰੀ ਡੇਟਾ ਨਹੀਂ।', nextNone: 'ਹੁਣ ਕੋਈ ਲੰਬਿਤ ਬੇਨਤੀ ਨਹੀਂ।', nextErr: 'ਸੁਝਾਅ ਲੋਡ ਨਹੀਂ ਹੋਇਆ।', nextSuggestedFmt: 'ਅਗਲਾ ਸੁਝਾਅ: ਟੇਬਲ {table} (ਸਕੋਰ {score})', urgentTag: 'ਤੁਰੰਤ', assigning: 'ਅਸਾਈਨ ਹੋ ਰਿਹਾ ਹੈ…', autoAssignErr: 'ਅਸਾਈਨ ਲਈ ਬੇਨਤੀ ਨਹੀਂ', assignFail: 'ਅਸਾਈਨ ਅਸਫਲ', assignedTo: 'ਬੇਨਤੀ {name} ਨੂੰ ਅਸਾਈਨ।', dndNoPending: 'ਕੋਈ ਲੰਬਿਤ ਬੇਨਤੀ ਨਹੀਂ', dndNoStaff: 'ਕੋਈ ਸਟਾਫ ਲੇਨ ਨਹੀਂ', mobileNoReq: 'ਕੋਈ ਬੇਨਤੀ ਨਹੀਂ', mobileNoStaff: 'ਕੋਈ ਸਟਾਫ ਨਹੀਂ', pauseResume: 'ਬੇਨਤੀਆਂ ਮੁੜ ਸ਼ੁਰੂ', pauseNew: 'ਨਵੀਆਂ ਬੇਨਤੀਆਂ ਰੋਕੋ', pauseShort: 'ਰੋਕੋ', notifOn: 'ਵੈਬ ਸੂਚਨਾਵਾਂ: ਚਾਲੂ', notifEnable: 'ਵੈਬ ਸੂਚਨਾਵਾਂ ਚਾਲੂ ਕਰੋ', notifTitleOn: 'ਬ੍ਰਾਊਜ਼ਰ ਪਹਿਲਾਂ ਹੀ ਇਸ ਸਾਈਟ ਲਈ ਸੂਚਨਾਵਾਂ ਮਨਜ਼ੂਰ। ਆਵਾਜ਼ ਚੈਕ ਕਲਿਕ।', notifTitleEnable: 'ਇਸ ਸਾਈਟ ਲਈ ਬ੍ਰਾਊਜ਼ਰ ਸੂਚਨਾਵਾਂ ਮਨਜ਼ੂਰ ਕਰੋ।', hideToken: 'ਛੁਪਾਓ', copiedToken: 'ਕਾਪੀ ਹੋ ਗਿਆ!'
+        });
+
+        function t(lang, k) {
+            var L = D[lang];
+            if (!L) L = D.en;
+            var v = L[k];
+            if (v !== undefined && v !== '') return v;
+            return D.en[k] || k;
+        }
+        function setText(id, value) { var el = document.getElementById(id); if (el) el.textContent = value; }
+        function readLangFromSelect(s) {
+            if (!s || !s.options || s.selectedIndex < 0) return '';
+            var opt = s.options[s.selectedIndex];
+            return opt ? String(opt.value || '').trim() : '';
+        }
+        function apply(lang) {
+            lang = normLang(lang);
+            var u = {{ username|tojson }};
+            var n = {{ (num_tables or 10)|tojson }};
+            document.documentElement.setAttribute('lang', lang);
+            document.documentElement.setAttribute('dir', lang === 'ur' ? 'rtl' : 'ltr');
+            setText('dash-welcome-title', t(lang, 'welcome').replace('{u}', String(u || '')));
+            setText('dash-your-links', t(lang, 'links'));
+            setText('dash-logout', t(lang, 'logout'));
+            var tablesTitle = document.getElementById('dash-tables-title');
+            if (tablesTitle) tablesTitle.textContent = t(lang, 'tables').replace('{n}', String(n || 10));
+            setText('dash-tables-sub', t(lang, 'tsub'));
+            setText('dash-help-title', t(lang, 'help'));
+            setText('dash-help-desc-line', t(lang, 'helpDesc'));
+            setText('dash-help-recent-line', t(lang, 'helpRecent'));
+            setText('dash-handoff-edit-title', t(lang, 'handoffTitle'));
+            setText('dash-handoff-edit-sub', t(lang, 'handoffSub'));
+            var _shi = document.getElementById('shift-handoff-input');
+            if (_shi) _shi.placeholder = t(lang, 'handoffPlaceholder');
+            setText('shift-handoff-save-btn', t(lang, 'handoffSave'));
+            setText('shift-handoff-prev-label', t(lang, 'handoffPrevNote'));
+            setText('dash-shortcuts-hint', t(lang, 'shortcutsHint'));
+            var _dsl = document.getElementById('dash-system-link');
+            if (_dsl) _dsl.textContent = t(lang, 'systemConfig');
+            setText('enable-sound-line1', '🔔 ' + t(lang, 'soundBanner1'));
+            setText('enable-sound-line2', t(lang, 'soundBanner2'));
+            var _esnd = document.getElementById('enable-sound-btn');
+            if (_esnd) _esnd.textContent = t(lang, 'allowSoundBtn');
+            setText('sound-unlock-tip', t(lang, 'soundUnlockTip'));
+            setText('bulk-select-all-lbl', t(lang, 'bulkSelectAll'));
+            var _bulkAcc = document.getElementById('bulk-accept-btn');
+            if (_bulkAcc) _bulkAcc.textContent = t(lang, 'bulkAccept'));
+            setText('dash-ops-title', t(lang, 'opsTitle'));
+            setText('dash-ops-sub', t(lang, 'opsSub'));
+            setText('enable-notifications', t(lang, 'noti'));
+            setText('test-sound-btn', t(lang, 'sound'));
+            setText('clear-all-pending-btn', t(lang, 'clear'));
+            setText('snooze-alerts-btn', t(lang, 'mute'));
+            setText('dash-shift-title', t(lang, 'shift'));
+            setText('dash-shift-sub', t(lang, 'shiftSub'));
+            setText('presence-online-btn', t(lang, 'online'));
+            setText('presence-break-btn', t(lang, 'brk'));
+            setText('presence-offline-btn', t(lang, 'offline'));
+            setText('auto-assign-next-btn', t(lang, 'autoAssign'));
+            setText('next-suggestion', t(lang, 'nextLoading'));
+            setText('dash-per-table-title', t(lang, 'perTableTitle'));
+            setText('dash-per-table-sub', t(lang, 'perTableSub'));
+            setText('dash-history-table-lbl', t(lang, 'historyTableLbl'));
+            setText('load-table-history-btn', t(lang, 'loadHistory'));
+            setText('table-history-content', t(lang, 'tableHistoryIdle'));
+            setText('dash-admin-presence-title', t(lang, 'adminPresenceTitle'));
+            setText('dash-admin-presence-sub', t(lang, 'adminPresenceSub'));
+            setText('dash-admin-reassign-title', t(lang, 'adminReassignTitle'));
+            setText('dash-admin-reassign-sub', t(lang, 'adminReassignSub'));
+            setText('admin-reassign-btn', t(lang, 'assignNow'));
+            setText('dash-dnd-title', t(lang, 'dndTitle'));
+            setText('dash-dnd-sub', t(lang, 'dndSub'));
+            setText('dash-dnd-mobile-hint', t(lang, 'dndMobileHint'));
+            setText('dash-audit-title', t(lang, 'auditTitle'));
+            setText('dash-audit-sub', t(lang, 'auditSub'));
+            setText('reload-activity-btn', t(lang, 'refreshBtn'));
+            setText('dash-export-title', t(lang, 'exportTitle'));
+            setText('dash-export-sub', t(lang, 'exportSub'));
+            setText('dash-export-from-lbl', t(lang, 'exportFrom'));
+            setText('dash-export-to-lbl', t(lang, 'exportTo'));
+            setText('export-requests-link', t(lang, 'downloadCsv'));
+            setText('dash-cafe-title', t(lang, 'cafeTitle'));
+            setText('dash-cafe-sub', t(lang, 'cafeSub'));
+            setText('dash-cafe-link', t(lang, 'openMenuEditor'));
+            setText('dash-quiet-title', t(lang, 'quietTitle'));
+            setText('dash-quiet-sub', t(lang, 'quietSub'));
+            setText('dash-push-title', t(lang, 'pushTitle'));
+            setText('dash-push-saved-lbl', t(lang, 'pushSavedLbl'));
+            setText('dash-vapid-lbl', t(lang, 'vapidLbl'));
+            setText('local-noti-test-btn', t(lang, 'localNotiBtn'));
+            setText('push-test-btn', t(lang, 'sendPushBtn'));
+            setText('dash-api-token-title', t(lang, 'apiTokenTitle'));
+            setText('dash-api-token-sub', t(lang, 'apiTokenSub'));
+            setText('dash-token-hint', t(lang, 'tokenHint'));
+            var tokIn = document.getElementById('api-token-input');
+            if (tokIn && !tokIn.value) tokIn.placeholder = t(lang, 'tokenPlaceholder');
+            setText('show-token-btn', t(lang, 'showToken'));
+            setText('copy-token-btn', t(lang, 'copyToken'));
+            setText('dash-accepted-title', t(lang, 'accepted'));
+            setText('dash-accepted-sub', t(lang, 'acceptedSub'));
+            setText('dash-th-table', t(lang, 'thTable'));
+            setText('dash-th-note', t(lang, 'thNote'));
+            setText('dash-th-raised', t(lang, 'thRaised'));
+            setText('dash-th-status', t(lang, 'thStatus'));
+            setText('dash-analytics-title', t(lang, 'analytics'));
+            setText('dash-analytics-sub', t(lang, 'analyticsSub'));
+            setText('analytics-csv-link', t(lang, 'downloadCsv'));
+            setText('dash-password-title', t(lang, 'pass'));
+            setText('dash-current-pass-label', t(lang, 'cur'));
+            setText('dash-new-pass-label', t(lang, 'nw'));
+            setText('dash-update-pass-btn', t(lang, 'upd'));
+            setText('dash-quick-title', t(lang, 'quick'));
+            setText('dash-quick-sub', t(lang, 'quickSub'));
+            var pb = document.getElementById('presence-board-content');
+            if (pb && pb.textContent === 'Loading…') pb.textContent = t(lang, 'loading');
+            var act = document.getElementById('activity-log-content');
+            if (act && act.textContent === 'Loading…') act.textContent = t(lang, 'loading');
+            var ac = document.getElementById('analytics-content');
+            if (ac && ac.textContent === 'Loading…') ac.textContent = t(lang, 'loading');
+            var pushc = document.getElementById('push-count');
+            if (pushc && pushc.textContent === 'Loading…') pushc.textContent = t(lang, 'loading');
+            var vap = document.getElementById('vapid-keys');
+            if (vap && vap.textContent === 'Loading…') vap.textContent = t(lang, 'loading');
+            var atb = document.getElementById('accepted-tbody');
+            if (atb) {
+                var ec = atb.querySelector('.empty-cell');
+                if (ec && ec.textContent === 'Loading…') ec.textContent = t(lang, 'loading');
+            }
+            var rl = document.getElementById('requests-list');
+            if (rl) {
+                var es = rl.querySelector('.empty-state');
+                if (es && es.textContent === 'Loading…') es.textContent = t(lang, 'loading');
+            }
+            window.SOULPLACE_DASH_I18N = {
+                recForYou: t(lang, 'recForYou'), suggestedStaffPrefix: t(lang, 'suggestedStaffPrefix'), tableWord: t(lang, 'tableWord'), vipUrgent: t(lang, 'vipUrgent'), imAttending: t(lang, 'imAttending'), btnAccepted: t(lang, 'btnAccepted'), noPendingReq: t(lang, 'noPendingReq'), reqLoadFail: t(lang, 'reqLoadFail'), noAcceptedYet: t(lang, 'noAcceptedYet'), loadFailShort: t(lang, 'loadFailShort'), atTable: t(lang, 'atTable'), doneStatus: t(lang, 'doneStatus'), presencePrefix: t(lang, 'presencePrefix'), presenceNoData: t(lang, 'presenceNoData'), nextNone: t(lang, 'nextNone'), nextErr: t(lang, 'nextErr'), nextSuggestedFmt: t(lang, 'nextSuggestedFmt'), urgentTag: t(lang, 'urgentTag'), assigning: t(lang, 'assigning'), autoAssignErr: t(lang, 'autoAssignErr'), assignFail: t(lang, 'assignFail'), assignedTo: t(lang, 'assignedTo'), dndNoPending: t(lang, 'dndNoPending'), dndNoStaff: t(lang, 'dndNoStaff'), mobileNoReq: t(lang, 'mobileNoReq'), mobileNoStaff: t(lang, 'mobileNoStaff'), pauseResume: t(lang, 'pauseResume'), pauseNew: t(lang, 'pauseNew'), pauseShort: t(lang, 'pauseShort'), notifOn: t(lang, 'notifOn'), notifEnable: t(lang, 'notifEnable'), notifTitleOn: t(lang, 'notifTitleOn'), notifTitleEnable: t(lang, 'notifTitleEnable'), tokenPlaceholder: t(lang, 'tokenPlaceholder'), showToken: t(lang, 'showToken'), copyToken: t(lang, 'copyToken'), hideToken: t(lang, 'hideToken'), copiedToken: t(lang, 'copiedToken')
+            };
+            try { window.dispatchEvent(new CustomEvent('soulplace-dash-i18n')); } catch (e) {}
+            var sel = document.getElementById('dash-lang-select');
+            if (sel) sel.value = lang;
+            try { localStorage.setItem('soulplace-lang', lang); } catch (e) {}
+            try { var url = new URL(window.location.href); url.searchParams.set('lang', lang); window.history.replaceState(null, '', url.pathname + url.search + url.hash); } catch (e) {}
+        }
+        var sel = document.getElementById('dash-lang-select');
+        var lang = 'en';
+        try {
+            var q = (new URLSearchParams(window.location.search).get('lang') || '').trim();
+            if (q) lang = normLang(q);
+            else {
+                var s = localStorage.getItem('soulplace-lang');
+                if (s) lang = normLang(s);
+            }
+        } catch (e) {}
+        apply(lang);
+        requestAnimationFrame(function () {
+            try {
+                var s = document.getElementById('dash-lang-select');
+                if (!s) return;
+                var selLang = normLang(readLangFromSelect(s));
+                var docLang = normLang(document.documentElement.getAttribute('lang') || 'en');
+                if (selLang && selLang !== docLang) apply(selLang);
+            } catch (e) {}
+        });
+        function onDashLangChange() {
+            apply(normLang(readLangFromSelect(this)));
+        }
+        if (sel) {
+            sel.addEventListener('change', onDashLangChange);
+            sel.addEventListener('input', onDashLangChange);
+        }
+        window.soulplaceApplyDashboardLang = apply;
+        window.addEventListener('pageshow', function (ev) {
+            try {
+                if (!ev.persisted) return;
+                var s = document.getElementById('dash-lang-select');
+                if (s) apply(normLang(readLangFromSelect(s)));
+            } catch (e) {}
+        });
+    })();
+    </script>
+    <script src="{{ base_url }}{{ url_for('static', filename='js/app.js') }}?v=52"></script>
     <script>(function(){var k='soulplace-theme',s='\u2600',m='\u263D';function g(){try{var t=localStorage.getItem(k);return t==='dark'||t==='light'?t:'light';}catch(e){return 'light';}}function set(t){document.documentElement.setAttribute('data-theme',t);try{localStorage.setItem(k,t);}catch(e){}var b=document.getElementById('theme-toggle');if(b)b.textContent=t==='dark'?s:m;}set(g());var b=document.getElementById('theme-toggle');if(b)b.onclick=function(){var n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';set(n);};})();</script>
 </body>
 </html>

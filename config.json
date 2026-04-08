@@ -1,7 +1,33 @@
 {
+  "billing_url": "",
+  "payment_methods": {
+    "intro": "Pay at Soulplace using UPI, cash, or card.",
+    "upi": {
+      "enabled": true,
+      "id": "",
+      "note": "Use GPay, PhonePe, Paytm, or any UPI app. Ask staff for the bill amount before paying."
+    },
+    "cash": {
+      "enabled": true,
+      "note": "Cash is accepted at the counter."
+    },
+    "card": {
+      "enabled": true,
+      "note": "Debit and credit cards accepted at the counter (RuPay, Visa, Mastercard)."
+    }
+  },
+  "slot_pricing": {
+    "weekday": "₹99 per head/hour at weekdays",
+    "weekend": "₹129 per head/hour at weekend"
+  },
   "num_tables": 10,
+  "qr_promo": {
+    "enabled": true,
+    "image": "images/promo/qr-promo.png",
+    "once_per_session": true
+  },
   "admins": [
-    {"name": "ASHOK", "password": "SoulOfBlue#7"},
+    {"name": "ASHOK", "password": "Ashok123"},
     {"name": "BOO", "password": "SoulOfBlack#7"}
   ],
   "staff": [
