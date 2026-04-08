@@ -8,7 +8,7 @@
     <title>Soul – Soulplace Boardgames</title>
     <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}" type="image/png">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/logo.png') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=21">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=26">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -49,6 +49,7 @@
         </div>
         <a href="{{ base_url }}{{ url_for('main.links_page') }}" class="link-btn" id="dash-your-links" style="margin-right:0.5rem;">Your links</a>
         <a href="{{ base_url }}{{ url_for('main.payments_page') }}" class="link-btn" id="dash-payments" style="margin-right:0.5rem;">Payments</a>
+        <a href="{{ base_url }}{{ url_for('main.payments_create') }}" class="link-btn" id="dash-pay-create" style="margin-right:0.5rem;" title="Slot, food &amp; amount">Create payment</a>
         <a href="{{ base_url }}{{ url_for('main.logout') }}" class="logout-link" id="dash-logout">Log out</a>
     </header>
 

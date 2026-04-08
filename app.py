@@ -21,6 +21,7 @@ import socket
 import time
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
+from urllib.parse import quote
 
 import qrcode
 from flask import Flask, Blueprint, Response, render_template, request, redirect, url_for, session, jsonify, make_response, g
@@ -236,6 +237,9 @@ def load_config():
         "upi": {
             "enabled": upi.get("enabled", True) is not False,
             "id": str(upi.get("id") or "").strip()[:120],
+            "merchant_name": str(upi.get("merchant_name") or "Soulplace Boardgames").strip()[:80],
+            "scan_amount_label": str(upi.get("scan_amount_label") or "").strip()[:40],
+            "amount_rupees": str(upi.get("amount_rupees") or "").strip()[:24],
             "note": str(upi.get("note") or "Use GPay, PhonePe, Paytm, or any UPI app. Ask staff for the exact amount.").strip()[:500],
         },
         "cash": {
@@ -1183,19 +1187,202 @@ def dashboard():
     return resp
 
 
+def _normalize_amount_for_upi(raw):
+    """Return amount string like 1499.00 for UPI, or empty if invalid."""
+    if raw is None:
+        return ""
+    s = str(raw).strip().replace(",", "")
+    if not s:
+        return ""
+    try:
+        v = float(s)
+        if v <= 0 or v > 99999999:
+            return ""
+        return "%.2f" % v
+    except (ValueError, TypeError):
+        return ""
+
+
+def _inr_scan_label(amount_normalized):
+    if not amount_normalized:
+        return ""
+    try:
+        v = float(amount_normalized)
+        if abs(v - int(v)) < 0.001:
+            return "₹{:,}".format(int(round(v)))
+        return "₹{:,.2f}".format(v)
+    except (ValueError, TypeError):
+        return "₹" + str(amount_normalized)
+
+
+def _payment_tn_from_slot_food(slot, food, max_len=78):
+    slot = (slot or "").strip()
+    food = (food or "").strip()
+    parts = []
+    if slot:
+        parts.append("Slot: " + slot[:44])
+    if food:
+        parts.append("Food: " + food[:44])
+    s = " | ".join(parts) if parts else ""
+    if len(s) > max_len:
+        s = s[: max_len - 1] + "…"
+    return s
+
+
+def _upi_intent_uri(pa, pn, am="", tn=""):
+    """Build npci-style upi://pay URI for QR and app deep links."""
+    pa = (pa or "").strip()
+    if not pa:
+        return ""
+    pn = (pn or "Merchant").strip() or "Merchant"
+    qs = [f"pa={quote(pa, safe='')}", f"pn={quote(pn, safe='')}", "cu=INR"]
+    am = (am or "").strip()
+    if am:
+        qs.append(f"am={quote(am, safe='')}")
+    tn = (tn or "").strip()
+    if tn:
+        qs.append(f"tn={quote(tn, safe='')}")
+    return "upi://pay?" + "&".join(qs)
+
+
 @bp.route("/payments")
 def payments_page():
-    """Payments & billing: rates, UPI, cash, card; optional portal URL in config."""
+    """Payments & billing: rates, UPI, cash, card; optional portal URL in config.
+    Query params from staff /payments/create: gen=1, am, slot, food, payee — custom QR + UPI note."""
     portal = (APP_CONFIG or {}).get("billing_url") or ""
-    resp = make_response(render_template("billing.html", billing_portal_url=portal))
+    pm = (APP_CONFIG or {}).get("payment_methods") or {}
+    u = pm.get("upi") or {}
+    pa = u.get("id") or ""
+    pn = u.get("merchant_name") or "Soulplace Boardgames"
+    cfg_am = _normalize_amount_for_upi(u.get("amount_rupees"))
+
+    am_in = request.args.get("am") or request.args.get("amount")
+    slot = (request.args.get("slot") or "").strip()[:800]
+    food = (request.args.get("food") or "").strip()[:800]
+    payee = (request.args.get("payee") or "").strip()[:80]
+    gen = request.args.get("gen") == "1"
+
+    norm_am = _normalize_amount_for_upi(am_in) if am_in else ""
+    if not norm_am:
+        norm_am = cfg_am or ""
+    pr_tn = _payment_tn_from_slot_food(slot, food)
+    pay_request_active = bool(
+        gen or am_in or slot or food or payee
+    )
+
+    upi_intent_uri = _upi_intent_uri(pa, pn, norm_am, pr_tn)
+
+    if am_in and _normalize_amount_for_upi(am_in):
+        pr_scan_label = _inr_scan_label(_normalize_amount_for_upi(am_in))
+    elif norm_am:
+        pr_scan_label = _inr_scan_label(norm_am)
+    else:
+        pr_scan_label = u.get("scan_amount_label") or ""
+
+    qr_url = None
+    if pa:
+        qp = {}
+        if norm_am:
+            qp["am"] = norm_am
+        if pr_tn:
+            qp["tn"] = pr_tn
+        qr_url = url_for("main.upi_payment_qr_png", **qp) if qp else url_for("main.upi_payment_qr_png")
+
+    customer_pay_url = request.url if gen else ""
+
+    resp = make_response(
+        render_template(
+            "billing.html",
+            billing_portal_url=portal,
+            upi_intent_uri=upi_intent_uri,
+            pay_request_active=pay_request_active,
+            pr_slot_text=slot,
+            pr_food_text=food,
+            pr_payee_name=payee,
+            pr_scan_label=pr_scan_label,
+            pr_tn=pr_tn,
+            qr_url=qr_url,
+            customer_pay_url=customer_pay_url,
+        )
+    )
     resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
     return resp
 
 
+@bp.route("/payments/create", methods=["GET", "POST"])
+@login_required
+def payments_create():
+    """Staff/admin: build slot + food + amount, then redirect to /payments with UPI note + QR."""
+    display = (session.get("display_name") or session.get("username") or "").strip()
+    if request.method == "POST":
+        slot = (request.form.get("slot") or "").strip()[:800]
+        food = (request.form.get("food") or "").strip()[:800]
+        amount_raw = (request.form.get("amount") or "").strip()
+        payee = (request.form.get("payee") or "").strip()[:80]
+        norm = _normalize_amount_for_upi(amount_raw)
+        if not norm:
+            return render_template(
+                "payment_create.html",
+                default_payee=payee or display,
+                form_slot=slot,
+                form_food=food,
+                form_amount=amount_raw,
+                error_message="Enter a valid amount (e.g. 1499 or 1499.50).",
+            ), 400
+        return redirect(
+            url_for(
+                "main.payments_page",
+                gen="1",
+                am=norm,
+                slot=slot,
+                food=food,
+                payee=payee,
+            )
+        )
+    return render_template("payment_create.html", default_payee=display)
+
+
+@bp.route("/upi-payment-qr.png")
+def upi_payment_qr_png():
+    """PNG QR encoding the configured UPI intent (blue modules on white, like checkout UIs)."""
+    pm = (APP_CONFIG or {}).get("payment_methods") or {}
+    u = pm.get("upi") or {}
+    pa = (u.get("id") or "").strip()
+    if not pa:
+        return Response(status=404)
+    q_am = request.args.get("am") or request.args.get("amount")
+    q_tn = (request.args.get("tn") or "")[:80]
+    am_use = _normalize_amount_for_upi(q_am) or _normalize_amount_for_upi(u.get("amount_rupees")) or ""
+    uri = _upi_intent_uri(
+        pa,
+        u.get("merchant_name") or "Soulplace Boardgames",
+        am_use,
+        q_tn,
+    )
+    if not uri:
+        return Response(status=404)
+    qr = qrcode.QRCode(version=None, box_size=10, border=2, error_correction=qrcode.constants.ERROR_CORRECT_M)
+    qr.add_data(uri)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="#0ea5e9", back_color="#ffffff")
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    buf.seek(0)
+    return Response(
+        buf.read(),
+        mimetype="image/png",
+        headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"},
+    )
+
+
 @bp.route("/billing")
 def billing_page():
-    """Same as /payments (redirect for old bookmarks)."""
-    r = redirect(url_for("main.payments_page"))
+    """Same as /payments (redirect for old bookmarks). Preserve ?am=…&slot=… query string."""
+    dest = url_for("main.payments_page")
+    qs = request.query_string.decode()
+    if qs:
+        dest = dest + "?" + qs
+    r = redirect(dest)
     r.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
     return r
 

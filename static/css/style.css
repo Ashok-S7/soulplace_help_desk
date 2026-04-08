@@ -617,6 +617,83 @@ body {
     box-shadow: var(--focus-ring);
 }
 
+.login-form .password-field {
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.login-form .password-field input {
+    margin-bottom: 0;
+    padding-right: 2.75rem;
+}
+
+.login-form .password-toggle {
+    position: absolute;
+    right: 0.35rem;
+    top: 50%;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color 0.15s var(--ease), background 0.15s var(--ease);
+}
+
+.login-form .password-toggle__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 0;
+}
+
+/* One icon at a time (class beats generic flex; do not rely on [hidden] vs specificity) */
+.login-form .password-toggle__icon--hide {
+    display: none !important;
+}
+
+.login-form .password-toggle.password-toggle--revealed .password-toggle__icon--show {
+    display: none !important;
+}
+
+.login-form .password-toggle.password-toggle--revealed .password-toggle__icon--hide {
+    display: flex !important;
+}
+
+.login-form .password-toggle__svg {
+    display: block;
+    width: 1.375rem;
+    height: 1.375rem;
+    flex-shrink: 0;
+}
+
+.login-form .password-toggle:hover {
+    color: var(--text);
+    background: var(--primary-light);
+}
+
+.login-form .password-toggle:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+    color: var(--primary-dark);
+}
+
+[dir="rtl"] .login-form .password-field input {
+    padding-right: 1rem;
+    padding-left: 2.75rem;
+}
+
+[dir="rtl"] .login-form .password-toggle {
+    right: auto;
+    left: 0.35rem;
+}
+
 .btn {
     display: inline-flex;
     align-items: center;
@@ -647,6 +724,12 @@ body {
     transform: scale(0.98);
 }
 
+.btn-primary:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
 .btn-primary:focus-visible,
 .btn-attend:focus-visible,
 .link-btn:focus-visible {
@@ -670,6 +753,9 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.75rem;
+    row-gap: 0.65rem;
     padding: 1rem 1.5rem;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(8px);
@@ -1355,4 +1441,233 @@ body {
         padding: 0.5rem 0.85rem;
         font-size: 0.85rem;
     }
+}
+
+/* Screen-reader only */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.request-item .bulk-req-label {
+    flex-shrink: 0;
+    margin-right: 0.35rem;
+    display: flex;
+    align-items: center;
+}
+
+.request-tag {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.12rem 0.4rem;
+    border-radius: 6px;
+    margin-left: 0.35rem;
+    vertical-align: middle;
+}
+
+.request-tag-quiet {
+    background: rgba(100, 116, 139, 0.2);
+    color: var(--text-muted);
+}
+
+.request-tag-alert {
+    background: var(--error-bg);
+    color: var(--error);
+}
+
+.request-wait {
+    display: inline-block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-left: 0.35rem;
+}
+
+.request-item-sla-warn {
+    border-left: 4px solid #f59e0b;
+}
+
+.request-item-sla-critical {
+    border-left: 4px solid #dc2626;
+    background: rgba(220, 38, 38, 0.06);
+}
+
+[data-theme="dark"] .request-item-sla-critical {
+    background: rgba(220, 38, 38, 0.12);
+}
+
+.incident-row {
+    padding: 0.45rem 0;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.incident-row:last-child {
+    border-bottom: none;
+}
+
+.incident-time {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.incident-sev-warn strong {
+    color: #d97706;
+}
+
+.incident-sev-critical {
+    background: rgba(220, 38, 38, 0.06);
+}
+
+.incident-sev-critical strong {
+    color: #dc2626;
+}
+
+/* VIP / urgent pending request */
+.request-item-vip {
+    border: 2px solid #b45309;
+    box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.35);
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.08), var(--card));
+}
+[data-theme="dark"] .request-item-vip {
+    border-color: #f59e0b;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), var(--card));
+}
+
+/* Table request page – use theme tokens (no hardcoded light-only text) */
+.table-request-page .login-card,
+.table-request-page .login-header .logo-main,
+.table-request-page .login-header .logo-sub,
+.table-request-page .brand-name-bar {
+    color: var(--text) !important;
+}
+.table-request-page .login-card {
+    background: var(--card);
+    border-color: var(--border);
+}
+.table-request-page .login-header .brand-name-bar {
+    background: var(--primary-light) !important;
+    border-color: var(--border) !important;
+    color: var(--primary-dark) !important;
+}
+.table-request-page #theme-toggle,
+.table-request-page .table-toolbar-theme,
+.table-request-page .table-lang-select {
+    background: var(--card) !important;
+    color: var(--text) !important;
+    border-color: var(--border) !important;
+}
+html[dir="rtl"] .table-request-page .login-card {
+    text-align: right;
+}
+html[dir="rtl"] .table-request-page .staff-link-wrap {
+    direction: rtl;
+}
+
+/* Premium language selector (shared across pages) */
+.lang-panel {
+    position: relative;
+    margin: 0 0 1rem;
+    padding: 0.85rem;
+    border-radius: 18px;
+    border: 1px solid color-mix(in oklab, var(--primary) 35%, var(--border) 65%);
+    background:
+        radial-gradient(120% 130% at 0% 0%, color-mix(in oklab, var(--primary-light) 72%, #ffffff 28%) 0%, transparent 55%),
+        linear-gradient(145deg, color-mix(in oklab, var(--card) 92%, #ffffff 8%) 0%, var(--card) 100%);
+    box-shadow:
+        0 14px 32px rgba(2, 132, 199, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(6px);
+}
+
+.lang-panel::before {
+    content: "🌐";
+    position: absolute;
+    top: -10px;
+    left: 12px;
+    font-size: 0.95rem;
+    line-height: 1;
+    padding: 0.15rem 0.35rem;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--card) 88%, #fff 12%);
+    border: 1px solid color-mix(in oklab, var(--primary) 30%, var(--border) 70%);
+    box-shadow: var(--shadow-sm);
+}
+
+.lang-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 800;
+    margin: 0 0 0.45rem;
+    color: color-mix(in oklab, var(--primary-dark) 85%, var(--text) 15%);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.lang-select-wrap {
+    position: relative;
+}
+
+.lang-select-wrap::after {
+    content: "⌄";
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--primary-dark);
+    background: color-mix(in oklab, var(--primary-light) 75%, #fff 25%);
+    border: 1px solid color-mix(in oklab, var(--primary) 35%, var(--border) 65%);
+    pointer-events: none;
+}
+
+.lang-select {
+    width: 100%;
+    min-height: 46px;
+    border-radius: 13px;
+    border: 1px solid color-mix(in oklab, var(--primary) 22%, var(--border) 78%);
+    padding: 0.5rem 2.6rem 0.5rem 0.75rem;
+    font-weight: 700;
+    font-size: 0.96rem;
+    background: color-mix(in oklab, var(--card) 92%, #fff 8%);
+    color: var(--text);
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--primary-light) 62%, transparent);
+    transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease), transform 0.15s var(--ease), background 0.2s var(--ease);
+}
+
+.lang-select::-ms-expand,
+.table-lang-select::-ms-expand {
+    display: none;
+}
+
+.lang-select:hover {
+    border-color: color-mix(in oklab, var(--primary) 45%, var(--border) 55%);
+    background: color-mix(in oklab, var(--card) 86%, #fff 14%);
+}
+
+.lang-select:focus-visible {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow:
+        0 0 0 3px color-mix(in oklab, var(--primary-light) 70%, transparent),
+        0 10px 22px rgba(14, 165, 233, 0.16);
+    transform: translateY(-1px);
 }

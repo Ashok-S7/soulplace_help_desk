@@ -1,117 +1,200 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script>try{var t=localStorage.getItem('soulplace-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payments &amp; billing – Soulplace Boardgames</title>
     <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}" type="image/png">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/logo.png') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=23">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=26">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        .billing-page { max-width: 560px; margin: 0 auto; padding: 1.5rem; position: relative; z-index: 2; color: #0f172a; background: rgba(255,255,255,0.95); border-radius: 16px; box-shadow: 0 4px 20px rgba(15,23,42,0.08); }
-        .billing-page h1 { font-size: 1.25rem; margin-bottom: 0.5rem; color: #0f172a; }
-        .billing-page .link-box { background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.75rem 1rem; margin: 0.5rem 0 1rem; word-break: break-all; font-size: 0.95rem; color: #0f172a; }
-        .billing-page .link-label { font-size: 0.85rem; color: #475569; font-weight: 600; }
-        .billing-page button.copy-btn { margin-top: 0.25rem; padding: 0.35rem 0.75rem; font-size: 0.85rem; background: #0ea5e9; color: white; border: none; border-radius: 6px; cursor: pointer; }
-        .billing-page button.copy-btn:hover { opacity: 0.9; }
-        .billing-page a.back { display: inline-block; margin-top: 1.25rem; color: #0ea5e9; font-weight: 600; text-decoration: none; }
-        .billing-page a.back:hover { text-decoration: underline; }
-        .billing-page .btn-open { display: inline-block; margin-top: 0.5rem; padding: 0.55rem 1.1rem; font-size: 0.95rem; font-weight: 600; background: #0ea5e9; color: #fff; border-radius: 8px; text-decoration: none; }
-        .billing-page .btn-open:hover { opacity: 0.92; }
-        .billing-page .hint { font-size: 0.9rem; color: #475569; line-height: 1.45; }
-        .billing-page .slots-block { margin: 0 0 1.25rem; padding: 1rem 1.1rem; border-radius: 12px; border: 1px solid #e2e8f0; background: linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%); }
-        .billing-page .slots-block h2 { font-size: 1.05rem; margin: 0 0 0.65rem; color: #0f172a; font-weight: 700; letter-spacing: 0.02em; }
-        .billing-page .slots-block ul { margin: 0; padding-left: 1.2rem; line-height: 1.6; color: #334155; font-size: 0.98rem; }
-        .billing-page .slots-block li { margin: 0.25rem 0; }
-        .billing-page .pay-intro { margin: 0 0 1rem; font-size: 0.95rem; color: #334155; line-height: 1.5; }
-        .billing-page .pay-grid { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.25rem; }
-        .billing-page .pay-card { padding: 1rem 1.1rem; border-radius: 12px; border: 1px solid #e2e8f0; background: #fff; box-shadow: 0 1px 3px rgba(15,23,42,0.06); }
-        .billing-page .pay-card h3 { margin: 0 0 0.5rem; font-size: 1rem; color: #0369a1; font-weight: 700; display: flex; align-items: center; gap: 0.35rem; }
-        .billing-page .pay-card p { margin: 0; font-size: 0.92rem; color: #475569; line-height: 1.5; }
-        .billing-page .pay-card .upi-id { font-weight: 700; font-size: 1.05rem; color: #0f172a; letter-spacing: 0.02em; }
-        .billing-page .warn-box { font-size: 0.82rem; color: #92400e; background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 0.65rem 0.75rem; margin: 0.75rem 0 0; line-height: 1.45; }
+        .pay-portal { min-height: 100vh; background: #121212; color: #f1f5f9; font-family: 'DM Sans', 'Outfit', system-ui, sans-serif; }
+        .pay-portal .page-bg, .pay-portal .live-bg { display: none; }
+        .pay-portal__header { text-align: center; padding: 1.25rem 1rem 0.5rem; border-bottom: 1px solid #2a2a2a; }
+        .pay-portal__header .logo-img { width: 48px; height: 48px; filter: brightness(0) invert(1); opacity: 0.95; }
+        .pay-portal__header .logo-main { display: block; font-size: 1.35rem; font-weight: 700; color: #fff; letter-spacing: 0.06em; margin-top: 0.35rem; }
+        .pay-portal__header .logo-sub { display: block; font-size: 0.68rem; font-weight: 600; color: #94a3b8; margin-top: 0.15rem; letter-spacing: 0.12em; }
+        .pay-portal__main { max-width: 420px; margin: 0 auto; padding: 1rem 1rem 2rem; position: relative; }
+        .pay-portal__theme { position: absolute; top: 0.5rem; right: 0.5rem; z-index: 5; width: 2.5rem; height: 2.5rem; border-radius: 50%; border: 1px solid #334155; background: #1e293b; color: #e2e8f0; font-size: 1.1rem; cursor: pointer; }
+        .pay-slots-strip { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 0.85rem 1rem; margin-bottom: 1rem; }
+        .pay-slots-strip h2 { margin: 0 0 0.5rem; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: #94a3b8; }
+        .pay-slots-strip ul { margin: 0; padding-left: 1.1rem; font-size: 0.88rem; line-height: 1.45; color: #e2e8f0; }
+        .pay-intro { font-size: 0.88rem; color: #94a3b8; margin: 0 0 1rem; line-height: 1.45; text-align: center; }
+        .pay-tabs { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; justify-content: center; flex-wrap: wrap; }
+        .pay-tab { flex: 1; min-width: 5.5rem; max-width: 8rem; display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem; padding: 0.65rem 0.5rem; font-size: 0.88rem; font-weight: 600; color: #cbd5e1; background: #1e293b; border: 1px solid #334155; border-radius: 10px; cursor: pointer; transition: border-color 0.15s, color 0.15s, background 0.15s; }
+        .pay-tab:hover { border-color: #475569; color: #fff; }
+        .pay-tab.is-active { color: #fff; border-color: #e2e8f0; background: #0f172a; box-shadow: 0 0 0 1px rgba(255,255,255,0.12); }
+        .pay-tab__icon { font-size: 1.1rem; line-height: 1; }
+        .pay-panel { display: none; background: #1a1a1a; border: 1px solid #333; border-radius: 14px; padding: 1.25rem 1rem 1.5rem; margin-bottom: 1rem; }
+        .pay-panel.is-active { display: block; }
+        .pay-panel--upi { text-align: center; }
+        .pay-qr-wrap { display: inline-block; padding: 0.75rem; background: #fff; border-radius: 12px; margin-bottom: 0.75rem; }
+        .pay-qr-wrap img { display: block; width: min(220px, 72vw); height: auto; }
+        .pay-scan-amount { font-size: 1.05rem; font-weight: 700; color: #fff; margin: 0 0 0.35rem; }
+        .pay-upi-id { font-size: 0.9rem; color: #94a3b8; margin: 0 0 0.75rem; }
+        .pay-upi-id strong { color: #e2e8f0; font-weight: 600; }
+        .pay-copy-btn { padding: 0.4rem 1rem; font-size: 0.82rem; font-weight: 600; background: #0ea5e9; color: #fff; border: none; border-radius: 8px; cursor: pointer; }
+        .pay-copy-btn:hover { opacity: 0.92; }
+        .pay-divider { display: flex; align-items: center; gap: 0.75rem; margin: 1.25rem 0 1rem; color: #64748b; font-size: 0.78rem; text-transform: lowercase; }
+        .pay-divider::before, .pay-divider::after { content: ""; flex: 1; height: 1px; background: #334155; }
+        .pay-app-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+        @media (min-width: 380px) { .pay-app-row { grid-template-columns: repeat(4, 1fr); } }
+        .pay-app-tile { display: flex; flex-direction: column; align-items: center; gap: 0.35rem; padding: 0.65rem 0.35rem; background: #262626; border: 1px solid #3f3f3f; border-radius: 10px; text-decoration: none; color: #e2e8f0; font-size: 0.68rem; font-weight: 600; text-align: center; transition: border-color 0.15s, background 0.15s; }
+        .pay-app-tile:hover { border-color: #64748b; background: #2d2d2d; color: #fff; }
+        .pay-app-tile[aria-disabled="true"] { opacity: 0.45; pointer-events: none; }
+        .pay-app-tile__icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.95rem; font-weight: 800; color: #fff; }
+        .pay-app-tile__icon--gp { background: linear-gradient(145deg, #1a73e8, #4285f4); }
+        .pay-app-tile__icon--pp { background: linear-gradient(145deg, #5f259f, #7c3aed); }
+        .pay-app-tile__icon--bh { background: linear-gradient(145deg, #0d47a1, #1565c0); }
+        .pay-app-tile__icon--pt { background: linear-gradient(145deg, #00b9f5, #0ea5e9); }
+        .pay-note { font-size: 0.82rem; color: #94a3b8; line-height: 1.5; margin: 0.75rem 0 0; text-align: left; }
+        .pay-panel--card .pay-note, .pay-panel--cash .pay-note { text-align: center; font-size: 0.95rem; color: #cbd5e1; }
+        .pay-panel--card .pay-card-visual { font-size: 3rem; text-align: center; margin-bottom: 0.75rem; opacity: 0.9; }
+        .pay-panel--cash .pay-cash-visual { font-size: 3rem; text-align: center; margin-bottom: 0.75rem; opacity: 0.9; }
+        .pay-portal .pay-optional { margin-top: 1rem; padding: 0.75rem; border-radius: 10px; border: 1px solid #334155; background: #1e293b; font-size: 0.8rem; color: #94a3b8; }
+        .pay-portal .pay-optional a { color: #38bdf8; font-weight: 600; }
+        .pay-portal .pay-back { display: inline-block; margin-top: 1rem; color: #38bdf8; font-weight: 600; text-decoration: none; font-size: 0.9rem; }
+        .pay-portal .pay-back:hover { text-decoration: underline; }
+        .pay-placeholder { color: #f87171; font-size: 0.88rem; padding: 0.5rem; }
+        .pay-request-banner { text-align: left; background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 1rem 1.1rem; margin-bottom: 1rem; }
+        .pay-request-banner h2 { margin: 0 0 0.65rem; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: #38bdf8; }
+        .pay-request-banner p { margin: 0.35rem 0 0; font-size: 0.88rem; color: #e2e8f0; line-height: 1.45; }
+        .pay-request-banner strong { color: #94a3b8; font-weight: 700; margin-right: 0.35rem; }
+        .pay-payee-name { font-size: 1rem; font-weight: 700; letter-spacing: 0.08em; color: #fff; margin: 0.5rem 0 0.75rem; text-transform: uppercase; }
+        .pay-copy-link { margin-top: 0.65rem; }
     </style>
 </head>
-<body class="login-page">
+<body class="login-page pay-portal" data-theme="dark">
     <div class="page-bg" aria-hidden="true"></div>
-    <div class="live-bg" aria-hidden="true">
-        <div class="live-bg__blob live-bg__blob--1"></div>
-        <div class="live-bg__blob live-bg__blob--2"></div>
-        <div class="live-bg__blob live-bg__blob--3"></div>
-        <div class="live-bg__blob live-bg__blob--4"></div>
-        <div class="live-bg__blob live-bg__blob--5"></div>
-        <div class="live-bg__shimmer"></div>
-    </div>
-    <header class="login-header" style="opacity:1;visibility:visible;">
+    <header class="pay-portal__header">
         <div class="logo">
-            <div class="logo-img-wrap">
-                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Soulplace logo" class="logo-img">
-            </div>
-            <span class="logo-main" style="display:block;font-size:1.85rem;font-weight:700;color:#0f172a;">SOULPLACE</span>
-            <span class="logo-sub" style="display:block;font-size:0.75rem;font-weight:600;color:#475569;">BOARDGAMES – HELP DESK</span>
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="" class="logo-img" width="48" height="48">
+            <span class="logo-main">SOULPLACE</span>
+            <span class="logo-sub">BOARDGAMES – HELP DESK</span>
         </div>
-        <div class="header-line"></div>
     </header>
-    <main class="billing-page" style="position:relative;">
-        <button type="button" id="theme-toggle" title="Dark / Light" style="position:absolute;top:0.5rem;right:0.5rem;z-index:10;width:2.5rem;height:2.5rem;border-radius:50%;border:1px solid #e2e8f0;background:#fff;color:#0f172a;font-size:1.2rem;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.1);line-height:1;">☽</button>
-        <h1>Payments &amp; billing</h1>
+    <main class="pay-portal__main">
+        {% set pay_request_active = pay_request_active|default(false) %}
+        {% set customer_pay_url = customer_pay_url|default('') %}
+        {% set qr_url = qr_url|default(none) %}
+        {% set pr_slot_text = pr_slot_text|default('') %}
+        {% set pr_food_text = pr_food_text|default('') %}
+        {% set pr_payee_name = pr_payee_name|default('') %}
+        {% set pr_scan_label = pr_scan_label|default('') %}
+        <button type="button" id="theme-toggle" class="pay-portal__theme" title="Theme" aria-label="Toggle theme">☽</button>
 
-        <section class="slots-block" aria-label="Slot pricing">
+        <section class="pay-slots-strip" aria-label="Slot pricing">
             <h2>Slots</h2>
             <ul>
-                <li>{{ app_config.slot_pricing.weekday }}</li>
-                <li>{{ app_config.slot_pricing.weekend }}</li>
+                <li>{{ app_config.slot_pricing.weekday|default('') }}</li>
+                <li>{{ app_config.slot_pricing.weekend|default('') }}</li>
             </ul>
         </section>
 
         {% set pm = app_config.payment_methods %}
         <p class="pay-intro">{{ pm.intro }}</p>
-        <div class="pay-grid" role="list">
+
+        {% if pay_request_active and (pr_slot_text or pr_food_text) %}
+        <section class="pay-request-banner" aria-label="Bill details">
+            <h2>Bill details</h2>
+            {% if pr_slot_text %}<p><strong>Slot</strong> {{ pr_slot_text }}</p>{% endif %}
+            {% if pr_food_text %}<p><strong>Food</strong> {{ pr_food_text }}</p>{% endif %}
+        </section>
+        {% endif %}
+
+        <div class="pay-tabs" role="tablist" aria-label="Payment method">
             {% if pm.upi.enabled %}
-            <div class="pay-card" role="listitem">
-                <h3><span aria-hidden="true">📲</span> UPI</h3>
-                {% if pm.upi.id %}
-                <p class="upi-id" id="upi-id-text">{{ pm.upi.id }}</p>
-                <button type="button" class="copy-btn" onclick="copy('upi-id-text')">Copy UPI ID</button>
-                {% else %}
-                <p>Add your UPI ID in <strong>config.json</strong> under <code style="background:#f1f5f9;padding:0.1rem 0.35rem;border-radius:4px;font-size:0.85rem;">payment_methods.upi.id</code>, then redeploy.</p>
-                {% endif %}
-                <p style="margin-top:0.6rem;">{{ pm.upi.note }}</p>
-            </div>
-            {% endif %}
-            {% if pm.cash.enabled %}
-            <div class="pay-card" role="listitem">
-                <h3><span aria-hidden="true">💵</span> Cash</h3>
-                <p>{{ pm.cash.note }}</p>
-            </div>
+            <button type="button" class="pay-tab{% if pm.upi.enabled %} is-active{% endif %}" role="tab" aria-selected="true" data-panel="upi" id="tab-upi"><span class="pay-tab__icon" aria-hidden="true">〰</span> UPI</button>
             {% endif %}
             {% if pm.card.enabled %}
-            <div class="pay-card" role="listitem">
-                <h3><span aria-hidden="true">💳</span> Card</h3>
-                <p>{{ pm.card.note }}</p>
-            </div>
+            <button type="button" class="pay-tab{% if not pm.upi.enabled and pm.card.enabled %} is-active{% endif %}" role="tab" aria-selected="{% if not pm.upi.enabled and pm.card.enabled %}true{% else %}false{% endif %}" data-panel="card" id="tab-card"><span class="pay-tab__icon" aria-hidden="true">💳</span> Card</button>
+            {% endif %}
+            {% if pm.cash.enabled %}
+            <button type="button" class="pay-tab{% if not pm.upi.enabled and not pm.card.enabled and pm.cash.enabled %} is-active{% endif %}" role="tab" aria-selected="{% if not pm.upi.enabled and not pm.card.enabled and pm.cash.enabled %}true{% else %}false{% endif %}" data-panel="cash" id="tab-cash"><span class="pay-tab__icon" aria-hidden="true">💵</span> Cash</button>
             {% endif %}
         </div>
 
+        {% if pm.upi.enabled %}
+        <div class="pay-panel pay-panel--upi is-active" role="tabpanel" id="pay-panel-upi" aria-labelledby="tab-upi">
+            {% if pm.upi.id %}
+            <div class="pay-qr-wrap">
+                <img src="{% if qr_url %}{{ qr_url }}{% else %}{{ url_for('main.upi_payment_qr_png') }}{% endif %}" width="220" height="220" alt="Scan to pay with UPI">
+            </div>
+            <p class="pay-scan-amount">
+                {% if pr_scan_label %}Scan to pay {{ pr_scan_label }}
+                {% elif pm.upi.scan_amount_label %}Scan to pay {{ pm.upi.scan_amount_label }}
+                {% else %}Scan to pay with UPI{% endif %}
+            </p>
+            {% if pr_payee_name %}
+            <p class="pay-payee-name">{{ pr_payee_name|upper }}</p>
+            {% endif %}
+            <p class="pay-upi-id" id="upi-id-line">UPI ID: <strong id="upi-id-text">{{ pm.upi.id }}</strong></p>
+            {% if customer_pay_url %}
+            <p class="pay-copy-link"><button type="button" class="pay-copy-btn" onclick="copyPayUrl()">Copy payment page link</button></p>
+            {% endif %}
+            <button type="button" class="pay-copy-btn" onclick="copy('upi-id-text')">Copy UPI ID</button>
+            <p class="pay-note">{{ pm.upi.note }}</p>
+
+            <div class="pay-divider">or pay via UPI app</div>
+            <div class="pay-app-row">
+                {% if upi_intent_uri %}
+                <a class="pay-app-tile" href="{{ upi_intent_uri }}"><span class="pay-app-tile__icon pay-app-tile__icon--gp">G</span>Google Pay</a>
+                <a class="pay-app-tile" href="{{ upi_intent_uri }}"><span class="pay-app-tile__icon pay-app-tile__icon--pp">पे</span>PhonePe</a>
+                <a class="pay-app-tile" href="{{ upi_intent_uri }}"><span class="pay-app-tile__icon pay-app-tile__icon--bh">BH</span>BHIM</a>
+                <a class="pay-app-tile" href="{{ upi_intent_uri }}"><span class="pay-app-tile__icon pay-app-tile__icon--pt">P</span>Paytm</a>
+                {% else %}
+                <span class="pay-app-tile" aria-disabled="true"><span class="pay-app-tile__icon pay-app-tile__icon--gp">G</span>Google Pay</span>
+                <span class="pay-app-tile" aria-disabled="true"><span class="pay-app-tile__icon pay-app-tile__icon--pp">पे</span>PhonePe</span>
+                <span class="pay-app-tile" aria-disabled="true"><span class="pay-app-tile__icon pay-app-tile__icon--bh">BH</span>BHIM</span>
+                <span class="pay-app-tile" aria-disabled="true"><span class="pay-app-tile__icon pay-app-tile__icon--pt">P</span>Paytm</span>
+                {% endif %}
+            </div>
+            {% else %}
+            <p class="pay-placeholder">Add your UPI ID in <strong>config.json</strong> → <code>payment_methods.upi.id</code>, then redeploy. The QR code and app buttons will appear here.</p>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% if pm.card.enabled %}
+        <div class="pay-panel pay-panel--card{% if not pm.upi.enabled and pm.card.enabled %} is-active{% endif %}" role="tabpanel" id="pay-panel-card"{% if pm.upi.enabled %} hidden{% endif %} aria-labelledby="tab-card">
+            <div class="pay-card-visual" aria-hidden="true">💳</div>
+            <p class="pay-note">{{ pm.card.note }}</p>
+        </div>
+        {% endif %}
+
+        {% if pm.cash.enabled %}
+        <div class="pay-panel pay-panel--cash{% if not pm.upi.enabled and not pm.card.enabled and pm.cash.enabled %} is-active{% endif %}" role="tabpanel" id="pay-panel-cash"{% if pm.upi.enabled or pm.card.enabled %} hidden{% endif %} aria-labelledby="tab-cash">
+            <div class="pay-cash-visual" aria-hidden="true">💵</div>
+            <p class="pay-note">{{ pm.cash.note }}</p>
+        </div>
+        {% endif %}
+
         {% if billing_portal_url %}
-        <p class="link-label" style="margin-top: 0.5rem;">Optional online link</p>
-        <p class="hint">Only use a <strong>stable</strong> URL (e.g. your store page). One-time Razorpay checkout links expire and show errors like <code style="background:#f1f5f9;font-size:0.8rem;">PAYMENT_NOT_FOUND</code>.</p>
-        <p><a class="btn-open" href="{{ billing_portal_url }}" target="_blank" rel="noopener noreferrer">Open linked page</a></p>
-        <div class="link-box" id="billing-portal-url">{{ billing_portal_url }}</div>
-        <button type="button" class="copy-btn" onclick="copy('billing-portal-url')">Copy URL</button>
+        <div class="pay-optional">
+            <strong>Optional link:</strong> <a href="{{ billing_portal_url }}" target="_blank" rel="noopener noreferrer">Open external page</a>
+            <span style="display:block;margin-top:0.35rem;opacity:0.85;">Use only stable URLs. One-time payment checkout links may expire.</span>
+        </div>
         {% endif %}
 
         {% if session.get('username') %}
-        <a href="{{ base_url }}{{ url_for('main.dashboard') }}" class="back">← Back to dashboard</a>
+        <a href="{{ base_url }}{{ url_for('main.dashboard') }}" class="pay-back">← Back to dashboard</a>
         {% else %}
-        <a href="{{ base_url }}{{ url_for('main.login') }}" class="back">← Staff login</a>
+        <a href="{{ base_url }}{{ url_for('main.login') }}" class="pay-back">← Staff login</a>
         {% endif %}
     </main>
     <script>
+        var PAY_URL = {{ customer_pay_url|tojson }};
+        function copyPayUrl() {
+            if (!PAY_URL) return;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(PAY_URL).then(function () { alert('Link copied. Send it to the customer.'); });
+            } else {
+                prompt('Copy this link:', PAY_URL);
+            }
+        }
         function copy(id) {
             var el = document.getElementById(id);
             if (!el) return;
@@ -130,7 +213,30 @@
                 alert('Copied!');
             }
         }
+        (function () {
+            var tabs = document.querySelectorAll('.pay-tab');
+            var panels = document.querySelectorAll('.pay-panel');
+            function activate(panelId) {
+                tabs.forEach(function (t) {
+                    var on = t.getAttribute('data-panel') === panelId;
+                    t.classList.toggle('is-active', on);
+                    t.setAttribute('aria-selected', on ? 'true' : 'false');
+                });
+                panels.forEach(function (p) {
+                    var on = p.id === 'pay-panel-' + panelId;
+                    p.classList.toggle('is-active', on);
+                    if (on) { p.removeAttribute('hidden'); } else { p.setAttribute('hidden', 'hidden'); }
+                });
+            }
+            tabs.forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    activate(btn.getAttribute('data-panel'));
+                });
+            });
+            var first = document.querySelector('.pay-tab.is-active');
+            if (first) activate(first.getAttribute('data-panel'));
+        })();
     </script>
-    <script>(function(){var k='soulplace-theme',s='\u2600',m='\u263D';function g(){try{var t=localStorage.getItem(k);return t==='dark'||t==='light'?t:'light';}catch(e){return 'light';}}function set(t){document.documentElement.setAttribute('data-theme',t);try{localStorage.setItem(k,t);}catch(e){}var b=document.getElementById('theme-toggle');if(b)b.textContent=t==='dark'?s:m;}set(g());var b=document.getElementById('theme-toggle');if(b)b.onclick=function(){var n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';set(n);};})();</script>
+    <script>(function(){var k='soulplace-theme',s='\u2600',m='\u263D';function g(){try{var t=localStorage.getItem(k);return t==='dark'||t==='light'?t:'dark';}catch(e){return 'dark';}}function set(t){document.documentElement.setAttribute('data-theme',t);try{localStorage.setItem(k,t);}catch(e){}var b=document.getElementById('theme-toggle');if(b)b.textContent=t==='dark'?s:m;}set(g());var b=document.getElementById('theme-toggle');if(b)b.onclick=function(){var n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';set(n);};})();</script>
 </body>
 </html>

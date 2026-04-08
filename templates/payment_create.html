@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>try{var t=localStorage.getItem('soulplace-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create payment link – Soulplace</title>
+    <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}" type="image/png">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=26">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        .pc-wrap { max-width: 520px; margin: 0 auto; padding: 1.5rem 1rem 2rem; font-family: 'DM Sans', system-ui, sans-serif; }
+        .pc-wrap h1 { font-size: 1.2rem; margin: 0 0 0.35rem; color: var(--text); }
+        .pc-wrap .pc-sub { font-size: 0.88rem; color: var(--text-muted); margin: 0 0 1.25rem; line-height: 1.45; }
+        .pc-field { margin-bottom: 1rem; }
+        .pc-field label { display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.35rem; }
+        .pc-field input, .pc-field textarea { width: 100%; max-width: 100%; box-sizing: border-box; padding: 0.55rem 0.65rem; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text); font-size: 0.95rem; }
+        .pc-field textarea { min-height: 72px; resize: vertical; }
+        .pc-field .hint { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem; }
+        .pc-error { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; padding: 0.65rem 0.75rem; border-radius: 8px; font-size: 0.88rem; margin-bottom: 1rem; }
+        html[data-theme="dark"] .pc-error { background: #450a0a; border-color: #7f1d1d; color: #fecaca; }
+        .pc-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; margin-top: 1.25rem; }
+        .pc-back { color: var(--primary); font-weight: 600; text-decoration: none; font-size: 0.9rem; }
+        .pc-back:hover { text-decoration: underline; }
+    </style>
+</head>
+<body class="dashboard-page">
+    <div class="page-bg" aria-hidden="true"></div>
+    <main class="pc-wrap">
+        <h1>Create payment (slot &amp; food)</h1>
+        <p class="pc-sub">Enter the bill amount and what to show on the customer payment screen. You’ll get a UPI QR with a note like “Slot: … | Food: …”. Show the phone this page or copy the link.</p>
+        {% if error_message %}
+        <div class="pc-error" role="alert">{{ error_message }}</div>
+        {% endif %}
+        <form method="post" action="{{ base_url }}{{ url_for('main.payments_create') }}">
+            <div class="pc-field">
+                <label for="pc-amount">Amount (₹) <span style="color:#b91c1c;">*</span></label>
+                <input type="text" id="pc-amount" name="amount" required inputmode="decimal" placeholder="e.g. 1499.00" value="{{ form_amount|default('') }}" autocomplete="off">
+                <p class="hint">Total to collect (slot + food, or any one bill).</p>
+            </div>
+            <div class="pc-field">
+                <label for="pc-slot">Slot details</label>
+                <textarea id="pc-slot" name="slot" maxlength="800" placeholder="e.g. Table 5, 2 hours weekend">{{ form_slot|default('') }}</textarea>
+            </div>
+            <div class="pc-field">
+                <label for="pc-food">Food / café</label>
+                <textarea id="pc-food" name="food" maxlength="800" placeholder="e.g. 2× fries, 1× cold coffee">{{ form_food|default('') }}</textarea>
+            </div>
+            <div class="pc-field">
+                <label for="pc-payee">Name on payment screen</label>
+                <input type="text" id="pc-payee" name="payee" maxlength="80" placeholder="Shown below the QR" value="{{ default_payee|default('') }}">
+                <p class="hint">e.g. customer or staff name (optional).</p>
+            </div>
+            <div class="pc-actions">
+                <button type="submit" class="btn btn-primary">Open payment page</button>
+                <a href="{{ base_url }}{{ url_for('main.dashboard') }}" class="pc-back">← Dashboard</a>
+            </div>
+        </form>
+    </main>
+</body>
+</html>

@@ -6,11 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
-    <meta name="app-version" content="login-v5-notify-on-login">
+    <meta name="app-version" content="login-v6-i18n-notify-sound">
     <title>Soul Login – Soulplace Boardgames</title>
     <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}" type="image/png">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/logo.png') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=12">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=21">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -38,13 +38,31 @@
         <div class="header-line"></div>
     </header>
 
-    <main class="login-main">
+    <main class="login-main" role="main" id="main-content">
         <div class="login-card card-elevated" data-page-version="{{ cache_bust|default('v2') }}" style="position:relative;">
             <button type="button" id="theme-toggle" title="Dark / Light" style="position:absolute;top:0.75rem;right:0.75rem;z-index:10;width:2.5rem;height:2.5rem;border-radius:50%;border:1px solid #e2e8f0;background:#fff;color:#0f172a;font-size:1.2rem;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.1);line-height:1;">☽</button>
+            <div class="lang-panel">
+                <label for="login-lang-select" id="login-lang-label" class="lang-label">Language</label>
+                <div class="lang-select-wrap">
+                <select id="login-lang-select" class="lang-select">
+                    <option value="en">English</option>
+                    <option value="ta">தமிழ் (Tamil)</option>
+                    <option value="te">తెలుగు (Telugu)</option>
+                    <option value="kn">ಕನ್ನಡ (Kannada)</option>
+                    <option value="ml">മലയാളം (Malayalam)</option>
+                    <option value="hi">हिन्दी (Hindi)</option>
+                    <option value="ur">اردو (Urdu)</option>
+                    <option value="bn">বাংলা (Bengali)</option>
+                    <option value="gu">ગુજરાતી (Gujarati)</option>
+                    <option value="mr">मराठी (Marathi)</option>
+                    <option value="pa">ਪੰਜਾਬੀ (Punjabi)</option>
+                </select>
+                </div>
+            </div>
             <p class="card-brand" style="margin:0 0 0.5rem;font-size:1.5rem;font-weight:700;letter-spacing:0.12em;color:#0f172a;text-align:center;">SOULPLACE</p>
             <p class="card-brand-sub" style="margin:0 0 1rem;font-size:0.8rem;font-weight:600;color:#0369a1;text-align:center;">Boardgames – Help Desk</p>
-            <h1 class="login-title">Soul login</h1>
-            <p class="login-subtitle">Sign in to see help requests</p>
+            <h1 class="login-title" id="login-title">Soul login</h1>
+            <p class="login-subtitle" id="login-subtitle">{% if totp_step %}Enter your authenticator code{% else %}Sign in to see help requests{% endif %}</p>
 
             {% if error %}
             <div class="error-message" role="alert">
@@ -53,25 +71,53 @@
             </div>
             {% endif %}
 
+            {% if totp_step %}
             <form method="post" action="{{ base_url }}{{ url_for('main.login') }}" class="login-form" id="login-form">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" placeholder="e.g. ashok" autocomplete="username" required autofocus>
-
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" placeholder="Enter password" autocomplete="current-password" required>
-
+                <label for="totp" id="label-totp">Authenticator code</label>
+                <input type="text" id="totp" name="totp" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" maxlength="10" required autofocus aria-required="true">
                 <button type="submit" class="btn btn-primary btn-lg">
-                    <span class="btn-text">Sign In</span>
+                    <span class="btn-text" id="btn-signin">Verify</span>
                 </button>
             </form>
+            <p class="demo-hint" style="margin-top:0.75rem;"><a href="{{ base_url }}{{ url_for('main.login', cancel_2fa=1) }}">Cancel and start over</a></p>
+            {% else %}
+            <form method="post" action="{{ base_url }}{{ url_for('main.login') }}" class="login-form" id="login-form">
+                <label for="username" id="label-username">Username</label>
+                <input type="text" id="username" name="username" placeholder="e.g. ashok" autocomplete="username" required autofocus>
 
+                <label for="password" id="label-password">Password</label>
+                <div class="password-field">
+                    <input type="password" id="password" name="password" placeholder="Enter password" autocomplete="current-password" required>
+                    <button type="button" class="password-toggle" id="password-toggle" aria-pressed="false" aria-label="Show password" title="Show password">
+                        <span class="password-toggle__icon password-toggle__icon--show" aria-hidden="true">
+                            <svg class="password-toggle__svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </span>
+                        <span class="password-toggle__icon password-toggle__icon--hide" aria-hidden="true">
+                            <svg class="password-toggle__svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
+                        </span>
+                    </button>
+                </div>
+                <label class="checkbox-label" style="display:flex;align-items:center;gap:0.5rem;margin-top:0.5rem;font-weight:600;cursor:pointer;">
+                    <input type="checkbox" id="remember-username" name="remember_me" value="1">
+                    <span id="remember-label">Remember username on this device</span>
+                </label>
+
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <span class="btn-text" id="btn-signin">Sign In</span>
+                </button>
+            </form>
+            {% endif %}
+
+            {% if not totp_step %}
             <p class="demo-hint">
-                <span class="demo-hint-label">Admins:</span> ASHOK, BOO &nbsp;|&nbsp; <span class="demo-hint-label">Staff:</span> BALA MURUGAN, RAJESH, RITHISH, LOKESH, DILLI BABU. Use your assigned password. Passwords are case-sensitive.
+                <span class="demo-hint-label">Admins:</span> ASHOK, BOO &nbsp;|&nbsp; <span class="demo-hint-label">Staff:</span> BALA MURUGAN, RAJESH, RITHISH, LOKESH, DILLI BABU. Use your assigned password. Username and password checks ignore letter case.
             </p>
             <p class="demo-hint" style="margin-top:0.5rem;" id="login-links">
                 <a href="{{ base_url }}{{ url_for('main.tables_page') }}" class="staff-link">View table QR codes (1–{{ num_tables or 10 }})</a>
                 <span aria-hidden="true"> &nbsp;·&nbsp; </span>
                 <a href="{{ base_url }}{{ url_for('main.links_page') }}" class="staff-link">Your login link (long-distance)</a>
+                <span aria-hidden="true"> &nbsp;·&nbsp; </span>
+                <a href="{{ base_url }}{{ url_for('main.payments_page') }}" class="staff-link">Payments (UPI / card / cash)</a>
             </p>
             <p class="demo-hint" style="margin-top:0.5rem;display:flex;flex-wrap:wrap;align-items:baseline;gap:0.35rem 0.75rem;">
                 <button type="button" id="login-enable-notifications" class="link-btn" style="background:transparent;border:none;cursor:pointer;font-size:inherit;color:var(--primary);text-decoration:underline;padding:0;">Enable website notifications</button>
@@ -79,13 +125,133 @@
             </p>
             <p class="demo-hint" style="margin-top:0.5rem;">
                 <button type="button" id="login-test-sound" class="link-btn" style="background:transparent;border:none;cursor:pointer;font-size:inherit;color:var(--primary);text-decoration:underline;padding:0;">Test notification sound</button>
-                <span style="font-size:0.85rem;color:var(--text-muted);"> – After login, use the dashboard for sound + lock-screen push when new requests arrive.</span>
+                <span style="font-size:0.85rem;color:var(--text-muted);" id="login-sound-hint"> – After login, use the dashboard for sound + lock-screen push when new requests arrive.</span>
             </p>
             <p class="demo-hint" style="margin-top:0.5rem;font-size:0.85rem;">
                 Scan to open request-help: <img src="{{ base_url }}{{ url_for('main.qr_image_general') }}" alt="QR for request help" style="width:64px;height:64px;vertical-align:middle;">
             </p>
+            {% endif %}
         </div>
     </main>
+    <script>
+    (function () {
+        try {
+            if (new URLSearchParams(window.location.search).get('forget') === '1') {
+                localStorage.removeItem('soulplace-remember-username');
+            }
+        } catch (e) {}
+    })();
+    (function () {
+        var u = document.getElementById('username');
+        var form = document.getElementById('login-form');
+        if (!u || !form) return;
+        try {
+            var s = localStorage.getItem('soulplace-remember-username');
+            if (s) u.value = s;
+        } catch (e) {}
+        form.addEventListener('submit', function () {
+            var cb = document.getElementById('remember-username');
+            try {
+                if (cb && cb.checked && u.value.trim()) localStorage.setItem('soulplace-remember-username', u.value.trim());
+                else localStorage.removeItem('soulplace-remember-username');
+            } catch (e) {}
+        });
+    })();
+    </script>
+    <script>
+    (function() {
+        var VALID = ['en', 'ta', 'te', 'kn', 'ml', 'hi', 'ur', 'bn', 'gu', 'mr', 'pa'];
+        function normLang(raw) {
+            if (raw == null || String(raw).trim() === '') return 'en';
+            var base = String(raw).trim().toLowerCase().split(/[-_]/)[0];
+            return VALID.indexOf(base) !== -1 ? base : 'en';
+        }
+        var I18N = {
+            en: { lang: 'Language', title: 'Soul login', subtitle: 'Sign in to see help requests', user: 'Username', pass: 'Password', sign: 'Sign In', notify: 'Enable website notifications', test_sound: 'Test notification sound', sound_hint: ' – After login, use the dashboard for sound + lock-screen push when new requests arrive.', show_pass: 'Show password', hide_pass: 'Hide password', notif_no_browser: 'This browser does not support notifications.', notif_btn_on: 'Website notifications: On', notif_stat_on: 'Browser already allows this site. To turn off: lock icon → Site settings → Notifications.', notif_btn_blocked: 'Notifications blocked — how to allow', notif_stat_blocked: 'Click the button for steps (browser settings).', notif_stat_prompt: 'Click and choose Allow when the browser asks.', notif_asking: 'Asking…', notif_after_granted_hint: 'Already allowed. Sign in and open the dashboard for alerts and sound.', sound_after_play: 'Sound played – tap again to repeat', alert_blocked: 'To allow notifications: click the lock icon in the address bar → Site settings → Notifications → Allow, then refresh this page.', alert_granted: 'Notifications allowed for Soulplace. Sign in and open the dashboard once so lock-screen alerts can finish setting up.' },
+            ta: { lang: 'மொழி', title: 'Soul உள்நுழைவு', subtitle: 'உதவி கோரிக்கைகளை பார்க்க உள்நுழைக', user: 'பயனர் பெயர்', pass: 'கடவுச்சொல்', sign: 'உள்நுழைக', notify: 'அறிவிப்புகளை இயக்கு', test_sound: 'ஒலி சோதனை', sound_hint: ' – உள்நுழைந்த பிறகு, டாஷ்போர்டில் ஒலி + லாக்-ஸ்கிரீன் push கிடைக்கும்.', show_pass: 'கடவுச்சொல்லைக் காட்டு', hide_pass: 'மறை', notif_no_browser: 'இந்த உலாவி அறிவிப்புகளை ஆதரிக்காது.', notif_btn_on: 'வலை அறிவிப்புகள்: இயக்கம்', notif_stat_on: 'இந்த தளத்திற்கு ஏற்கனவே அனுமதி உள்ளது. நீக்க: முகவரிப்பட்டையில் பூட்டு → தள அமைப்புகள் → அறிவிப்புகள்.', notif_btn_blocked: 'அறிவிப்புகள் தடை — அனுமதி எப்படி', notif_stat_blocked: 'படிகளுக்கு பொத்தானை அழுத்தவும் (உலாவி அமைப்புகள்).', notif_stat_prompt: 'உலாவி கேட்கும்போது அனுமதி தேர்ந்தெடுக்கவும்.', notif_asking: 'கேட்கிறது…', notif_after_granted_hint: 'ஏற்கனவே அனுமதி. உள்நுழைந்து டாஷ்போர்டைத் திறக்கவும்.', sound_after_play: 'ஒலி ஒலித்தது — மீண்டும் தட்டவும்', alert_blocked: 'அறிவிப்புகளை அனுமதிக்க: முகவரிப்பட்டையில் பூட்டு → தள அமைப்புகள் → அறிவிப்புகள் → அனுமதி, பின் பக்கத்தைப் புதுப்பிக்கவும்.', alert_granted: 'Soulplace-க்கு அறிவிப்புகள் அனுமதிக்கப்பட்டன. லாக்-ஸ்கிரீன் எச்சரிக்கைகளுக்கு டாஷ்போர்டை ஒருமுறைத் திறக்கவும்.' },
+            te: { lang: 'భాష', title: 'Soul లాగిన్', subtitle: 'సహాయం అభ్యర్థనలు చూడటానికి లాగిన్ అవ్వండి', user: 'యూజర్ నేమ్', pass: 'పాస్‌వర్డ్', sign: 'లాగిన్', notify: 'నోటిఫికేషన్లు ఆన్ చేయండి', test_sound: 'శబ్ద పరీక్ష', sound_hint: ' – లాగిన్ తర్వాత డ్యాష్‌బోర్డ్‌లో సౌండ్ + లాక్ స్క్రీన్ పుష్ వస్తుంది.', show_pass: 'పాస్‌వర్డ్ చూపు', hide_pass: 'దాచు', notif_no_browser: 'ఈ బ్రౌజర్ నోటిఫికేషన్లకు మద్దతు ఇవ్వదు.', notif_btn_on: 'వెబ్ నోటిఫికేషన్లు: ఆన్', notif_stat_on: 'ఈ సైట్‌కు ఇప్పటికే అనుమతి ఉంది. ఆఫ్ చేయడం: అడ్రస్ బార్‌లో లాక్ → సైట్ సెట్టింగ్‌లు → నోటిఫికేషన్లు.', notif_btn_blocked: 'నోటిఫికేషన్లు బ్లాక్ — అనుమతి ఎలా', notif_stat_blocked: 'దశల కోసం బటన్ నొక్కండి (బ్రౌజర్ సెట్టింగ్‌లు).', notif_stat_prompt: 'బ్రౌజర్ అడిగినప్పుడు అలో అనుమతించండి.', notif_asking: 'అడుగుతోంది…', notif_after_granted_hint: 'ఇప్పటికే అనుమతి. లాగిన్ చేసి డ్యాష్‌బోర్డ్ తెరవండి.', sound_after_play: 'శబ్దం ప్లే అయింది — మళ్లీ నొక్కండి', alert_blocked: 'నోటిఫికేషన్లు అనుమతించడం: లాక్ → సైట్ సెట్టింగ్‌లు → నోటిఫికేషన్లు → అలో, తర్వాత రిఫ్రెష్.', alert_granted: 'Soulplace కోసం నోటిఫికేషన్లు అనుమతించబడ్డాయి. లాక్-స్క్రీన్ కోసం డ్యాష్‌బోర్డ్ ఒకసారి తెరవండి.' },
+            kn: { lang: 'ಭಾಷೆ', title: 'Soul ಲಾಗಿನ್', subtitle: 'ಸಹಾಯ ವಿನಂತಿಗಳನ್ನು ನೋಡಲು ಲಾಗಿನ್ ಮಾಡಿ', user: 'ಬಳಕೆದಾರ ಹೆಸರು', pass: 'ಪಾಸ್ವರ್ಡ್', sign: 'ಲಾಗಿನ್', notify: 'ಅಧಿಸೂಚನೆಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ', test_sound: 'ಶಬ್ದ ಪರೀಕ್ಷೆ', sound_hint: ' – ಲಾಗಿನ್ ನಂತರ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ನಲ್ಲಿ ಶಬ್ದ + ಲಾಕ್ ಸ್ಕ್ರೀನ್ ಪುಶ್ ಸಿಗುತ್ತದೆ.', show_pass: 'ಪಾಸ್ವರ್ಡ್ ತೋರಿಸಿ', hide_pass: 'ಮರೆಮಾಡಿ', notif_no_browser: 'ಈ ಬ್ರೌಸರ್ ಅಧಿಸೂಚನೆಗಳನ್ನು ಬೆಂಬಲಿಸುವುದಿಲ್ಲ.', notif_btn_on: 'ವೆಬ್ ಅಧಿಸೂಚನೆಗಳು: ಆನ್', notif_stat_on: 'ಈ ಸೈಟ್‌ಗೆ ಈಗಾಗಲೇ ಅನುಮತಿ. ಆಫ್: ಲಾಕ್ ಐಕಾನ್ → ಸೈಟ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳು → ಅಧಿಸೂಚನೆಗಳು.', notif_btn_blocked: 'ಅಧಿಸೂಚನೆಗಳು ತಡೆ — ಅನುಮತಿ ಹೇಗೆ', notif_stat_blocked: 'ಹಂತಗಳಿಗೆ ಬಟನ್ ಒತ್ತಿ (ಬ್ರೌಸರ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳು).', notif_stat_prompt: 'ಬ್ರೌಸರ್ ಕೇಳಿದಾಗ ಅನುಮತಿಸಿ.', notif_asking: 'ಕೇಳಲಾಗುತ್ತಿದೆ…', notif_after_granted_hint: 'ಈಗಾಗಲೇ ಅನುಮತಿ. ಲಾಗಿನ್ ಮಾಡಿ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ತೆರೆಯಿರಿ.', sound_after_play: 'ಶಬ್ದ ಪ್ಲೇ ಆಯಿತು — ಮತ್ತೆ ಒತ್ತಿ', alert_blocked: 'ಅಧಿಸೂಚನೆಗಳಿಗೆ: ಲಾಕ್ → ಸೈಟ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳು → ಅನುಮತಿ, ನಂತರ ರಿಫ್ರೆಶ್.', alert_granted: 'Soulplace ಗೆ ಅಧಿಸೂಚನೆಗಳು ಅನುಮತಿಸಲಾಗಿದೆ. ಲಾಕ್-ಸ್ಕ್ರೀನ್‌ಗೆ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ಒಮ್ಮೆ ತೆರೆಯಿರಿ.' },
+            ml: { lang: 'ഭാഷ', title: 'Soul ലോഗിൻ', subtitle: 'സഹായ അഭ്യർത്ഥനകൾ കാണാൻ ലോഗിൻ ചെയ്യുക', user: 'യൂസർനേം', pass: 'പാസ്‌വേഡ്', sign: 'ലോഗിൻ', notify: 'നോട്ടിഫിക്കേഷൻ ഓൺ ചെയ്യുക', test_sound: 'ശബ്ദ പരിശോധന', sound_hint: ' – ലോഗിൻ ശേഷം ഡാഷ്ബോർഡിൽ ശബ്ദവും ലോക്ക്-സ്ക്രീൻ പുഷും ലഭിക്കും.', show_pass: 'പാസ്‌വേഡ് കാണിക്കുക', hide_pass: 'മറയ്ക്കുക', notif_no_browser: 'ഈ ബ്രൗസർ അറിയിപ്പുകൾ പിന്തുണയ്ക്കുന്നില്ല.', notif_btn_on: 'വെബ് അറിയിപ്പുകൾ: ഓൺ', notif_stat_on: 'ഈ സൈറ്റിന് ഇതിനകം അനുമതി. ഓഫ്: ലോക്ക് → സൈറ്റ് ക്രമീകരണങ്ങൾ → അറിയിപ്പുകൾ.', notif_btn_blocked: 'അറിയിപ്പുകൾ തടഞ്ഞു — അനുമതി എങ്ങനെ', notif_stat_blocked: 'ഘട്ടങ്ങൾക്ക് ബട്ടൺ അമർത്തുക (ബ്രൗസർ ക്രമീകരണങ്ങൾ).', notif_stat_prompt: 'ബ്രൗസർ ചോദിക്കുമ്പോൾ അനുവദിക്കുക.', notif_asking: 'ചോദിക്കുന്നു…', notif_after_granted_hint: 'ഇതിനകം അനുവദിച്ചു. ലോഗിൻ ചെയ്ത് ഡാഷ്ബോർഡ് തുറക്കുക.', sound_after_play: 'ശബ്ദം പ്ലേ ചെയ്തു — വീണ്ടും അമർത്തുക', alert_blocked: 'അറിയിപ്പുകൾ: ലോക്ക് → സൈറ്റ് ക്രമീകരണങ്ങൾ → അനുവദിക്കുക, പിന്നീട് റിഫ്രെഷ്.', alert_granted: 'Soulplace-ന് അറിയിപ്പുകൾ അനുവദിച്ചു. ലോക്ക്-സ്ക്രീനിന് ഡാഷ്ബോർഡ് ഒരിക്കൽ തുറക്കുക.' },
+            hi: { lang: 'भाषा', title: 'Soul लॉगिन', subtitle: 'मदद अनुरोध देखने के लिए लॉगिन करें', user: 'यूज़रनेम', pass: 'पासवर्ड', sign: 'लॉगिन', notify: 'वेबसाइट नोटिफिकेशन चालू करें', test_sound: 'नोटिफिकेशन साउंड टेस्ट', sound_hint: ' – लॉगिन के बाद डैशबोर्ड में साउंड + लॉक-स्क्रीन पुश मिलेगा।', show_pass: 'पासवर्ड दिखाएँ', hide_pass: 'छिपाएँ', notif_no_browser: 'यह ब्राउज़र सूचनाएँ समर्थित नहीं करता।', notif_btn_on: 'वेब सूचनाएँ: चालू', notif_stat_on: 'इस साइट के लिए पहले से अनुमति है। बंद करने के लिए: लॉक → साइट सेटिंग → सूचनाएँ।', notif_btn_blocked: 'सूचनाएँ अवरुद्ध — अनुमति कैसे दें', notif_stat_blocked: 'चरणों के लिए बटन दबाएँ (ब्राउज़र सेटिंग)।', notif_stat_prompt: 'ब्राउज़र पूछे तो अनुमति दें।', notif_asking: 'पूछ रहा है…', notif_after_granted_hint: 'पहले से अनुमति है। लॉगिन करके डैशबोर्ड खोलें।', sound_after_play: 'ध्वनि बजी — फिर टैप करें', alert_blocked: 'सूचनाओं के लिए: लॉक → साइट सेटिंग → सूचनाएँ → अनुमति, फिर रिफ़्रेश।', alert_granted: 'Soulplace के लिए सूचनाएँ अनुमत हैं। लॉक-स्क्रीन के लिए डैशबोर्ड एक बार खोलें।' },
+            ur: { lang: 'زبان', title: 'Soul لاگ اِن', subtitle: 'مدد کی درخواستیں دیکھنے کے لیے لاگ اِن کریں', user: 'یوزرنیم', pass: 'پاس ورڈ', sign: 'لاگ اِن', notify: 'نوٹیفکیشن آن کریں', test_sound: 'آواز ٹیسٹ', sound_hint: ' – لاگ اِن کے بعد ڈیش بورڈ پر آواز + لاک اسکرین پش ملے گا۔', show_pass: 'پاس ورڈ دکھائیں', hide_pass: 'چھپائیں', notif_no_browser: 'یہ براؤزر اطلاعات کی حمایت نہیں کرتا۔', notif_btn_on: 'ویب اطلاعات: چالو', notif_stat_on: 'اس سائٹ کی اجازت پہلے سے ہے۔ بند کرنے کے لئے: تالا → سائٹ سیٹنگز → اطلاعات۔', notif_btn_blocked: 'اطلاعات مسدود — اجازت کیسے دیں', notif_stat_blocked: 'مراحل کے لیے بٹن دبائیں (براؤزر سیٹنگز)۔', notif_stat_prompt: 'براؤزر پوچھے تو اجازت دیں۔', notif_asking: 'پوچھ رہا ہے…', notif_after_granted_hint: 'پہلے سے اجازت ہے۔ لاگ اِن کر کے ڈیش بورڈ کھولیں۔', sound_after_play: 'آواز بجی — دوبارہ ٹیپ کریں', alert_blocked: 'اطلاعات کے لیے: تالا → سائٹ سیٹنگز → اطلاعات → اجازت، پھر تازہ کریں۔', alert_granted: 'Soulplace کے لیے اطلاعات کی اجازت۔ لاک اسکرین کے لیے ڈیش بورڈ ایک بار کھولیں۔' },
+            bn: { lang: 'ভাষা', title: 'Soul লগইন', subtitle: 'সহায়তার অনুরোধ দেখতে লগইন করুন', user: 'ইউজারনেম', pass: 'পাসওয়ার্ড', sign: 'লগইন', notify: 'নোটিফিকেশন চালু করুন', test_sound: 'সাউন্ড টেস্ট', sound_hint: ' – লগইনের পরে ড্যাশবোর্ডে সাউন্ড + লক-স্ক্রিন পুশ পাবেন।', show_pass: 'পাসওয়ার্ড দেখান', hide_pass: 'লুকান', notif_no_browser: 'এই ব্রাউজার বিজ্ঞপ্তি সমর্থন করে না।', notif_btn_on: 'ওয়েব বিজ্ঞপ্তি: চালু', notif_stat_on: 'এই সাইটের অনুমতি আগে থেকেই আছে। বন্ধ: তালা → সাইট সেটিংস → বিজ্ঞপ্তি।', notif_btn_blocked: 'বিজ্ঞপ্তি ব্লক — অনুমতি কীভাবে', notif_stat_blocked: 'ধাপের জন্য বোতাম চাপুন (ব্রাউজার সেটিংস)।', notif_stat_prompt: 'ব্রাউজার জিজ্ঞাসা করলে অনুমতি দিন।', notif_asking: 'জিজ্ঞাসা করছে…', notif_after_granted_hint: 'ইতিমধ্যে অনুমতি। লগইন করে ড্যাশবোর্ড খুলুন।', sound_after_play: 'শব্দ বাজলো — আবার ট্যাপ করুন', alert_blocked: 'বিজ্ঞপ্তির জন্য: তালা → সাইট সেটিংস → বিজ্ঞপ্তি → অনুমতি, তারপর রিফ্রেশ।', alert_granted: 'Soulplace-এর জন্য বিজ্ঞপ্তি অনুমোদিত। লক-স্ক্রিনের জন্য ড্যাশবোর্ড একবার খুলুন।' },
+            gu: { lang: 'ભાષા', title: 'Soul લૉગિન', subtitle: 'મદદ વિનંતીઓ જોવા લૉગિન કરો', user: 'યુઝરનેમ', pass: 'પાસવર્ડ', sign: 'લૉગિન', notify: 'નોટિફિકેશન ચાલુ કરો', test_sound: 'સાઉન્ડ ટેસ્ટ', sound_hint: ' – લૉગિન પછી ડેશબોર્ડમાં સાઉન્ડ + લોક સ્ક્રીન પુશ મળશે.', show_pass: 'પાસવર્ડ બતાવો', hide_pass: 'છુપાવો', notif_no_browser: 'આ બ્રાઉઝર સૂચનાઓને સપોર્ટ કરતું નથી.', notif_btn_on: 'વેબ સૂચનાઓ: ચાલુ', notif_stat_on: 'આ સાઇટ માટે પહેલેથી પરવાનગી. બંધ: લૉક → સાઇટ સેટિંગ્સ → સૂચનાઓ.', notif_btn_blocked: 'સૂચનાઓ અવરોધિત — પરવાનગી કેવી રીતે', notif_stat_blocked: 'પગલાં માટે બટન દબાવો (બ્રાઉઝર સેટિંગ્સ).', notif_stat_prompt: 'બ્રાઉઝર પૂછે તો પરવાનગી આપો.', notif_asking: 'પૂછી રહ્યું છે…', notif_after_granted_hint: 'પહેલેથી પરવાનગી. લૉગિન કરી ડેશબોર્ડ ખોલો.', sound_after_play: 'ધ્વનિ વગાડી — ફરી ટૅપ કરો', alert_blocked: 'સૂચનાઓ માટે: લૉક → સાઇટ સેટિંગ્સ → સૂચનાઓ → પરવાનગી, પછી રિફ્રેશ.', alert_granted: 'Soulplace માટે સૂચનાઓ મંજૂર. લોક સ્ક્રીન માટે ડેશબોર્ડ એક વાર ખોલો.' },
+            mr: { lang: 'भाषा', title: 'Soul लॉगिन', subtitle: 'मदत विनंत्या पाहण्यासाठी लॉगिन करा', user: 'यूजरनेम', pass: 'पासवर्ड', sign: 'लॉगिन', notify: 'नोटिफिकेशन सुरू करा', test_sound: 'साउंड टेस्ट', sound_hint: ' – लॉगिननंतर डॅशबोर्डवर साउंड + लॉक-स्क्रीन पुश मिळेल.', show_pass: 'पासवर्ड दाखवा', hide_pass: 'लपवा', notif_no_browser: 'हा ब्राउझर सूचना समर्थित करत नाही.', notif_btn_on: 'वेब सूचना: चालू', notif_stat_on: 'या साइटसाठी आधीच परवानगी. बंद: लॉक → साइट सेटिंग्ज → सूचना.', notif_btn_blocked: 'सूचना अवरुद्ध — परवानगी कशी', notif_stat_blocked: 'पायऱ्यांसाठी बटण दाबा (ब्राउझर सेटिंग्ज).', notif_stat_prompt: 'ब्राउझर विचारल्यास परवानगी द्या.', notif_asking: 'विचारत आहे…', notif_after_granted_hint: 'आधीच परवानगी. लॉगिन करून डॅशबोर्ड उघडा.', sound_after_play: 'आवाज वाजला — पुन्हा टॅप करा', alert_blocked: 'सूचनांसाठी: लॉक → साइट सेटिंग्ज → सूचना → परवानगी, नंतर रिफ्रेश.', alert_granted: 'Soulplace साठी सूचना मंजूर. लॉक-स्क्रीनसाठी डॅशबोर्ड एकदा उघडा.' },
+            pa: { lang: 'ਭਾਸ਼ਾ', title: 'Soul ਲਾਗਇਨ', subtitle: 'ਮਦਦ ਦੀਆਂ ਬੇਨਤੀਆਂ ਦੇਖਣ ਲਈ ਲਾਗਇਨ ਕਰੋ', user: 'ਯੂਜ਼ਰਨੇਮ', pass: 'ਪਾਸਵਰਡ', sign: 'ਲਾਗਇਨ', notify: 'ਨੋਟੀਫਿਕੇਸ਼ਨ ਚਾਲੂ ਕਰੋ', test_sound: 'ਸਾਊਂਡ ਟੈਸਟ', sound_hint: ' – ਲਾਗਇਨ ਤੋਂ ਬਾਅਦ ਡੈਸ਼ਬੋਰਡ ਤੇ ਸਾਊਂਡ + ਲਾਕ-ਸਕ੍ਰੀਨ ਪੁਸ਼ ਮਿਲੇਗਾ।', show_pass: 'ਪਾਸਵਰਡ ਦਿਖਾਓ', hide_pass: 'ਛੁਪਾਓ', notif_no_browser: 'ਇਹ ਬ੍ਰਾਊਜ਼ਰ ਸੂਚਨਾਵਾਂ ਸਮਰਥਿਤ ਨਹੀਂ ਕਰਦਾ।', notif_btn_on: 'ਵੈਬ ਸੂਚਨਾਵਾਂ: ਚਾਲੂ', notif_stat_on: 'ਇਸ ਸਾਈਟ ਲਈ ਪਹਿਲਾਂ ਹੀ ਇਜਾਜ਼ਤ। ਬੰਦ: ਲੌਕ → ਸਾਈਟ ਸੈਟਿੰਗਾਂ → ਸੂਚਨਾਵਾਂ।', notif_btn_blocked: 'ਸੂਚਨਾਵਾਂ ਬਲਾਕ — ਇਜਾਜ਼ਤ ਕਿਵੇਂ', notif_stat_blocked: 'ਕਦਮਾਂ ਲਈ ਬਟਨ ਦਬਾਓ (ਬ੍ਰਾਊਜ਼ਰ ਸੈਟਿੰਗਾਂ)।', notif_stat_prompt: 'ਬ੍ਰਾਊਜ਼ਰ ਪੁੱਛੇ ਤਾਂ ਇਜਾਜ਼ਤ ਦਿਓ।', notif_asking: 'ਪੁੱਛ ਰਿਹਾ ਹੈ…', notif_after_granted_hint: 'ਪਹਿਲਾਂ ਹੀ ਇਜਾਜ਼ਤ। ਲਾਗਇਨ ਕਰਕੇ ਡੈਸ਼ਬੋਰਡ ਖੋਲ੍ਹੋ।', sound_after_play: 'ਆਵਾਜ਼ ਵਜੀ — ਦੁਬਾਰਾ ਟੈਪ ਕਰੋ', alert_blocked: 'ਸੂਚਨਾਵਾਂ ਲਈ: ਲੌਕ → ਸਾਈਟ ਸੈਟਿੰਗਾਂ → ਸੂਚਨਾਵਾਂ → ਇਜਾਜ਼ਤ, ਫਿਰ ਰਿਫ੍ਰੈਸ਼।', alert_granted: 'Soulplace ਲਈ ਸੂਚਨਾਵਾਂ ਮਨਜ਼ੂਰ। ਲਾਕ-ਸਕ੍ਰੀਨ ਲਈ ਡੈਸ਼ਬੋਰਡ ਇੱਕ ਵਾਰ ਖੋਲ੍ਹੋ।' }
+        };
+        function loginT(key) {
+            var s = document.getElementById('login-lang-select');
+            var lang = normLang(s && s.value ? s.value : 'en');
+            var L = I18N[lang] || I18N.en;
+            var v = L[key];
+            if (v !== undefined && v !== '') return v;
+            return I18N.en[key] || '';
+        }
+        window.soulplaceLoginT = loginT;
+        function updatePasswordToggleLabels() {
+            var s = document.getElementById('login-lang-select');
+            var lang = normLang(s && s.value ? s.value : 'en');
+            var L = I18N[lang] || I18N.en;
+            var showLbl = L.show_pass != null ? L.show_pass : I18N.en.show_pass;
+            var hideLbl = L.hide_pass != null ? L.hide_pass : I18N.en.hide_pass;
+            var btn = document.getElementById('password-toggle');
+            var inp = document.getElementById('password');
+            if (!btn || !inp) return;
+            var vis = inp.type === 'text';
+            btn.setAttribute('aria-pressed', vis ? 'true' : 'false');
+            btn.setAttribute('aria-label', vis ? hideLbl : showLbl);
+            btn.title = vis ? hideLbl : showLbl;
+            if (vis) btn.classList.add('password-toggle--revealed');
+            else btn.classList.remove('password-toggle--revealed');
+        }
+        function applyLang(lang) {
+            if (VALID.indexOf(lang) === -1) lang = 'en';
+            var L = I18N[lang] || I18N.en;
+            document.documentElement.setAttribute('lang', lang);
+            document.documentElement.setAttribute('dir', lang === 'ur' ? 'rtl' : 'ltr');
+            var m = {
+                'login-lang-label': L.lang, 'login-title': L.title, 'login-subtitle': L.subtitle,
+                'label-username': L.user, 'label-password': L.pass, 'btn-signin': L.sign,
+                'login-enable-notifications': L.notify, 'login-test-sound': L.test_sound, 'login-sound-hint': L.sound_hint
+            };
+            Object.keys(m).forEach(function (id) { var el = document.getElementById(id); if (el) el.textContent = m[id]; });
+            var s = document.getElementById('login-lang-select');
+            if (s) s.value = lang;
+            try { localStorage.setItem('soulplace-lang', lang); } catch (e) {}
+            try { var u = new URL(window.location.href); u.searchParams.set('lang', lang); window.history.replaceState(null, '', u.pathname + u.search + u.hash); } catch (e) {}
+            updatePasswordToggleLabels();
+            try { if (typeof window.soulplaceLoginRefreshNoti === 'function') window.soulplaceLoginRefreshNoti(); } catch (e) {}
+        }
+        var sel = document.getElementById('login-lang-select');
+        var chosen = 'en';
+        try {
+            var q = (new URLSearchParams(window.location.search).get('lang') || '').trim();
+            if (q) chosen = normLang(q);
+            else {
+                var ls = localStorage.getItem('soulplace-lang');
+                if (ls) chosen = normLang(ls);
+            }
+        } catch (e) {}
+        applyLang(chosen);
+        function onLoginLangChange() {
+            applyLang(this.value);
+        }
+        if (sel) {
+            sel.addEventListener('change', onLoginLangChange);
+            sel.addEventListener('input', onLoginLangChange);
+        }
+        var pt = document.getElementById('password-toggle');
+        var pinp = document.getElementById('password');
+        if (pt && pinp) {
+            pt.addEventListener('click', function () {
+                pinp.type = pinp.type === 'password' ? 'text' : 'password';
+                updatePasswordToggleLabels();
+            });
+        }
+        updatePasswordToggleLabels();
+        window.soulplaceApplyLoginLang = applyLang;
+    })();
+    </script>
     <script>
     (function() {
         try {
@@ -109,44 +275,48 @@
         var status = document.getElementById('login-noti-status');
         if (!btn) return;
         function updateLoginNotiLabel() {
+            var T = window.soulplaceLoginT || function (k) { return ''; };
             if (!('Notification' in window)) {
                 btn.style.display = 'none';
-                if (status) status.textContent = 'This browser does not support notifications.';
+                if (status) status.textContent = T('notif_no_browser') || 'This browser does not support notifications.';
                 return;
             }
+            btn.style.display = '';
             if (Notification.permission === 'granted') {
-                btn.textContent = 'Website notifications: On';
-                if (status) status.textContent = 'Browser already allows this site. To turn off: lock icon → Site settings → Notifications.';
+                btn.textContent = T('notif_btn_on') || 'Website notifications: On';
+                if (status) status.textContent = T('notif_stat_on') || '';
             } else if (Notification.permission === 'denied') {
-                btn.textContent = 'Notifications blocked — how to allow';
-                if (status) status.textContent = 'Click the button for steps (browser settings).';
+                btn.textContent = T('notif_btn_blocked') || 'Notifications blocked — how to allow';
+                if (status) status.textContent = T('notif_stat_blocked') || '';
             } else {
-                btn.textContent = 'Enable website notifications';
-                if (status) status.textContent = 'Click and choose Allow when the browser asks.';
+                btn.textContent = T('notify') || 'Enable website notifications';
+                if (status) status.textContent = T('notif_stat_prompt') || '';
             }
         }
+        window.soulplaceLoginRefreshNoti = updateLoginNotiLabel;
         updateLoginNotiLabel();
         btn.addEventListener('click', function() {
+            var T = window.soulplaceLoginT || function (k) { return ''; };
             if (!('Notification' in window)) return;
             if (Notification.permission === 'granted') {
                 if (status) {
                     var prev = status.textContent;
-                    status.textContent = 'Already allowed. Sign in and open the dashboard for alerts and sound.';
+                    status.textContent = T('notif_after_granted_hint') || prev;
                     setTimeout(function() { status.textContent = prev; updateLoginNotiLabel(); }, 5000);
                 }
                 return;
             }
             if (Notification.permission === 'denied') {
-                alert('To allow notifications: click the lock icon in the address bar → Site settings → Notifications → Allow, then refresh this page.');
+                alert(T('alert_blocked') || '');
                 return;
             }
             btn.disabled = true;
-            btn.textContent = 'Asking…';
+            btn.textContent = T('notif_asking') || 'Asking…';
             Notification.requestPermission().then(function(p) {
                 btn.disabled = false;
                 updateLoginNotiLabel();
                 if (p === 'granted') {
-                    alert('Notifications allowed for Soulplace. Sign in and open the dashboard once so lock-screen alerts can finish setting up.');
+                    alert(T('alert_granted') || '');
                 }
             }).catch(function() {
                 btn.disabled = false;
@@ -190,8 +360,12 @@
         }
         btn.addEventListener('click', function() {
             playBeep();
-            btn.textContent = 'Sound played – tap again to repeat';
-            setTimeout(function() { btn.textContent = 'Test notification sound'; }, 2000);
+            var T = window.soulplaceLoginT || function () { return ''; };
+            btn.textContent = T('sound_after_play') || 'Sound played – tap again to repeat';
+            setTimeout(function() {
+                var T2 = window.soulplaceLoginT || function () { return ''; };
+                btn.textContent = T2('test_sound') || 'Test notification sound';
+            }, 2000);
         });
     })();
     </script>
