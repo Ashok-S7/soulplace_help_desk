@@ -4,8 +4,11 @@
     "intro": "Pay at Soulplace using UPI, cash, or card.",
     "upi": {
       "enabled": true,
-      "id": "",
-      "note": "Use GPay, PhonePe, Paytm, or any UPI app. Ask staff for the bill amount before paying."
+      "id": "merchant@upi",
+      "merchant_name": "Soulplace Boardgames",
+      "scan_amount_label": "₹1,499",
+      "amount_rupees": "1499.00",
+      "note": "Use GPay, PhonePe, Paytm, or any UPI app. Ask staff if the amount differs."
     },
     "cash": {
       "enabled": true,
